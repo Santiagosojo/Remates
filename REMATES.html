@@ -1,0 +1,1447 @@
+HTLM
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Remates En Vivo</title>
+
+<link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b4332">
+
+  <!-- Supabase JS CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --primary: #1b4332;
+      --primary-light: #2d6a4f;
+      --accent: #d97706;
+      --danger: #dc2626;
+      --bg: #f4f6f8;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 50px; }
+
+    /* HEADER Y NAVEGACIÓN PRINCIPAL */
+    header { background-color: var(--primary); color: white; padding: 12px 16px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .header-top { display: flex; justify-content: space-between; align-items: center; }
+    .header-title { font-size: 17px; font-weight: bold; }
+    .user-tag { display: flex; align-items: center; gap: 8px; }
+    .role-badge { background: var(--accent); color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+
+    .header-event-bar { display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); margin: 8px -16px -12px -16px; padding: 6px 16px; font-size: 12px; }
+    .btn-nav-back { background: rgba(255,255,255,0.25); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; }
+    .btn-nav-back:hover { background: rgba(255,255,255,0.4); }
+
+    .subnav-comprador { display: flex; gap: 8px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 8px; }
+    .subnav-btn { flex: 1; background: rgba(255,255,255,0.2); color: white; border: none; padding: 6px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .subnav-btn.active { background: var(--accent); }
+
+    /* BANNER NOTIFICACIÓN FLOTANTE REALTIME */
+    #liveBanner {
+      position: fixed; top: 85px; left: 50%; transform: translateX(-50%);
+      width: 92%; max-width: 500px; background: #1e40af; color: white;
+      padding: 12px 16px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 999; animation: slideDown 0.3s ease-out;
+    }
+    @keyframes slideDown { from { top: 40px; opacity: 0; } to { top: 85px; opacity: 1; } }
+    .banner-btn { background: #f59e0b; border: none; color: white; padding: 6px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 8px; }
+
+    /* CONTAINERS Y CARDS */
+    .container { padding: 12px; max-width: 900px; margin: 0 auto; }
+    .card { background: var(--card-bg); border-radius: 8px; padding: 14px; margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-title { font-size: 15px; font-weight: bold; color: var(--primary); margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
+
+    /* LOGIN */
+    .login-container { max-width: 400px; margin: 30px auto 0 auto; }
+    .login-header { text-align: center; margin-bottom: 20px; }
+    .login-header h2 { font-size: 22px; color: var(--primary); font-weight: bold; }
+    .login-header p { font-size: 13px; color: #6b7280; margin-top: 4px; }
+    
+    .demo-presets { margin-top: 16px; border-top: 1px dashed #d1d5db; padding-top: 12px; text-align: center; }
+    .demo-presets-title { font-size: 11px; font-weight: bold; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; }
+    .btn-preset { background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; margin: 2px; }
+    .btn-preset:hover { background: #e5e7eb; }
+
+    /* MENÚ CARÁTULA PRINCIPAL (DASHBOARD) */
+    .menu-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 10px; }
+    @media (min-width: 600px) { .menu-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    
+    .menu-card-btn {
+      background: #ffffff; border: 2px solid #e5e7eb; border-radius: 12px; padding: 20px 14px;
+      text-align: center; cursor: pointer; transition: all 0.2s ease; display: flex;
+      flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .menu-card-btn:hover { border-color: var(--primary); background: #f0fdf4; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .menu-icon { font-size: 36px; }
+    .menu-title { font-size: 15px; font-weight: bold; color: var(--primary); }
+    .menu-desc { font-size: 12px; color: #6b7280; line-height: 1.3; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .form-group { margin-bottom: 12px; }
+    label { display: block; font-size: 11px; font-weight: bold; color: #4b5563; margin-bottom: 4px; text-transform: uppercase; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background-color: #fff; }
+    
+    .chips-group { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .btn-chip { border: 1px solid #d1d5db; background: #f9fafb; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; flex: 1; text-align: center; }
+    .btn-chip.selected { background: var(--primary-light); color: white; border-color: var(--primary); }
+    .btn-chip-add { background: #e0f2fe; color: #0369a1; border-color: #7dd3fc; }
+
+    .btn-submit { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 6px; font-size: 15px; font-weight: bold; cursor: pointer; }
+    .btn-export { background: #0284c7; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    .btn-print { background: #374151; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-size: 11px; font-weight: bold; cursor: pointer; }
+
+    /* REPORTES Y TABLAS */
+    .report-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+    .report-table th, .report-table td { border: 1px solid #e5e7eb; padding: 8px 6px; text-align: left; }
+    .report-table th { background: #f8fafc; font-weight: bold; color: #334155; }
+
+    /* SELECCIÓN DE EVENTOS */
+    .event-card { border: 2px solid #e5e7eb; border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: all 0.2s ease; background: #fafafa; }
+    .event-card:hover, .event-card.active { border-color: var(--primary); background: #f0fdf4; }
+    .event-card.sugerido-hoy { border-color: var(--accent); background: #fffbeb; }
+    .event-type-badge { background: #dbeafe; color: #1e40af; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+    .badge-sugerido { background: #d97706; color: white; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+
+    /* KPIS Y COMPRAS */
+    .kpi-card { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 6px; text-align: center; }
+    .kpi-val { font-size: 18px; font-weight: bold; color: #166534; }
+    .kpi-lbl { font-size: 10px; color: #15803d; text-transform: uppercase; font-weight: bold; }
+
+    /* CORRALES Y PISTA */
+    .corral-card { border-left: 6px solid #9ca3af; transition: all 0.3s ease; position: relative; }
+    .corral-card.en-pista { border-left-color: #d97706; background: #fffbeb; }
+    .corral-card.vendido { border-left-color: #10b981; background: #f0fdf4; }
+
+    .badge-pista { background: #d97706; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    .actions-row { display: flex; gap: 6px; margin-top: 10px; }
+    .btn-action { flex: 1; padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+    .btn-pista { background: #d97706; color: white; }
+    .btn-venta { background: #10b981; color: white; }
+
+    .buyer-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
+    .buyer-limit-badge { background: #fef3c7; color: #b45309; font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+
+    .hidden { display: none !important; }
+    .print-only { display: none; }
+
+    /* ESTILOS IMPRESIÓN PAPEL */
+    @media print {
+      body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
+      header, #secLogin, #secMenuPrincipal, #secSeleccionEvento, #secGestionCompradores, #secReportesGlobales, #vistaConsignataria, #vistaComprador, #liveBanner, .container { display: none !important; }
+      .print-only { display: block !important; padding: 15px; }
+      .print-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+      .print-table th, .print-table td { border: 1px solid #000; padding: 6px 4px; text-align: left; }
+      .print-table th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; font-weight: bold; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-top">
+      <div class="header-title">🐂 Remates En Vivo</div>
+      <div class="user-tag hidden" id="userTagHeader">
+        <span id="lblUsuarioNombre" style="font-size: 12px;">Invitado</span>
+        <span id="lblRolActual" class="role-badge">CONSIGNATARIA</span>
+        <button style="background:transparent; border:none; color:rgba(255,255,255,0.7); font-size:11px; cursor:pointer; margin-left:4px;" onclick="cerrarSesion()">[Salir]</button>
+      </div>
+    </div>
+    
+    <div id="headerEventBar" class="header-event-bar hidden">
+      <span>📍 Evento: <strong id="lblEventoActivo">Seleccionar remate...</strong></span>
+      <button class="btn-nav-back" onclick="volverAlMenuPrincipal()">⬅️ Menú Principal</button>
+    </div>
+
+    <div id="subnavComprador" class="subnav-comprador hidden">
+      <button id="btnTabRemate" class="subnav-btn active" onclick="setTabComprador('remate')">📋 Corrales en Remate</button>
+      <button id="btnTabMisCompras" class="subnav-btn" onclick="setTabComprador('compras')">🛒 Mis Compras del Día</button>
+    </div>
+  </header>
+
+  <!-- BANNER NOTIFICACIÓN FLOTANTE -->
+  <div id="liveBanner" class="hidden">
+    <div>
+      <span id="bannerText">🔨 ¡Corral #112 en pista ahora!</span>
+    </div>
+    <div>
+      <button class="banner-btn" id="bannerActionBtn" onclick="actionBanner()">Ir al Corral</button>
+      <button style="background:transparent; border:none; color:white; margin-left:6px; cursor:pointer;" onclick="cerrarBanner()">✕</button>
+    </div>
+  </div>
+
+  <!-- AREA IMPRESIÓN IMPRESA EN PAPEL -->
+  <div id="printArea" class="print-only"></div>
+
+  <div class="container">
+
+    <!-- 0. PANTALLA INICIAL: FORMULARIO DE LOGIN -->
+    <div id="secLogin">
+      <div class="card login-container">
+        <div class="login-header">
+          <h2>Plataforma de Remates</h2>
+          <p>Ingresá tus datos para acceder al sistema</p>
+        </div>
+        <form id="formLogin" onsubmit="procesarLogin(event)">
+          <div class="form-group">
+            <label>Usuario / Email</label>
+            <input type="text" id="login_email" placeholder="ejemplo@consignataria.com" required>
+          </div>
+          <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="login_pass" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn-submit">🔒 Iniciar Sesión</button>
+        </form>
+
+        <div class="demo-presets">
+          <div class="demo-presets-title">Acceso Rápido de Evaluación</div>
+          <button class="btn-preset" onclick="autocompletarLogin('demo@consignataria.com', 'demo123')">🏢 Demo Consignataria</button>
+          <button class="btn-preset" onclick="autocompletarLogin('comprador@demo.com', 'demo123')">🛒 Comprador Demo</button>
+          <button class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. CARÁTULA / DASHBOARD PRINCIPAL DIVERSIFICADO POR ROL -->
+    <div id="secMenuPrincipal" class="hidden">
+      <div class="card">
+        <div class="card-title">
+          <span>🏠 Menú Principal de Gestión</span>
+        </div>
+        
+        <!-- OPCIONES PARA CONSIGNATARIA / ADMIN -->
+        <div id="gridMenuConsignataria" class="menu-grid">
+          <div class="menu-card-btn" onclick="abrirSeccionRemates()">
+            <span class="menu-icon">🔨</span>
+            <div class="menu-title">1. Remates & Eventos</div>
+            <div class="menu-desc">Registrar nuevos remates y operar corrales en vivo en pista.</div>
+          </div>
+
+          <div class="menu-card-btn" onclick="abrirSeccionCompradores()">
+            <span class="menu-icon">👥</span>
+            <div class="menu-title">2. Registrar Comprador</div>
+            <div class="menu-desc">Alta de clientes, CUIT y asignación de límites de crédito por remate.</div>
+          </div>
+
+          <div class="menu-card-btn" onclick="abrirSeccionReportes()">
+            <span class="menu-icon">📊</span>
+            <div class="menu-title">3. Reportes & Cierre</div>
+            <div class="menu-desc">Descargar resúmenes por categoría, compras y cierre contable CSV.</div>
+          </div>
+        </div>
+
+        <!-- OPCIONES EXCLUSIVAS PARA COMPRADOR -->
+        <div id="gridMenuComprador" class="menu-grid hidden">
+          <div class="menu-card-btn" onclick="abrirSeccionRemates()">
+            <span class="menu-icon">🐂</span>
+            <div class="menu-title">1. Eventos del Día & Pista</div>
+            <div class="menu-desc">Consultar hacienda disponible y seguir remates en vivo.</div>
+          </div>
+
+          <div class="menu-card-btn" onclick="abrirSeccionReportesComprador()">
+            <span class="menu-icon">📈</span>
+            <div class="menu-title">2. Mis Reportes & Cierres</div>
+            <div class="menu-desc">Ver resumen por categoría, promedios $/kg y descargar compras en CSV.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 2. SECCIÓN: REGISTRAR O SELECCIONAR REMATE -->
+    <div id="secSeleccionEvento" class="hidden">
+      <div style="margin-bottom:12px; display:flex; gap:8px;">
+        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">📅 Remates Asignados a tu Cuenta</div>
+        <div id="listaEventosDisponibles">
+          <p style="color:#888; text-align:center;">Cargando remates...</p>
+        </div>
+      </div>
+
+      <!-- FORMULARIO CREAR EVENTO CON AUTOCOMPLETADO MERCADO -->
+      <div id="cardCrearEvento" class="card hidden">
+        <div class="card-title">➕ Registrar Nuevo Evento de Remate</div>
+        <form id="formNuevoEvento">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Tipo de Evento</label>
+              <select id="ev_tipo" onchange="actualizarSugerenciaNombreMercado();">
+                <option value="Mercado" selected>Mercado Agroganadero (MAG)</option>
+                <option value="Feria">Remate Feria</option>
+                <option value="Cabaña">Remate Cabaña</option>
+                <option value="TV">Remate TV / Streaming</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Fecha del Evento</label>
+              <input type="date" id="ev_fecha" onchange="actualizarSugerenciaNombreMercado()" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Nombre del Evento / Remate</label>
+            <input type="text" id="ev_nombre" placeholder="Ej: Mercado - 31/10 o Cabaña La Pelada" required>
+          </div>
+
+          <div class="form-group">
+            <label>Lugar / Predio</label>
+            <input type="text" id="ev_lugar" placeholder="Ej: Cañuelas / Instalaciones Feria">
+          </div>
+          <button type="submit" class="btn-submit">🚀 Crear e Ingresar al Remate</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 3. SECCIÓN: REGISTRAR COMPRADOR Y LÍMITES DE CRÉDITO -->
+    <div id="secGestionCompradores" class="hidden">
+      <div style="margin-bottom:12px; display:flex; gap:8px;">
+        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+      </div>
+
+      <div class="card" style="background:#f0f9ff; border: 1px solid #bae6fd;">
+        <div class="card-title" style="color:#0369a1;">
+          <span>👥 Registrar Comprador & Crédito de Alarma</span>
+        </div>
+        <form id="formCrearComprador" onsubmit="crearCompradorAutorizado(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Razón Social / Nombre</label>
+              <input type="text" id="u_comprador_nombre" placeholder="Ej: Comercial Roddes" required>
+            </div>
+            <div class="form-group">
+              <label>CUIT (11 dígitos para contabilidad)</label>
+              <input type="text" id="u_comprador_cuit" placeholder="Ej: 30-71234567-8" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Email de Acceso</label>
+              <input type="email" id="u_comprador_email" placeholder="comprador@empresa.com" required>
+            </div>
+            <div class="form-group">
+              <label>Límite de Crédito por Remate ($)</label>
+              <input type="number" id="u_comprador_limite" placeholder="Ej: 50000000" step="100000" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" style="background:#0284c7;">👤 Dar de Alta Comprador y Alarma</button>
+        </form>
+
+        <div style="margin-top:14px;">
+          <label style="color:#0369a1;">Compradores Habilitados y Estado de Crédito:</label>
+          <div id="listaCompradoresAutorizados"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. SECCIÓN: REPORTES GLOBALES CON FILTRO PRIMARIO TIPO DE REMATE -->
+    <div id="secReportesGlobales" class="hidden">
+      <div style="margin-bottom:12px; display:flex; gap:8px;">
+        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>📊 Reportes y Cierres Contables</span>
+          <button type="button" class="btn-export" onclick="exportarReporteConsignatariaCSV()">📥 Exportar Cierre Contable (CSV)</button>
+        </div>
+
+        <div class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:6px; margin-bottom:12px;">
+          <div class="grid-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>1º Filtro Primario: Tipo de Remate</label>
+              <select id="f_tipo_remate_reporte" onchange="renderReporteGlobal()">
+                <option value="">Todos los Tipos (Mercado, Feria, Cabaña)</option>
+                <option value="Mercado">Mercado Agroganadero (MAG)</option>
+                <option value="Feria">Remate Feria</option>
+                <option value="Cabaña">Remate Cabaña</option>
+                <option value="TV">Remate TV / Streaming</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>2º Filtro: Evento Específico</label>
+              <select id="f_evento_especifico_reporte" onchange="renderReporteGlobal()">
+                <option value="">Todos los Remates del Tipo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div id="reporteGlobalTablaContainer">
+          <p style="color:#888; text-align:center;">Generando consolidado...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. VISTA CONSIGNATARIA (PISTA Y BOLETÍN DEL REMATE ACTIVO) -->
+    <div id="vistaConsignataria" class="hidden">
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; gap:8px;">
+        <button class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
+        <button class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
+      </div>
+
+      <div class="grid-3" style="margin-bottom: 12px;">
+        <div class="kpi-card">
+          <div class="kpi-val" id="kpiTotalCabezas">0</div>
+          <div class="kpi-lbl">Cabezas Cargadas</div>
+        </div>
+        <div class="kpi-card" style="background:#eff6ff; border-color:#bfdbfe;">
+          <div class="kpi-val" style="color:#1e40af;" id="kpiVendidas">0</div>
+          <div class="kpi-lbl" style="color:#1d4ed8;">Vendidas</div>
+        </div>
+        <div class="kpi-card" style="background:#fef3c7; border-color:#fde68a;">
+          <div class="kpi-val" style="color:#92400e;" id="kpiMontoTotal">$0M</div>
+          <div class="kpi-lbl" style="color:#b45309;">Monto Total</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span>📋 Boletín del Remate</span>
+          <button type="button" class="btn-print" onclick="imprimirBoletinPapel()">🖨️ Imprimir Planilla (Papel)</button>
+        </div>
+        <div id="listaCorralesConsignataria"></div>
+      </div>
+    </div>
+
+    <!-- 6. VISTA COMPRADOR CON FILTRO DE RANGO DE PESOS -->
+    <div id="vistaComprador" class="hidden">
+      <div style="margin-bottom:12px; display:flex; justify-content:space-between; gap:8px;">
+        <button class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
+        <button class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
+      </div>
+
+      <div id="secCompradorRemate">
+        <div class="card" style="background:#e0e7ff; border: 1px solid #c7d2fe;">
+          <div class="card-title" style="color:#1e40af;">🔍 Filtros de Búsqueda Rápida</div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Raza</label>
+              <select id="f_raza" onchange="renderVistaComprador()">
+                <option value="">Todas las Razas</option>
+                <option value="Angus">Angus</option>
+                <option value="Hereford">Hereford</option>
+                <option value="Careta">Careta</option>
+                <option value="Holando">Holando</option>
+                <option value="Brangus">Brangus / Braford</option>
+                <option value="Cruza Británica">Cruza Británica</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Categoría</label>
+              <select id="f_categoria" onchange="renderVistaComprador()">
+                <option value="">Todas las Categorías</option>
+                <option value="VQ">Vaquillona (VQ)</option>
+                <option value="NOV">Novillo (NOV)</option>
+                <option value="VC">Vaca (VC)</option>
+                <option value="NT">Novillito (NT)</option>
+                <option value="TR">Toro (TR)</option>
+                <option value="TER">Ternero (TER)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- NUEVO FILTRO DE RANGO DE PESOS COMPRADOR -->
+          <div class="grid-2">
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Peso Mínimo (kg)</label>
+              <input type="number" id="f_peso_min" placeholder="Ej: 150" oninput="renderVistaComprador()">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>Peso Máximo (kg)</label>
+              <input type="number" id="f_peso_max" placeholder="Ej: 300" oninput="renderVistaComprador()">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🛒 Corrales Disponibles en Venta</div>
+          <div id="listaCorralesComprador"></div>
+        </div>
+      </div>
+
+      <div id="secCompradorCompras" class="hidden">
+        <div class="card" style="background:#f0fdf4; border: 1px solid #bbf7d0;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label>Ingresá tu Nombre / Razón Social para filtrar tus compras:</label>
+            <input type="text" id="filtroMiNombre" placeholder="Ej: Comercial Roddes / Frigorífico del Valle" oninput="renderMisCompras()">
+          </div>
+        </div>
+
+        <div class="grid-3" style="margin-bottom: 12px;">
+          <div class="kpi-card">
+            <div class="kpi-val" id="compraCabezas">0</div>
+            <div class="kpi-lbl">Cabezas Compradas</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="compraMonto">$0</div>
+            <div class="kpi-lbl">Total Adjudicado</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-val" id="compraPromedio">$0</div>
+            <div class="kpi-lbl">Prom. Ponderado / kg</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>📊 Resumen Agrupado por Categoría</span>
+            <button type="button" class="btn-export" onclick="exportarComprasDetalladasCSV()">📥 Descargar Compras (CSV)</button>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label>1º Filtro Primario: Tipo de Remate</label>
+            <select id="f_tipo_remate_comprador" onchange="renderMisCompras()">
+              <option value="">Todos los Tipos</option>
+              <option value="Mercado">Mercado Agroganadero (MAG)</option>
+              <option value="Feria">Remate Feria</option>
+              <option value="Cabaña">Remate Cabaña</option>
+            </select>
+          </div>
+
+          <div id="resumenCategoriasComprador">
+            <p style="color:#888; text-align:center;">Cargando resumen por categoría...</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🧾 Detalle de Lotes Adjudicados</div>
+          <div id="listaMisCompras"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // --- DATOS DEMO Y COMPRADORES AUTORIZADOS ---
+    const COMPRADORES_AUTORIZADOS_DEMO = [
+      { id: 1, consignataria_id: 'CONS_DEMO', nombre: 'Comercial Roddes', cuit: '30-71122334-8', email: 'comprador@demo.com', limite_credito: 60000000 },
+      { id: 2, consignataria_id: 'CONS_DEMO', nombre: 'Frigorífico Bermejo', cuit: '30-58998877-2', email: 'bermejo@compras.com', limite_credito: 45000000 }
+    ];
+
+    const HOY_STR = new Date().toISOString().split('T')[0];
+
+    const EVENTOS_DEMO = [
+      { id: 101, consignataria_id: 'CONS_DEMO', nombre: 'Mercado Agroganadero - Cañuelas (Demo)', tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Mercado Agroganadero, Cañuelas' },
+      { id: 102, consignataria_id: 'CONS_DEMO', nombre: 'Gran Remate Anual Cabaña La Pelada (Demo)', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Instalaciones Cabaña, Villa Angela' },
+      { id: 103, consignataria_id: 'CONS_DEMO', nombre: 'Remate Feria Especial Invernada (Demo)', tipo_evento: 'Feria', fecha: '2026-10-15', lugar: 'Sociedad Rural General Villegas' }
+    ];
+
+    const CORRALES_DEMO = {
+      101: [
+        { id: 1, evento_id: 101, numero_corral: '101', remitente: 'Chiesino', cabezas: 15, categoria: 'NOV', raza: 'Angus', peso_promedio: 380, pesada_observaciones: 'Consumo liviano', estado: 'Disponible' },
+        { id: 2, evento_id: 101, numero_corral: '102', remitente: 'Chiesino', cabezas: 18, categoria: 'NOV', raza: 'Careta', peso_promedio: 410, pesada_observaciones: 'Buena terminación', estado: 'Disponible' },
+        { id: 3, evento_id: 101, numero_corral: '103', remitente: 'Blasfer', cabezas: 20, categoria: 'NOV', raza: 'Angus', peso_promedio: 440, pesada_observaciones: 'Exportación', estado: 'Disponible' },
+        { id: 4, evento_id: 101, numero_corral: '104', remitente: 'Blasfer', cabezas: 14, categoria: 'NOV', raza: 'Hereford', peso_promedio: 470, pesada_observaciones: 'Pesados', estado: 'Disponible' },
+        { id: 5, evento_id: 101, numero_corral: '105', remitente: 'Regueira', cabezas: 16, categoria: 'NOV', raza: 'Cruza Británica', peso_promedio: 510, pesada_observaciones: 'Pesados pesada especial', estado: 'Disponible' },
+        { id: 6, evento_id: 101, numero_corral: '106', remitente: 'Regueira', cabezas: 18, categoria: 'NT', raza: 'Angus', peso_promedio: 340, pesada_observaciones: 'Parejos 340kg', estado: 'Disponible' },
+        { id: 7, evento_id: 101, numero_corral: '107', remitente: 'Arata', cabezas: 20, categoria: 'NT', raza: 'Careta', peso_promedio: 340, pesada_observaciones: 'Especial feedlot', estado: 'Disponible' },
+        { id: 8, evento_id: 101, numero_corral: '108', remitente: 'La Licha', cabezas: 15, categoria: 'NT', raza: 'Cruza Británica', peso_promedio: 340, pesada_observaciones: 'Muy livianos', estado: 'Disponible' },
+        { id: 9, evento_id: 101, numero_corral: '109', remitente: 'Goyaike', cabezas: 17, categoria: 'NT', raza: 'Angus', peso_promedio: 340, pesada_observaciones: 'Destacados', estado: 'Disponible' },
+        { id: 10, evento_id: 101, numero_corral: '110', remitente: 'Goyaike', cabezas: 35, categoria: 'VQ', raza: 'Angus', peso_promedio: 330, pesada_observaciones: 'Jaula entera Vaquillonas 330kg', estado: 'Disponible' },
+        { id: 11, evento_id: 101, numero_corral: '111', remitente: 'Ranchito María Inés', cabezas: 35, categoria: 'VQ', raza: 'Careta', peso_promedio: 330, pesada_observaciones: 'Jaula entera Vaquillonas 330kg', estado: 'Disponible' },
+        { id: 12, evento_id: 101, numero_corral: '112', remitente: 'Ranchito María Inés', cabezas: 15, categoria: 'VC', raza: 'Cruza Británica', peso_promedio: 420, pesada_observaciones: 'Vaca Descarte gordas 420kg', estado: 'Disponible' },
+        { id: 13, evento_id: 101, numero_corral: '113', remitente: 'Don Tomaso', cabezas: 18, categoria: 'VC', raza: 'Holando', peso_promedio: 420, pesada_observaciones: 'Vaca conserva / descarte', estado: 'Disponible' },
+        { id: 14, evento_id: 101, numero_corral: '114', remitente: 'Establecimiento Mandala', cabezas: 16, categoria: 'VC', raza: 'Cruza Cebú', peso_promedio: 420, pesada_observaciones: 'Vaca comercial 420kg', estado: 'Disponible' }
+      ],
+      102: (function(){
+        let arr = [];
+        for (let i = 1; i <= 15; i++) {
+          const reg = i <= 5 ? '[PEDIGREE]' : (i <= 12 ? '[PURO CONTROLADO]' : '[GENERAL]');
+          arr.push({ id: 20+i, evento_id: 102, numero_corral: `C-T0${i}`, remitente: 'Cabaña La Pelada', cabezas: 3, categoria: 'TR', raza: 'Angus', peso_promedio: 720 + (i * 10), pesada_observaciones: `${reg} [VENTA POR UNIDAD O CORRAL ENTERO] Toros inmunizados con garantía de fertilidad.`, estado: 'Disponible' });
+        }
+        arr.push(
+          { id: 40, evento_id: 102, numero_corral: 'C-V01', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQP', raza: 'Angus', peso_promedio: 480, pesada_observaciones: '[PEDIGREE] [VENTA POR CABEZA] Preñez por IATF servicio parición otoño.', estado: 'Disponible' },
+          { id: 41, evento_id: 102, numero_corral: 'C-V02', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQP', raza: 'Angus', peso_promedio: 460, pesada_observaciones: '[PURO CONTROLADO] [VENTA POR CABEZA] Preñadas con parición garantizada.', estado: 'Disponible' },
+          { id: 42, evento_id: 102, numero_corral: 'C-V03', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQP', raza: 'Careta', peso_promedio: 450, pesada_observaciones: '[PURO CONTROLADO] [VENTA POR CORRAL] Servicio con toros puros de pedigree.', estado: 'Disponible' },
+          { id: 43, evento_id: 102, numero_corral: 'C-VE01', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQ', raza: 'Angus', peso_promedio: 340, pesada_observaciones: '[PURO CONTROLADO] [VENTA POR CORRAL] Listas para servicio de primavera.', estado: 'Disponible' },
+          { id: 44, evento_id: 102, numero_corral: 'C-VE02', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQ', raza: 'Angus', peso_promedio: 330, pesada_observaciones: '[PURO CONTROLADO] [VENTA POR CORRAL] Excelente genética.', estado: 'Disponible' },
+          { id: 45, evento_id: 102, numero_corral: 'C-VE03', remitente: 'Cabaña La Pelada', cabezas: 12, categoria: 'VQ', raza: 'Hereford', peso_promedio: 320, pesada_observaciones: '[OTROS] [VENTA POR CORRAL] Para entorar de año y medio.', estado: 'Disponible' }
+        );
+        return arr;
+      })(),
+      103: (function(){
+        let arr = [];
+        for (let t = 1; t <= 13; t++) {
+          const pesoTernero = 150 + (t * 5);
+          arr.push({ id: 50+t, evento_id: 103, numero_corral: `F-${200 + t}`, remitente: `Estancia San José - Tropel ${t}`, cabezas: 30, categoria: 'TER', raza: t % 2 === 0 ? 'Angus' : 'Careta', peso_promedio: pesoTernero, pesada_observaciones: `Terneros de Invernada destetados, desparasitados. Promedio ${pesoTernero} kg.`, estado: 'Disponible' });
+        }
+        arr.push(
+          { id: 70, evento_id: 103, numero_corral: 'F-301', remitente: 'La Macarena', cabezas: 30, categoria: 'VC', raza: 'Cruza Británica', peso_promedio: 390, pesada_observaciones: 'VACAS CUT (Cría Último Ternero) Jaula 1', estado: 'Disponible' },
+          { id: 71, evento_id: 103, numero_corral: 'F-302', remitente: 'La Macarena', cabezas: 30, categoria: 'VC', raza: 'Cruza Británica', peso_promedio: 395, pesada_observaciones: 'VACAS CUT (Cría Último Ternero) Jaula 2', estado: 'Disponible' }
+        );
+        for (let v = 1; v <= 4; v++) {
+          arr.push({ id: 71+v, evento_id: 103, numero_corral: `F-30${2 + v}`, remitente: 'Los Aromos SA', cabezas: 30, categoria: 'VC', raza: 'Angus', peso_promedio: 410, pesada_observaciones: `Vacas Vacías por tacto (Lote ${v} de 4). Ideales engorde o verdeo.`, estado: 'Disponible' });
+        }
+        return arr;
+      })()
+    };
+
+    let usuarioActual = null;
+    let eventoActivoObj = null;
+    let categoriaSeleccionada = '';
+    let corralesGlobales = [];
+
+    // --- SUPABASE CONEXIÓN ---
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';
+    let sb = null;
+    try {
+      if (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('TU_PROYECTO')) {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {}
+
+    // --- AGREGAR NUEVA CATEGORÍA DINÁMICA ---
+    function agregarNuevaCategoria() {
+      const nueva = prompt('Ingrese la nueva categoría (Ej: TER-M, CND, VA, etc.):');
+      if (!nueva) return;
+
+      const catUpper = nueva.trim().toUpperCase();
+      const container = document.getElementById('chipsCategoria');
+      
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn-chip';
+      btn.onclick = function() { selectChip(this, catUpper); };
+      btn.textContent = catUpper;
+
+      container.insertBefore(btn, container.lastElementChild);
+      selectChip(btn, catUpper);
+    }
+
+    // --- INICIO DE SESIÓN Y DASHBOARD ---
+    function autocompletarLogin(email, pass) {
+      document.getElementById('login_email').value = email;
+      document.getElementById('login_pass').value = pass;
+      procesarLogin(new Event('submit'));
+    }
+
+    function procesarLogin(e) {
+      if (e) e.preventDefault();
+      const email = document.getElementById('login_email').value.trim().toLowerCase();
+
+      if (email.includes('admin')) {
+        usuarioActual = { rol: 'admin', nombre: 'Administrador General', consignataria_id: 'ALL' };
+      } else if (email.includes('comprador')) {
+        usuarioActual = { rol: 'comprador', nombre: 'Comercial Roddes', consignataria_id: 'CONS_DEMO' };
+      } else {
+        usuarioActual = { rol: 'consignataria', nombre: 'Demo Consignataria', consignataria_id: 'CONS_DEMO' };
+      }
+
+      document.getElementById('lblUsuarioNombre').textContent = usuarioActual.nombre;
+      const badge = document.getElementById('lblRolActual');
+      badge.textContent = usuarioActual.rol.toUpperCase();
+
+      if (usuarioActual.rol === 'admin') badge.style.background = '#7e22ce';
+      else if (usuarioActual.rol === 'consignataria') badge.style.background = '#d97706';
+      else badge.style.background = '#2563eb';
+
+      document.getElementById('userTagHeader').classList.remove('hidden');
+      document.getElementById('secLogin').classList.add('hidden');
+      document.getElementById('secMenuPrincipal').classList.remove('hidden');
+
+      const esComprador = usuarioActual.rol === 'comprador';
+      document.getElementById('gridMenuConsignataria').classList.toggle('hidden', esComprador);
+      document.getElementById('gridMenuComprador').classList.toggle('hidden', !esComprador);
+
+      if (esComprador) {
+        const inputNombre = document.getElementById('filtroMiNombre');
+        if (inputNombre) inputNombre.value = 'Comercial Roddes';
+      }
+
+      renderListaCompradoresAutorizados();
+    }
+
+    function cerrarSesion() {
+      usuarioActual = null;
+      eventoActivoObj = null;
+      ocultarTodasLasSecciones();
+      document.getElementById('userTagHeader').classList.add('hidden');
+      document.getElementById('secLogin').classList.remove('hidden');
+    }
+
+    // --- AUTOCOMPLETADO MERCADO AGROGANADERO ---
+    function actualizarSugerenciaNombreMercado() {
+      const tipo = document.getElementById('ev_tipo')?.value;
+      const fechaVal = document.getElementById('ev_fecha')?.value;
+      const nombreInput = document.getElementById('ev_nombre');
+
+      if (tipo === 'Mercado' && fechaVal && nombreInput) {
+        const partes = fechaVal.split('-');
+        if (partes.length === 3) {
+          nombreInput.value = `Mercado - ${partes[2]}/${partes[1]}`;
+        }
+      }
+    }
+
+    // --- NAVEGACIÓN Y SECCIONES ---
+    function ocultarTodasLasSecciones() {
+      document.getElementById('secLogin').classList.add('hidden');
+      document.getElementById('secMenuPrincipal').classList.add('hidden');
+      document.getElementById('secSeleccionEvento').classList.add('hidden');
+      document.getElementById('secGestionCompradores').classList.add('hidden');
+      document.getElementById('secReportesGlobales').classList.add('hidden');
+      document.getElementById('vistaConsignataria').classList.add('hidden');
+      document.getElementById('vistaComprador').classList.add('hidden');
+      document.getElementById('headerEventBar').classList.add('hidden');
+      document.getElementById('subnavComprador').classList.add('hidden');
+    }
+
+    function volverAlMenuPrincipal() {
+      ocultarTodasLasSecciones();
+      document.getElementById('secMenuPrincipal').classList.remove('hidden');
+    }
+
+    function abrirSeccionRemates() {
+      ocultarTodasLasSecciones();
+      document.getElementById('secSeleccionEvento').classList.remove('hidden');
+      
+      const esConsignatariaOAdmin = (usuarioActual.rol === 'admin' || usuarioActual.rol === 'consignataria');
+      document.getElementById('cardCrearEvento').classList.toggle('hidden', !esConsignatariaOAdmin);
+
+      if (esConsignatariaOAdmin) actualizarSugerenciaNombreMercado();
+
+      cargarEventosDisponibles();
+    }
+
+    function abrirSeccionCompradores() {
+      ocultarTodasLasSecciones();
+      document.getElementById('secGestionCompradores').classList.remove('hidden');
+      renderListaCompradoresAutorizados();
+    }
+
+    function abrirSeccionReportes() {
+      ocultarTodasLasSecciones();
+      document.getElementById('secReportesGlobales').classList.remove('hidden');
+      renderReporteGlobal();
+    }
+
+    function abrirSeccionReportesComprador() {
+      if (EVENTOS_DEMO.length > 0) {
+        seleccionarEvento(EVENTOS_DEMO[0].id, EVENTOS_DEMO[0].nombre, EVENTOS_DEMO[0].tipo_evento);
+        setTabComprador('compras');
+      }
+    }
+
+    // --- CARGAR EVENTOS DE LA CUENTA ---
+    async function cargarEventosDisponibles() {
+      let lista = EVENTOS_DEMO;
+
+      if (sb) {
+        try {
+          const { data, error } = await sb.from('eventos').select('*').order('id', { ascending: false });
+          if (!error && data && data.length > 0) lista = data;
+        } catch (err) {}
+      }
+
+      if (usuarioActual.rol !== 'admin') {
+        lista = lista.filter(ev => ev.consignataria_id === usuarioActual.consignataria_id);
+      }
+
+      const container = document.getElementById('listaEventosDisponibles');
+      if (!container) return;
+
+      let html = '';
+      lista.forEach(ev => {
+        const esHoy = (ev.fecha === HOY_STR);
+        html += `
+          <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${ev.nombre}</strong>
+              <div>
+                <span class="event-type-badge">${ev.tipo_evento}</span>
+                ${esHoy ? '<span class="badge-sugerido">⭐ SUGERIDO (HOY)</span>' : ''}
+              </div>
+            </div>
+            <div style="font-size:12px; color:#6b7280; margin-top:4px;">
+              📅 Fecha: ${ev.fecha} | 📍 ${ev.lugar || 'Sin ubicación'}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    async function seleccionarEvento(id, nombre, tipo) {
+      eventoActivoObj = { id, nombre, tipo };
+      document.getElementById('lblEventoActivo').textContent = `${nombre} (${tipo})`;
+      
+      ocultarTodasLasSecciones();
+      document.getElementById('headerEventBar').classList.remove('hidden');
+
+      const esVistaConsignataria = (usuarioActual.rol === 'admin' || usuarioActual.rol === 'consignataria');
+      
+      document.getElementById('vistaConsignataria').classList.toggle('hidden', !esVistaConsignataria);
+      document.getElementById('vistaComprador').classList.toggle('hidden', esVistaConsignataria);
+      document.getElementById('subnavComprador').classList.toggle('hidden', usuarioActual.rol !== 'comprador');
+
+      await cargarCorrales();
+    }
+
+    function setTabComprador(tab) {
+      document.getElementById('btnTabRemate').classList.toggle('active', tab === 'remate');
+      document.getElementById('btnTabMisCompras').classList.toggle('active', tab === 'compras');
+      
+      document.getElementById('secCompradorRemate').classList.toggle('hidden', tab !== 'remate');
+      document.getElementById('secCompradorCompras').classList.toggle('hidden', tab !== 'compras');
+
+      if (tab === 'compras') renderMisCompras();
+    }
+
+    function selectChip(element, cat) {
+      document.querySelectorAll('#chipsCategoria .btn-chip').forEach(b => b.classList.remove('selected'));
+      element.classList.add('selected');
+      categoriaSeleccionada = cat;
+    }
+
+    // --- ALTA Y ALERTA DE CRÉDITO DE COMPRADORES ---
+    function crearCompradorAutorizado(e) {
+      e.preventDefault();
+      const nombre = document.getElementById('u_comprador_nombre').value.trim();
+      const cuit = document.getElementById('u_comprador_cuit').value.trim();
+      const email = document.getElementById('u_comprador_email').value.trim().toLowerCase();
+      const limite = parseFloat(document.getElementById('u_comprador_limite').value) || 0;
+
+      if (!nombre || !cuit || !email) return;
+
+      const nuevoComprador = {
+        id: Date.now(),
+        consignataria_id: usuarioActual ? usuarioActual.consignataria_id : 'CONS_DEMO',
+        nombre: nombre,
+        cuit: cuit,
+        email: email,
+        limite_credito: limite
+      };
+
+      COMPRADORES_AUTORIZADOS_DEMO.push(nuevoComprador);
+      alert(`¡Comprador "${nombre}" (CUIT: ${cuit}) habilitado con límite de $${limite.toLocaleString('es-AR')}!`);
+      document.getElementById('formCrearComprador').reset();
+      renderListaCompradoresAutorizados();
+    }
+
+    function renderListaCompradoresAutorizados() {
+      const container = document.getElementById('listaCompradoresAutorizados');
+      if (!container) return;
+
+      const misCompradores = COMPRADORES_AUTORIZADOS_DEMO.filter(c => 
+        usuarioActual.rol === 'admin' || c.consignataria_id === usuarioActual.consignataria_id
+      );
+
+      if (misCompradores.length === 0) {
+        container.innerHTML = '<p style="font-size:12px; color:#888;">No hay compradores registrados aún para esta consignataria.</p>';
+        return;
+      }
+
+      let html = '';
+      misCompradores.forEach(c => {
+        let gastoActual = 0;
+        corralesGlobales.forEach(corral => {
+          if (corral.ventas && corral.ventas.length > 0) {
+            const v = corral.ventas[0];
+            if (v.comprador_nombre.toLowerCase().includes(c.nombre.toLowerCase())) {
+              const kilos = (corral.cabezas * corral.peso_promedio) || 0;
+              gastoActual += kilos > 0 ? kilos * v.precio_kg : corral.cabezas * v.precio_kg;
+            }
+          }
+        });
+
+        const excede = c.limite_credito > 0 && gastoActual > c.limite_credito;
+
+        html += `
+          <div class="buyer-item" style="${excede ? 'border-color:#f87171; background:#fef2f2;' : ''}">
+            <div>
+              <strong>${c.nombre}</strong> <small style="color:#4b5563;">(CUIT: ${c.cuit})</small><br>
+              <small style="color:#6b7280;">Acumulado: <strong>$${gastoActual.toLocaleString('es-AR')}</strong> de $${(c.limite_credito || 0).toLocaleString('es-AR')}</small>
+            </div>
+            <div>
+              ${excede ? '<span style="background:#dc2626; color:white; font-size:10px; font-weight:bold; padding:2px 6px; border-radius:4px;">⚠️ EXCEDIDO</span>' : '<span class="buyer-limit-badge">AUTORIZADO</span>'}
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // --- ACCIONES CONSIGNATARIA ---
+    async function ponerEnPista(id) {
+      if (sb) {
+        try { await sb.from('lotes_corral').update({ estado: 'En Pista' }).eq('id', id); } catch (err) {}
+      }
+      const c = corralesGlobales.find(item => item.id === id);
+      if (c) c.estado = 'En Pista';
+      renderVistaConsignataria();
+      renderVistaComprador();
+    }
+
+    async function registrarVentaRapida(loteId, numeroCorral) {
+      const compradorNombre = prompt(`📄 Comprador del Corral #${numeroCorral}:`);
+      if (!compradorNombre) return;
+
+      const precio = parseFloat(prompt(`💲 Precio acordado ($ / kg o $ / unidad):`, '4500'));
+      if (!precio) return;
+
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (!c) return;
+
+      const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+      const montoLote = kilosLote > 0 ? kilosLote * precio : c.cabezas * precio;
+
+      const compradorObj = COMPRADORES_AUTORIZADOS_DEMO.find(comp => comp.nombre.toLowerCase().includes(compradorNombre.toLowerCase()));
+
+      if (compradorObj && compradorObj.limite_credito > 0) {
+        let acumuladoExistente = 0;
+        corralesGlobales.forEach(corral => {
+          if (corral.ventas && corral.ventas.length > 0) {
+            const v = corral.ventas[0];
+            if (v.comprador_nombre.toLowerCase().includes(compradorObj.nombre.toLowerCase())) {
+              const k = (corral.cabezas * corral.peso_promedio) || 0;
+              acumuladoExistente += k > 0 ? k * v.precio_kg : corral.cabezas * v.precio_kg;
+            }
+          }
+        });
+
+        const totalConEstaCompra = acumuladoExistente + montoLote;
+
+        if (totalConEstaCompra > compradorObj.limite_credito) {
+          const confirmar = confirm(`⚠️ ¡ALERTA DE LÍMITE DE CRÉDITO EXCEDIDO!\n\n` +
+            `El comprador "${compradorObj.nombre}" tiene un límite de $${compradorObj.limite_credito.toLocaleString('es-AR')}.\n` +
+            `Con esta compra acumula $${totalConEstaCompra.toLocaleString('es-AR')}.\n\n` +
+            `¿Desea autorizar la venta de todas formas?`);
+          
+          if (!confirmar) return;
+        }
+      }
+
+      if (sb) {
+        try {
+          await sb.from('ventas').insert([{ lote_id: loteId, comprador_nombre: compradorNombre, precio_kg: precio, plazo_dias: 14 }]);
+          await sb.from('lotes_corral').update({ estado: 'Vendido' }).eq('id', loteId);
+        } catch (err) {}
+      }
+
+      c.estado = 'Vendido';
+      c.ventas = [{ comprador_nombre: compradorNombre, precio_kg: precio }];
+
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+      renderListaCompradoresAutorizados();
+    }
+
+    async function editarVenta(loteId, numeroCorral) {
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (!c || !c.ventas || c.ventas.length === 0) return;
+
+      const ventaActual = c.ventas[0];
+      const nuevoComprador = prompt(`✏️ Modificar Comprador del Corral #${numeroCorral}:`, ventaActual.comprador_nombre);
+      if (!nuevoComprador) return;
+
+      const nuevoPrecio = parseFloat(prompt(`💲 Modificar Precio ($ / kg o $ / unidad):`, ventaActual.precio_kg));
+      if (isNaN(nuevoPrecio)) return;
+
+      if (sb) {
+        try {
+          if (ventaActual.id) {
+            await sb.from('ventas').update({ comprador_nombre: nuevoComprador, precio_kg: nuevoPrecio }).eq('id', ventaActual.id);
+          } else {
+            await sb.from('ventas').update({ comprador_nombre: nuevoComprador, precio_kg: nuevoPrecio }).eq('lote_id', loteId);
+          }
+        } catch (err) {}
+      }
+
+      ventaActual.comprador_nombre = nuevoComprador;
+      ventaActual.precio_kg = nuevoPrecio;
+
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+      renderListaCompradoresAutorizados();
+    }
+
+    async function anularVenta(loteId, numeroCorral) {
+      if (!confirm(`⚠️ ¿Desea anular la venta del Corral #${numeroCorral} y volverlo a dejar disponible?`)) return;
+
+      if (sb) {
+        try {
+          await sb.from('ventas').delete().eq('lote_id', loteId);
+          await sb.from('lotes_corral').update({ estado: 'Disponible' }).eq('id', loteId);
+        } catch (err) {}
+      }
+
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (c) {
+        c.estado = 'Disponible';
+        c.ventas = [];
+      }
+
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+      renderListaCompradoresAutorizados();
+    }
+
+    // --- CARGA DE CORRALES Y RENDERIZADO COMPRADOR/CONSIGNATARIA ---
+    async function cargarCorrales() {
+      if (!eventoActivoObj) return;
+
+      if (sb) {
+        try {
+          const { data, error } = await sb.from('lotes_corral')
+            .select('*, ventas(*)')
+            .eq('evento_id', eventoActivoObj.id)
+            .order('id', { ascending: true });
+
+          if (!error && data && data.length > 0) {
+            corralesGlobales = data;
+            renderVistaConsignataria();
+            renderVistaComprador();
+            renderMisCompras();
+            return;
+          }
+        } catch (err) {}
+      }
+
+      corralesGlobales = CORRALES_DEMO[eventoActivoObj.id] || [];
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+    }
+
+    function renderVistaConsignataria() {
+      const container = document.getElementById('listaCorralesConsignataria');
+      let totalCab = 0;
+      let totalVendidas = 0;
+      let montoTotalAcumulado = 0;
+      let html = '';
+
+      corralesGlobales.forEach(c => {
+        totalCab += c.cabezas || 0;
+        const enPista = c.estado === 'En Pista';
+        const vendido = c.estado === 'Vendido';
+        const ventaInfo = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
+
+        if (vendido && ventaInfo) {
+          totalVendidas += c.cabezas || 0;
+          const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+          montoTotalAcumulado += (kilosLote > 0 ? kilosLote * ventaInfo.precio_kg : c.cabezas * ventaInfo.precio_kg);
+        }
+
+        html += `
+          <div id="corral-card-${c.id}" class="card corral-card ${enPista ? 'en-pista' : ''} ${vendido ? 'vendido' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>Corral #${c.numero_corral} — ${c.remitente}</strong>
+              <div>
+                ${enPista ? '<span class="badge-pista">EN PISTA</span>' : ''}
+                ${vendido ? '<span style="color:#10b981; font-weight:bold;">✔ VENDIDO</span>' : ''}
+              </div>
+            </div>
+            <div style="font-size:13px; margin:6px 0;">
+              ${c.cabezas} Cabezas | ${c.categoria} - ${c.raza} | Promedio: <strong>${c.peso_promedio || '-'} kg</strong>
+            </div>
+            <div style="font-size:12px; color:#4b5563;">
+              Obs: ${c.pesada_observaciones || 'Sin observaciones'}
+            </div>
+            ${ventaInfo ? `<div style="font-size:12px; color:#065f46; background:#d1fae5; padding:6px; border-radius:4px; margin-top:4px; display:flex; justify-content:space-between; align-items:center;">
+              <span>Comprador: <strong>${ventaInfo.comprador_nombre}</strong> | Precio: <strong>$${ventaInfo.precio_kg}</strong></span>
+            </div>` : ''}
+            
+            ${!vendido ? `
+              <div class="actions-row">
+                <button class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 Poner en Pista</button>
+                <button class="btn-action btn-venta" onclick="registrarVentaRapida(${c.id}, '${c.numero_corral}')">💲 Registrar Venta</button>
+              </div>
+            ` : `
+              <div class="actions-row">
+                <button class="btn-action" style="background:#0284c7; color:white;" onclick="editarVenta(${c.id}, '${c.numero_corral}')">✏️ Editar Venta</button>
+                <button class="btn-action" style="background:#dc2626; color:white;" onclick="anularVenta(${c.id}, '${c.numero_corral}')">❌ Anular Venta</button>
+              </div>
+            `}
+          </div>
+        `;
+      });
+
+      document.getElementById('kpiTotalCabezas').textContent = totalCab;
+      document.getElementById('kpiVendidas').textContent = totalVendidas;
+      document.getElementById('kpiMontoTotal').textContent = `$${(montoTotalAcumulado / 1000000).toFixed(1)}M`;
+      container.innerHTML = html || '<p style="color:#888;">No hay corrales cargados en este remate.</p>';
+    }
+
+    function renderVistaComprador() {
+      const container = document.getElementById('listaCorralesComprador');
+      const fRaza = document.getElementById('f_raza')?.value || '';
+      const fCat = document.getElementById('f_categoria')?.value || '';
+      const fMin = parseFloat(document.getElementById('f_peso_min')?.value) || 0;
+      const fMax = parseFloat(document.getElementById('f_peso_max')?.value) || Infinity;
+
+      let filtrados = corralesGlobales;
+      if (fRaza) filtrados = filtrados.filter(c => c.raza === fRaza);
+      if (fCat) filtrados = filtrados.filter(c => c.categoria === fCat);
+      if (fMin > 0) filtrados = filtrados.filter(c => (c.peso_promedio || 0) >= fMin);
+      if (fMax < Infinity) filtrados = filtrados.filter(c => (c.peso_promedio || 0) <= fMax);
+
+      let html = '';
+      filtrados.forEach(c => {
+        const enPista = c.estado === 'En Pista';
+        const vendido = c.estado === 'Vendido';
+
+        html += `
+          <div id="corral-card-${c.id}" class="card corral-card ${enPista ? 'en-pista' : ''} ${vendido ? 'vendido' : ''}">
+            <div style="display:flex; justify-content:space-between;">
+              <strong>Corral #${c.numero_corral}</strong>
+              <div>
+                ${enPista ? '<span class="badge-pista">REMATANDO AHORA</span>' : ''}
+                ${vendido ? '<span style="color:#10b981; font-weight:bold;">VENDIDO</span>' : ''}
+              </div>
+            </div>
+            <div style="font-size:13px; margin-top:4px;">
+              <strong>${c.cabezas} Cabezas</strong> (${c.categoria} - ${c.raza}) — Remitente: ${c.remitente}<br>
+              Peso Promedio: <strong>${c.peso_promedio || '-'} kg</strong><br>
+              <small style="color:#666;">${c.pesada_observaciones || ''}</small>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html || '<p style="color:#888;">No hay corrales para esta búsqueda de raza/categoría/peso.</p>';
+    }
+
+    function renderMisCompras() {
+      const container = document.getElementById('listaMisCompras');
+      const containerResumen = document.getElementById('resumenCategoriasComprador');
+      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || '';
+      const fTipo = document.getElementById('f_tipo_remate_comprador')?.value || '';
+
+      if (!miNombre) {
+        container.innerHTML = '<p style="color:#888; text-align:center;">Ingresá tu Razón Social arriba para consultar tus adjudicaciones.</p>';
+        if (containerResumen) containerResumen.innerHTML = '<p style="color:#888; text-align:center;">Ingresá tu Razón Social para ver el resumen agrupado.</p>';
+        return;
+      }
+
+      let totalCab = 0;
+      let totalKilos = 0;
+      let totalMonto = 0;
+      let html = '';
+      let resumenCategorias = {};
+
+      if (fTipo && eventoActivoObj && eventoActivoObj.tipo !== fTipo) {
+        container.innerHTML = `<p style="color:#888; text-align:center;">El remate activo "${eventoActivoObj.nombre}" es de tipo ${eventoActivoObj.tipo}. Cambiá el filtro a "${eventoActivoObj.tipo}" para ver tus compras.</p>`;
+        if (containerResumen) containerResumen.innerHTML = '<p style="color:#888; text-align:center;">Sin compras para este filtro de tipo de remate.</p>';
+        return;
+      }
+
+      corralesGlobales.forEach(c => {
+        if (c.ventas && c.ventas.length > 0) {
+          const v = c.ventas[0];
+          if (v.comprador_nombre.toLowerCase().includes(miNombre)) {
+            const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+            const montoLote = kilosLote > 0 ? kilosLote * v.precio_kg : c.cabezas * v.precio_kg;
+
+            totalCab += c.cabezas;
+            totalKilos += kilosLote;
+            totalMonto += montoLote;
+
+            if (!resumenCategorias[c.categoria]) {
+              resumenCategorias[c.categoria] = { cabezas: 0, kilos: 0, monto: 0 };
+            }
+            resumenCategorias[c.categoria].cabezas += c.cabezas;
+            resumenCategorias[c.categoria].kilos += kilosLote;
+            resumenCategorias[c.categoria].monto += montoLote;
+
+            html += `
+              <div class="card corral-card vendido">
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                  <span>Corral #${c.numero_corral} (${c.categoria} ${c.raza})</span>
+                  <span style="color:#10b981;">$${v.precio_kg}</span>
+                </div>
+                <div style="font-size:13px; margin-top:4px;">
+                  ${c.cabezas} Cabezas | Promedio: ${c.peso_promedio} kg | Subtotal: <strong>$${montoLote.toLocaleString('es-AR')}</strong>
+                </div>
+              </div>
+            `;
+          }
+        }
+      });
+
+      if (containerResumen) {
+        if (Object.keys(resumenCategorias).length === 0) {
+          containerResumen.innerHTML = '<p style="color:#888; text-align:center;">No hay compras registradas para generar el resumen.</p>';
+        } else {
+          let htmlRes = `
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>CATEGORÍA</th>
+                  <th style="text-align:center;">CABEZAS</th>
+                  <th style="text-align:center;">KILOS TOT.</th>
+                  <th style="text-align:right;">PROM ($/KG)</th>
+                  <th style="text-align:right;">TOTAL ($)</th>
+                </tr>
+              </thead>
+              <tbody>
+          `;
+
+          for (const cat in resumenCategorias) {
+            const item = resumenCategorias[cat];
+            const promCat = item.kilos > 0 ? (item.monto / item.kilos).toFixed(2) : (item.monto / item.cabezas).toFixed(2);
+            htmlRes += `
+              <tr>
+                <td><strong>${cat}</strong></td>
+                <td style="text-align:center; font-weight:bold;">${item.cabezas}</td>
+                <td style="text-align:center;">${item.kilos > 0 ? item.kilos.toLocaleString('es-AR') + ' kg' : '-'}</td>
+                <td style="text-align:right; font-weight:bold; color:#0284c7;">$${promCat}</td>
+                <td style="text-align:right; font-weight:bold; color:#166534;">$${item.monto.toLocaleString('es-AR')}</td>
+              </tr>
+            `;
+          }
+
+          htmlRes += `</tbody></table>`;
+          containerResumen.innerHTML = htmlRes;
+        }
+      }
+
+      const promPonderado = totalKilos > 0 ? (totalMonto / totalKilos).toFixed(2) : 0;
+
+      document.getElementById('compraCabezas').textContent = totalCab;
+      document.getElementById('compraMonto').textContent = `$${(totalMonto / 1000).toFixed(0)}k`;
+      document.getElementById('compraPromedio').textContent = `$${promPonderado}`;
+      container.innerHTML = html || '<p style="color:#888; text-align:center;">No hay compras registradas a ese nombre en este remate.</p>';
+    }
+
+    function renderReporteGlobal() {
+      const container = document.getElementById('reporteGlobalTablaContainer');
+      if (!container) return;
+
+      const tipoFiltro = document.getElementById('f_tipo_remate_reporte')?.value || '';
+
+      if (tipoFiltro && eventoActivoObj && eventoActivoObj.tipo !== tipoFiltro) {
+        container.innerHTML = `<p style="color:#888; text-align:center;">El remate activo "${eventoActivoObj.nombre}" es de tipo ${eventoActivoObj.tipo}. Seleccioná "${eventoActivoObj.tipo}" en el primer filtro para consolidar.</p>`;
+        return;
+      }
+
+      let html = `
+        <h4 style="margin-bottom:8px; color:var(--primary);">${eventoActivoObj ? eventoActivoObj.nombre : 'Remate General'} (${eventoActivoObj ? eventoActivoObj.fecha : ''})</h4>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>COMPRADOR</th>
+              <th>CUIT</th>
+              <th style="text-align:center;">CABEZAS</th>
+              <th style="text-align:center;">KILOS</th>
+              <th style="text-align:right;">PROM ($/KG)</th>
+              <th style="text-align:right;">MONTO TOTAL ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      let totalGlobalCab = 0;
+      let totalGlobalMonto = 0;
+
+      COMPRADORES_AUTORIZADOS_DEMO.forEach(c => {
+        let cab = 0;
+        let kilos = 0;
+        let monto = 0;
+
+        corralesGlobales.forEach(corral => {
+          if (corral.ventas && corral.ventas.length > 0) {
+            const v = corral.ventas[0];
+            if (v.comprador_nombre.toLowerCase().includes(c.nombre.toLowerCase())) {
+              const k = (corral.cabezas * corral.peso_promedio) || 0;
+              cab += corral.cabezas;
+              kilos += k;
+              monto += k > 0 ? k * v.precio_kg : corral.cabezas * v.precio_kg;
+            }
+          }
+        });
+
+        if (cab > 0) {
+          totalGlobalCab += cab;
+          totalGlobalMonto += monto;
+          const prom = kilos > 0 ? (monto / kilos).toFixed(2) : (monto / cab).toFixed(2);
+
+          html += `
+            <tr>
+              <td><strong>${c.nombre}</strong></td>
+              <td>${c.cuit}</td>
+              <td style="text-align:center; font-weight:bold;">${cab}</td>
+              <td style="text-align:center;">${kilos.toLocaleString('es-AR')} kg</td>
+              <td style="text-align:right; font-weight:bold;">$${prom}</td>
+              <td style="text-align:right; font-weight:bold; color:#166534;">$${monto.toLocaleString('es-AR')}</td>
+            </tr>
+          `;
+        }
+      });
+
+      html += `
+          </tbody>
+          <tfoot>
+            <tr style="background:#e2e8f0; font-weight:bold;">
+              <td colspan="2">TOTAL GENERAL OPERADO</td>
+              <td style="text-align:center;">${totalGlobalCab}</td>
+              <td colspan="2"></td>
+              <td style="text-align:right; color:#166534;">$${totalGlobalMonto.toLocaleString('es-AR')}</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    // --- EXPORTACIONES A CSV ---
+    function exportarComprasDetalladasCSV() {
+      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || '';
+      if (!miNombre) { alert('Ingrese su Razón Social para exportar sus compras.'); return; }
+
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Remate,Tipo,Fecha,Corral,Remitente,Cabezas,Categoria,Raza,PesoPromedio,PrecioFinal,MontoSubtotal\n";
+
+      corralesGlobales.forEach(c => {
+        if (c.ventas && c.ventas.length > 0) {
+          const v = c.ventas[0];
+          if (v.comprador_nombre.toLowerCase().includes(miNombre)) {
+            const kilos = (c.cabezas * c.peso_promedio) || 0;
+            const subtotal = kilos > 0 ? kilos * v.precio_kg : c.cabezas * v.precio_kg;
+            csvContent += `"${eventoActivoObj ? eventoActivoObj.nombre : 'Remate'}","${eventoActivoObj ? eventoActivoObj.tipo : ''}","${eventoActivoObj ? eventoActivoObj.fecha : ''}","${c.numero_corral}","${c.remitente}",${c.cabezas},"${c.categoria}","${c.raza}",${c.peso_promedio || 0},${v.precio_kg},${subtotal}\n`;
+          }
+        }
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Mis_Compras_${eventoActivoObj ? eventoActivoObj.nombre : 'Remate'}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function exportarReporteConsignatariaCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "Comprador,CUIT,CabezasCompradas,KilosTotales,PromedioPonderado,MontoTotalGasto\n";
+
+      COMPRADORES_AUTORIZADOS_DEMO.forEach(c => {
+        let cabezas = 0;
+        let kilos = 0;
+        let monto = 0;
+
+        corralesGlobales.forEach(corral => {
+          if (corral.ventas && corral.ventas.length > 0) {
+            const v = corral.ventas[0];
+            if (v.comprador_nombre.toLowerCase().includes(c.nombre.toLowerCase())) {
+              const k = (corral.cabezas * corral.peso_promedio) || 0;
+              cabezas += corral.cabezas;
+              kilos += k;
+              monto += k > 0 ? k * v.precio_kg : corral.cabezas * v.precio_kg;
+            }
+          }
+        });
+
+        if (cabezas > 0) {
+          const prom = kilos > 0 ? (monto / kilos).toFixed(2) : (monto / cabezas).toFixed(2);
+          csvContent += `"${c.nombre}","${c.cuit}",${cabezas},${kilos},${prom},${monto}\n`;
+        }
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Cierre_Contable_${eventoActivoObj ? eventoActivoObj.nombre : 'Remate'}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function imprimirBoletinPapel() {
+      if (!eventoActivoObj) return;
+
+      let totalCab = 0;
+      let html = `
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:12px;">
+          <div>
+            <h2 style="margin:0; font-size:18px;">${usuarioActual ? usuarioActual.nombre : 'CONSIGNATARIA'}</h2>
+            <h3 style="margin:3px 0 0 0; font-size:14px;">${eventoActivoObj.nombre} (${eventoActivoObj.tipo})</h3>
+          </div>
+          <div style="text-align:right; font-size:11px;">
+            <strong>FECHA:</strong> ${eventoActivoObj.fecha || new Date().toLocaleDateString('es-AR')}<br>
+            <strong>LUGAR:</strong> ${eventoActivoObj.lugar || 'En Pista'}
+          </div>
+        </div>
+
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th style="width:7%; text-align:center;">CORRAL</th>
+              <th style="width:22%;">REMITENTE</th>
+              <th style="width:6%; text-align:center;">CAB.</th>
+              <th style="width:13%;">CAT. / RAZA</th>
+              <th style="width:8%; text-align:center;">PROM.</th>
+              <th style="width:18%;">OBSERVACIONES / PESADA</th>
+              <th style="width:10%; text-align:center;">PRECIO ($)</th>
+              <th style="width:11%;">COMPRADOR</th>
+              <th style="width:5%; text-align:center;">PLAZO</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      corralesGlobales.forEach(c => {
+        totalCab += c.cabezas || 0;
+        const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
+
+        html += `
+          <tr>
+            <td style="font-weight:bold; text-align:center; font-size:12px;">${c.numero_corral}</td>
+            <td>${c.remitente}</td>
+            <td style="text-align:center; font-weight:bold;">${c.cabezas}</td>
+            <td>${c.categoria} ${c.raza}</td>
+            <td style="text-align:center;">${c.peso_promedio ? c.peso_promedio + ' kg' : '-'}</td>
+            <td style="font-size:10px;">${c.pesada_observaciones || ''}</td>
+            <td style="text-align:right; font-weight:bold;">${v ? '$' + v.precio_kg : ''}</td>
+            <td>${v ? v.comprador_nombre : ''}</td>
+            <td style="text-align:center;">${v ? (v.plazo_dias || 14) + 'd' : ''}</td>
+          </tr>
+        `;
+      });
+
+      html += `
+          </tbody>
+          <tfoot>
+            <tr style="font-weight:bold; background-color:#e5e7eb;">
+              <td colspan="2" style="text-align:right;">TOTAL CABEZAS:</td>
+              <td style="text-align:center;">${totalCab}</td>
+              <td colspan="6"></td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      document.getElementById('printArea').innerHTML = html;
+      window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const fechaEl = document.getElementById('ev_fecha');
+      if (fechaEl) {
+        fechaEl.valueAsDate = new Date();
+        actualizarSugerenciaNombreMercado();
+      }
+    });
+  </script>
+</body>
+</html>
