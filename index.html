@@ -1,6 +1,6 @@
 HTLM
-
-<!DOCTYPE html>
+        
+   <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -121,9 +121,6 @@ HTLM
     .corral-card.observado { border-left-color: #dc2626; background: #fef2f2; }
 
     .badge-pista { background: #d97706; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1.5s infinite; }
-    .badge-observado { background: #dc2626; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1s infinite; }
-    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
     .actions-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .btn-action { flex: 1; min-width: 110px; padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
     .btn-pista { background: #d97706; color: white; }
@@ -131,16 +128,20 @@ HTLM
 
     .buyer-item { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 6px; font-size: 13px; }
 
+    /* MODAL */
+    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:flex; justify-content:center; align-items:center; z-index:1000; }
+    .modal-content { background:#fff; padding:20px; border-radius:10px; width:90%; max-width:550px; max-height:85vh; overflow-y:auto; }
+
     .hidden { display: none !important; }
     .print-only { display: none; }
 
     @media print {
       body { background: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
-      header, #secLogin, #secSelectorModo, #secMenuPrincipal, #secSeleccionEvento, #secGestionCompradores, #secReportesGlobales, #vistaConsignataria, #vistaComprador, #liveBanner, .container { display: none !important; }
+      header, #secLogin, #secSelectorModo, #secMenuPrincipal, #secSeleccionEvento, #secGestionCompradores, #secReportesGlobales, #secAltaEmpresas, #vistaConsignataria, #vistaComprador, #liveBanner, .container { display: none !important; }
       .print-only { display: block !important; padding: 15px; }
       .print-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
       .print-table th, .print-table td { border: 1px solid #000; padding: 6px 4px; text-align: left; }
-      .print-table th { background-color: #f2f2f2 !important; -webkit-print-color-adjust: exact; font-weight: bold; }
+      .print-table th { background-color: #f2f2f2 !important; font-weight: bold; }
     }
   </style>
 </head>
@@ -280,7 +281,7 @@ HTLM
           <div class="menu-card-btn" onclick="abrirSeccionReportes()">
             <span class="menu-icon">⚙️</span>
             <div class="menu-title">2. Monitoreo del Sistema</div>
-            <div class="menu-desc">Estatus técnico de base de datos y logs.</div>
+            <div class="menu-desc">Estatus técnico de base de datos y consolidado general.</div>
           </div>
         </div>
 
@@ -294,13 +295,13 @@ HTLM
       </div>
 
       <div class="card">
-        <div class="card-title">📅 Remates Asignados</div>
+        <div class="card-title">📅 Remates Registrados</div>
         <div id="listaEventosDisponibles">
           <p style="color:#888; text-align:center;">Cargando remates...</p>
         </div>
       </div>
 
-      <!-- CREAR NUEVO EVENTO -->
+      <!-- CREAR NUEVO EVENTO CON REGLA AUTO-NOMBRE -->
       <div id="cardCrearEvento" class="card hidden">
         <div class="card-title">➕ Crear Nuevo Evento de Remate</div>
         <form id="formNuevoEvento" onsubmit="crearNuevoEvento(event)">
@@ -327,7 +328,7 @@ HTLM
 
           <div class="form-group">
             <label>Nombre del Evento (Auto-generado / Editable)</label>
-            <input type="text" id="ev_nombre" placeholder="Ej: MAG - 02/11 o Cañuelas - 15/10" required>
+            <input type="text" id="ev_nombre" placeholder="Ej: MAG - 02/11 o Cañuelas - 15/10" required oninput="this.setAttribute('data-manual', 'true');">
           </div>
 
           <button type="submit" class="btn-submit">🚀 Crear e Ingresar al Remate</button>
@@ -335,7 +336,7 @@ HTLM
       </div>
     </div>
 
-    <!-- 3. SECCIÓN: PADRÓN DE CLIENTES Y USUARIOS DE LA EMPRESA -->
+    <!-- 3. SECCIÓN: PADRÓN DE CLIENTES Y USUARIOS -->
     <div id="secGestionCompradores" class="hidden">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
@@ -357,7 +358,7 @@ HTLM
               </select>
             </div>
             <div class="form-group">
-              <label>Razón Social / Consignataria *</label>
+              <label>Razón Social / Nombre *</label>
               <input type="text" id="u_comprador_nombre" placeholder="Ej: Estancia El Trébol SA" required>
             </div>
             <div class="form-group">
@@ -398,7 +399,43 @@ HTLM
       </div>
     </div>
 
-    <!-- 4. SECCIÓN: REPORTES GLOBALES Y REPORTE COMPARATIVO MAG -->
+    <!-- 3.1 SECCIÓN EXCLUSIVA ADMIN: ALTA DE CONSIGNATARIA (NUEVO CUIT) -->
+    <div id="secAltaEmpresas" class="hidden">
+      <div style="margin-bottom:12px; display:flex; gap:8px;">
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+      </div>
+
+      <div class="card" style="background:#fefe90; border: 1px solid #facc15;">
+        <div class="card-title" style="color:#854d0e;">
+          <span>🛡️ Habilitar Nueva Casa Consignataria (Alta de CUIT por Admin)</span>
+        </div>
+        <form id="formAltaConsignataria" onsubmit="guardarNuevaConsignatariaAdmin(event)">
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Razón Social de la Consignataria *</label>
+              <input type="text" id="adm_empresa_nombre" placeholder="Ej: Ganadera del Oeste SA" required>
+            </div>
+            <div class="form-group">
+              <label>CUIT de la Empresa (11 dígitos) *</label>
+              <input type="text" id="adm_empresa_cuit" placeholder="Ej: 30-99881122-3" required>
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label>Email del Primer Usuario Vendedor (Titular) *</label>
+              <input type="email" id="adm_vendedor_email" placeholder="titular@ganaderadeloeste.com" required>
+            </div>
+            <div class="form-group">
+              <label>Contraseña Acceso Inicial *</label>
+              <input type="text" id="adm_vendedor_pass" placeholder="••••••••" required>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" style="background:#a16207;">🏢 Crear e Imputar Nueva Consignataria</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 4. SECCIÓN: REPORTES GLOBALES & COMPARATIVO MAG -->
     <div id="secReportesGlobales" class="hidden">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
         <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
@@ -416,9 +453,9 @@ HTLM
         <div class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; margin-bottom:12px;">
           <div class="grid-3">
             <div class="form-group">
-              <label style="color:#dc2626;">1º Filtro Obligatorio: Tipo Evento *</label>
+              <label style="color:#dc2626;">1º Tipo Evento *</label>
               <select id="f_tipo_remate_reporte" onchange="adaptarCategoriasFiltroPorTipoEvento()">
-                <option value="">-- Seleccionar Obligatorio --</option>
+                <option value="TODOS" selected>Todos los Eventos</option>
                 <option value="Mercado">Mercado Agroganadero (MAG)</option>
                 <option value="Feria">Remate Feria</option>
                 <option value="Cabaña">Remate Cabaña</option>
@@ -441,12 +478,20 @@ HTLM
           <div id="grpFiltrosEstandar" class="grid-3">
             <div class="form-group">
               <label>Categoría</label>
-              <select id="f_categoria_reporte"><option value="">Todas</option></select>
+              <select id="f_categoria_reporte">
+                <option value="">Todas las Categorías</option>
+                <option value="NOV">Novillo (NOV)</option>
+                <option value="NT">Novillito (NT)</option>
+                <option value="VQ">Vaquillona (VQ)</option>
+                <option value="VC">Vaca (VC)</option>
+                <option value="TR">Toro (TR)</option>
+                <option value="TER">Ternero (TER)</option>
+              </select>
             </div>
             <div class="form-group">
               <label>Plazo de Pago</label>
               <select id="f_plazo_reporte">
-                <option value="">Todos</option>
+                <option value="">Todos los Plazos</option>
                 <option value="30">30 Días</option>
                 <option value="60">60 Días</option>
                 <option value="90">90 Días</option>
@@ -459,7 +504,7 @@ HTLM
 
           <div id="grpFiltrosMAG" class="grid-3 hidden">
             <div class="form-group">
-              <label>Periodo de Comparación MAG</label>
+              <label>Periodo Comparativo MAG</label>
               <select id="f_mag_periodo">
                 <option value="dia">Día vs Día</option>
                 <option value="mes">Mes vs Mes</option>
@@ -482,11 +527,11 @@ HTLM
         </div>
 
         <div id="reporteGlobalTablaContainer">
-          <p style="color:#888; text-align:center;">Seleccioná el Tipo de Evento obligatorio para consultar el reporte.</p>
+          <p style="color:#888; text-align:center;">Hacé clic en "Generar Reporte" para calcular los totales y vencimientos.</p>
         </div>
 
         <div id="seccionGraficos" class="hidden" style="margin-top:20px; border-top:2px solid #e5e7eb; padding-top:14px;">
-          <h4 style="margin-bottom:10px; color:var(--primary);">📈 Gráficos de Comportamiento</h4>
+          <h4 style="margin-bottom:10px; color:var(--primary);">📈 Comportamiento de Precios & Pesos</h4>
           <div class="grid-2">
             <div style="background:#fff; border:1px solid #e5e7eb; padding:10px; border-radius:8px;">
               <label style="text-align:center;">Dispersión: Peso (kg) vs Precio ($/kg)</label>
@@ -502,7 +547,7 @@ HTLM
       </div>
     </div>
 
-    <!-- 5. VISTA VENDEDOR / CONSIGNATARIA (OPERACIÓN EN PISTA) -->
+    <!-- 5. VISTA VENDEDOR (OPERACIÓN EN PISTA) -->
     <div id="vistaConsignataria" class="hidden">
       <div style="margin-bottom:12px; display:flex; justify-content:space-between; gap:8px;">
         <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
@@ -665,12 +710,23 @@ HTLM
 
   </div>
 
+  <!-- MODAL FICHA CABAÑA -->
+  <div id="modalFichaCabana" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:8px; margin-bottom:12px;">
+        <h3 id="modalTituloCorral" style="color:var(--primary);">🐂 Ficha Técnica Cabaña</h3>
+        <button type="button" onclick="cerrarModalFicha()" style="background:none; border:none; font-size:18px; font-weight:bold; cursor:pointer;">✕</button>
+      </div>
+      <div id="modalCuerpoFicha"></div>
+    </div>
+  </div>
+
   <script>
     // ==========================================
-    // 🔑 CONFIGURACIÓN Y DATOS DEMO DUALES
+    // 🔑 CONFIGURACIÓN Y DATOS DEMO UNIFICADOS
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';                
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
+    const SUPABASE_ANON_KEY = ''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw;                
 
     let sb = null;
     try {
@@ -679,10 +735,6 @@ HTLM
       }
     } catch (e) {}
 
-    // CONSIGNATARIA DEMO PRINCIPAL
-    const CONSIGNATARIA_DEMO = { id: 'CONS_SUR', nombre: 'Ventas del Sur SA', cuit: '30-88776655-4' };
-
-    // 10 CLIENTES DEMO REALES
     let CLIENTES_DEMO = [
       { id: 1, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', email: 'compras@eltrebol.com', clave: '30711223348-T', limite_credito: 80000000 },
       { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 },
@@ -699,17 +751,14 @@ HTLM
     const HOY_STR = new Date().toISOString().split('T')[0];
     const AYER_STR = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
-    // REMATES PENDIENTES Y REALIZADOS
     const EVENTOS_DEMO = [
       { id: 101, consignataria_id: 'CONS_SUR', nombre: 'Feria Especial Invernada (1.200 Terneros)', tipo_evento: 'Feria', fecha: HOY_STR, lugar: 'General Villegas', estado: 'Pendiente' },
-      { id: 102, consignataria_id: 'CONS_SUR', nombre: 'MAG - Mercado Agroganadero', tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente' },
+      { id: 102, consignataria_id: 'CONS_SUR', nombre: `MAG - ${HOY_STR.split('-')[2]}/${HOY_STR.split('-')[1]}`, tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente' },
       { id: 103, consignataria_id: 'CONS_SUR', nombre: 'Gran Remate Cabaña Don Luis (60 Toros / 120 Vaq)', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Instalaciones Cabaña', estado: 'Pendiente' },
-      // EVENTOS REALIZADOS (HISTÓRICOS PARA REPORTES)
       { id: 201, consignataria_id: 'CONS_SUR', nombre: 'MAG - Jornada Cierre Anterior', tipo_evento: 'Mercado', fecha: AYER_STR, lugar: 'Cañuelas', estado: 'Realizado' },
       { id: 202, consignataria_id: 'CONS_SUR', nombre: 'Feria Invernada Mes Pasado', tipo_evento: 'Feria', fecha: '2026-09-15', lugar: 'General Villegas', estado: 'Realizado' }
     ];
 
-    // CORRALES Y VENDEDORES DEMO
     const CORRALES_DEMO = {
       101: Array.from({ length: 10 }, (_, i) => ({
         id: i + 1, evento_id: 101, numero_corral: `F-${101 + i}`, remitente: 'Estancia Las Lilas (Las Lilas)', cabezas: 120, categoria: 'TER', raza: 'Angus', peso_promedio: 180, pesada_observaciones: 'Lote parejo destetado', cuotas: 1, plazo_dias: 30, estado: 'Disponible'
@@ -732,7 +781,52 @@ HTLM
     let modoOperatorioActivo = 'vendedor';
     let eventoActivoObj = null;
     let corralesGlobales = [];
-    let chartScatterInstance = null, chartBarInstance = null;
+
+    // ==========================================
+    // ⚙️ REGLA AUTOASIGNACIÓN DE NOMBRE Y FECHA
+    // ==========================================
+    function evaluarFechaYNombreEvento() {
+      const tipo = document.getElementById('ev_tipo')?.value;
+      const fechaEl = document.getElementById('ev_fecha');
+      const lugarEl = document.getElementById('ev_lugar');
+      const nombreInput = document.getElementById('ev_nombre');
+
+      if (!tipo || !nombreInput) return;
+
+      if (tipo === 'Mercado') {
+        if (fechaEl && !fechaEl.getAttribute('data-manual')) {
+          const ahora = new Date();
+          let fechaTarget = new Date();
+          if (ahora.getHours() >= 8) {
+            fechaTarget.setDate(fechaTarget.getDate() + 1);
+          }
+          fechaEl.value = fechaTarget.toISOString().split('T')[0];
+        }
+      }
+
+      const fechaVal = fechaEl ? fechaEl.value : '';
+      let fechaStr = '';
+      if (fechaVal) {
+        const partes = fechaVal.split('-');
+        if (partes.length === 3) fechaStr = `${partes[2]}/${partes[1]}`;
+      }
+
+      const lugarVal = lugarEl ? lugarEl.value.trim() : '';
+
+      if (!nombreInput.getAttribute('data-manual')) {
+        if (tipo === 'Mercado') {
+          nombreInput.value = fechaStr ? `MAG - ${fechaStr}` : 'MAG';
+        } else {
+          if (lugarVal && fechaStr) {
+            nombreInput.value = `${lugarVal} - ${fechaStr}`;
+          } else if (lugarVal) {
+            nombreInput.value = lugarVal;
+          } else if (fechaStr) {
+            nombreInput.value = `${tipo} - ${fechaStr}`;
+          }
+        }
+      }
+    }
 
     function calcularFechaVencimiento(fechaEventoStr, plazoDias) {
       if (!fechaEventoStr) return '-';
@@ -745,6 +839,15 @@ HTLM
       document.getElementById('login_email').value = email;
       document.getElementById('login_pass').value = pass;
       procesarLogin(new Event('submit'));
+    }
+
+    function recuperarContrasena() {
+      const email = document.getElementById('login_email').value.trim();
+      if (!email) {
+        alert('Ingresá tu email en la casilla superior para enviarte el enlace de recuperación.');
+        return;
+      }
+      alert(`✔ Se ha enviado un enlace seguro de restablecimiento a: ${email}`);
     }
 
     function procesarLogin(e) {
@@ -815,6 +918,7 @@ HTLM
       document.getElementById('secSeleccionEvento').classList.add('hidden');
       document.getElementById('secGestionCompradores').classList.add('hidden');
       document.getElementById('secReportesGlobales').classList.add('hidden');
+      document.getElementById('secAltaEmpresas').classList.add('hidden');
       document.getElementById('vistaConsignataria').classList.add('hidden');
       document.getElementById('vistaComprador').classList.add('hidden');
       document.getElementById('headerEventBar').classList.add('hidden');
@@ -836,9 +940,15 @@ HTLM
       renderListaCompradoresAutorizados();
     }
 
+    function abrirSeccionAltaEmpresas() {
+      ocultarTodasLasSecciones();
+      document.getElementById('secAltaEmpresas').classList.remove('hidden');
+    }
+
     function abrirSeccionReportes() {
       ocultarTodasLasSecciones();
       document.getElementById('secReportesGlobales').classList.remove('hidden');
+      ejecutarReporteGlobal();
     }
 
     function abrirSeccionReportesComprador() {
@@ -863,10 +973,11 @@ HTLM
       if (e) e.preventDefault();
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
+      const nombre = document.getElementById('ev_nombre').value.trim();
 
       const nuevo = {
         consignataria_id: usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR',
-        nombre: document.getElementById('ev_nombre').value.trim(),
+        nombre: nombre,
         tipo_evento: document.getElementById('ev_tipo').value,
         fecha: fecha,
         lugar: lugar,
@@ -883,33 +994,38 @@ HTLM
 
       EVENTOS_DEMO.unshift(nuevo);
       document.getElementById('formNuevoEvento').reset();
+      document.getElementById('ev_nombre').removeAttribute('data-manual');
+      document.getElementById('ev_fecha').removeAttribute('data-manual');
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
 
     async function cargarEventosDisponibles() {
+      const container = document.getElementById('listaEventosDisponibles');
+      if (!container) return;
+
       let lista = EVENTOS_DEMO;
 
       if (sb) {
         try {
           let query = sb.from('eventos').select('*');
-          if (modoOperatorioActivo === 'vendedor' && usuarioActual) query = query.eq('consignataria_id', usuarioActual.consignataria_id);
+          if (modoOperatorioActivo === 'vendedor' && usuarioActual && usuarioActual.consignataria_id !== 'ALL') {
+            query = query.eq('consignataria_id', usuarioActual.consignataria_id);
+          }
           const { data, error } = await query.order('id', { ascending: false });
           if (!error && data && data.length > 0) lista = data;
         } catch (err) {}
       }
 
-      const container = document.getElementById('listaEventosDisponibles');
-      if (!container) return;
-
       let html = '';
       lista.forEach(ev => {
         const esHoy = (ev.fecha === HOY_STR);
+        const esRealizado = ev.estado === 'Realizado';
         html += `
           <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>${ev.nombre}</strong>
               <div>
-                <span class="event-type-badge">${ev.tipo_evento}</span>
+                ${esRealizado ? '<span class="event-type-badge" style="background:#e2e8f0; color:#475569;">FINALIZADO</span>' : `<span class="event-type-badge">${ev.tipo_evento}</span>`}
                 ${esHoy ? '<span class="badge-sugerido">⭐ HOY</span>' : ''}
               </div>
             </div>
@@ -919,7 +1035,7 @@ HTLM
           </div>
         `;
       });
-      container.innerHTML = html;
+      container.innerHTML = html || '<p style="color:#888;">No hay remates cargados.</p>';
     }
 
     async function seleccionarEvento(id, nombre, tipo) {
@@ -1015,7 +1131,7 @@ HTLM
       const c = CLIENTES_DEMO.find(item => item.id === id);
       if (!c) return;
 
-      if (confirm(`⚠️ ¿Está seguro de eliminar al usuario/cliente "${c.nombre}"? esta acción no se puede deshacer.`)) {
+      if (confirm(`⚠️ ¿Está seguro de eliminar al usuario/cliente "${c.nombre}"? Esta acción no se puede deshacer.`)) {
         CLIENTES_DEMO = CLIENTES_DEMO.filter(item => item.id !== id);
         if (sb) {
           try { await sb.from('compradores').delete().eq('id', id); } catch (err) {}
@@ -1023,6 +1139,18 @@ HTLM
         alert(`✔ El registro de "${c.nombre}" ha sido eliminado.`);
         renderListaCompradoresAutorizados();
       }
+    }
+
+    async function guardarNuevaConsignatariaAdmin(e) {
+      if (e) e.preventDefault();
+      const nombre = document.getElementById('adm_empresa_nombre').value.trim();
+      const cuit = document.getElementById('adm_empresa_cuit').value.trim();
+      const email = document.getElementById('adm_vendedor_email').value.trim().toLowerCase();
+      const pass = document.getElementById('adm_vendedor_pass').value.trim();
+
+      alert(`¡Consignataria "${nombre}" (CUIT: ${cuit}) habilitada con éxito!\nPrimer Usuario Activo: ${email}`);
+      document.getElementById('formAltaConsignataria').reset();
+      volverAlMenuPrincipal();
     }
 
     async function renderListaCompradoresAutorizados() {
@@ -1060,6 +1188,8 @@ HTLM
 
     async function cargarCorrales() {
       if (!eventoActivoObj) return;
+
+      corralesGlobales = [];
 
       if (sb) {
         try {
@@ -1183,7 +1313,13 @@ HTLM
             </div>
             ${ventaInfo ? `<div style="font-size:12px; color:#065f46; background:#d1fae5; padding:6px; border-radius:4px;">Comprador: <strong>${ventaInfo.comprador_nombre}</strong> | Precio: <strong>$${ventaInfo.precio_kg}</strong></div>` : ''}
             <div class="actions-row">
-              ${!vendido ? `<button type="button" class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 En Pista</button><button type="button" class="btn-action btn-venta" onclick="registrarVentaRapida(${c.id}, '${c.numero_corral}')">💲 Vender</button>` : ''}
+              ${!vendido ? `
+                <button type="button" class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 En Pista</button>
+                <button type="button" class="btn-action btn-venta" onclick="registrarVentaRapida(${c.id}, '${c.numero_corral}')">💲 Vender</button>
+              ` : `
+                <button type="button" class="btn-action" style="background:#0284c7; color:white;" onclick="editarVenta(${c.id}, '${c.numero_corral}')">✏️ Editar Venta</button>
+                <button type="button" class="btn-action" style="background:#dc2626; color:white;" onclick="anularVenta(${c.id}, '${c.numero_corral}')">❌ Anular Venta</button>
+              `}
             </div>
           </div>
         `;
@@ -1195,11 +1331,24 @@ HTLM
       container.innerHTML = html || '<p style="color:#888;">No hay corrales cargados para este remate.</p>';
     }
 
+    function ponerEnPista(loteId) {
+      corralesGlobales.forEach(c => {
+        if (c.id === loteId) {
+          c.estado = 'En Pista';
+          dispararAlertaLive(`🔨 ¡Lote #${c.numero_corral} (${c.categoria} ${c.raza}) EN PISTA!`);
+        } else if (c.estado === 'En Pista') {
+          c.estado = 'Disponible';
+        }
+      });
+      renderVistaConsignataria();
+      renderVistaComprador();
+    }
+
     async function registrarVentaRapida(loteId, numeroCorral) {
       const c = corralesGlobales.find(item => item.id === loteId);
       if (!c) return;
 
-      const compradorInput = prompt(`📄 Comprador / Alias del Corral #${numeroCorral}:`, 'El Trébol');
+      const compradorInput = prompt(`📄 Comprador / Alias del Corral #${numeroCorral}:`, 'Agropecuaria El Trébol SA');
       if (!compradorInput) return;
 
       const precio = parseFloat(prompt(`💲 Precio acordado ($ / kg o $ / unidad):`, '4500'));
@@ -1223,10 +1372,225 @@ HTLM
       renderMisCompras();
     }
 
+    function editarVenta(loteId, numeroCorral) {
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (!c || !c.ventas || c.ventas.length === 0) return;
+
+      const v = c.ventas[0];
+      const nuevoComprador = prompt(`✏️ Editar Comprador para Corral #${numeroCorral}:`, v.comprador_nombre);
+      if (!nuevoComprador) return;
+
+      const nuevoPrecio = parseFloat(prompt(`✏️ Editar Precio ($/kg):`, v.precio_kg));
+      if (!nuevoPrecio) return;
+
+      v.comprador_nombre = nuevoComprador;
+      v.precio_kg = nuevoPrecio;
+      const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+      v.monto_final = kilosLote > 0 ? kilosLote * nuevoPrecio : c.cabezas * nuevoPrecio;
+
+      alert('✔ Venta modificada exitosamente.');
+      renderVistaConsignataria();
+    }
+
+    function anularVenta(loteId, numeroCorral) {
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (!c) return;
+
+      if (confirm(`⚠️ ¿Está seguro de anular la venta del Corral #${numeroCorral}? Volverá a estar disponible en pista.`)) {
+        c.estado = 'Disponible';
+        c.ventas = [];
+        alert('✔ Venta anulada.');
+        renderVistaConsignataria();
+      }
+    }
+
+    function renderVistaComprador() {
+      const container = document.getElementById('listaCorralesComprador');
+      if (!container) return;
+
+      const fRaza = document.getElementById('f_raza')?.value || '';
+      const fCat = document.getElementById('f_categoria')?.value || '';
+
+      let html = '';
+      corralesGlobales.forEach(c => {
+        if (fRaza && c.raza !== fRaza) return;
+        if (fCat && c.categoria !== fCat) return;
+
+        const esCabana = eventoActivoObj && eventoActivoObj.tipo_evento === 'Cabaña';
+
+        html += `
+          <div class="card corral-card ${c.estado === 'Vendido' ? 'vendido' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>Corral #${c.numero_corral} — ${c.categoria} ${c.raza}</strong>
+              <span class="event-type-badge">${c.estado}</span>
+            </div>
+            <div style="font-size:13px; margin-top:6px;">
+              ${c.cabezas} Cabezas | Peso Promedio: <strong>${c.peso_promedio || '-'} kg</strong> | Plazo: ${c.cuotas || 1} Cuotas<br>
+              <small style="color:#6b7280;">Observaciones: ${c.pesada_observaciones || 'Sin detalles'}</small>
+            </div>
+            ${esCabana ? `
+              <div style="margin-top:8px;">
+                <button type="button" class="btn-preset" style="background:#1b4332; color:white;" onclick="verFichaTecnicaCabana('${c.numero_corral}', '${c.categoria}', '${c.raza}', '${c.peso_promedio}')">🐂 Ver Ficha Genealógica / Pedigree</button>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html || '<p style="color:#888; text-align:center;">No se encontraron corrales con los filtros seleccionados.</p>';
+    }
+
+    function verFichaTecnicaCabana(numero, cat, raza, peso) {
+      document.getElementById('modalTituloCorral').textContent = `🐂 Ficha Técnica — Corral #${numero}`;
+      document.getElementById('modalCuerpoFicha').innerHTML = `
+        <div style="font-size:13px; line-height:1.6;">
+          <p><strong>Categoría:</strong> ${cat} | <strong>Raza:</strong> ${raza}</p>
+          <p><strong>Peso Promedio:</strong> ${peso} kg</p>
+          <hr style="margin:10px 0; border:none; border-top:1px solid #e5e7eb;">
+          <p><strong>Padre:</strong> Don Luis Angus Master 1042 (Pedigree)</p>
+          <p><strong>Madre:</strong> Las Lilas Premium V201</p>
+          <p><strong>Dep's:</strong> PN +0.8 | PD +18.4 | PF +34.2 | CE +2.4 cm</p>
+          <p><strong>Sanidad:</strong> Vacunación Completa / Inmunizado Carbunclo y Mancha / Libres de Brucelosis y Tuberculosis.</p>
+        </div>
+      `;
+      document.getElementById('modalFichaCabana').classList.remove('hidden');
+    }
+
+    function cerrarModalFicha() {
+      document.getElementById('modalFichaCabana').classList.add('hidden');
+    }
+
+    function renderMisCompras() {
+      const container = document.getElementById('listaMisCompras');
+      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || '';
+
+      if (!miNombre) {
+        container.innerHTML = '<p style="color:#888; text-align:center;">Ingresá tu Razón Social o Alias arriba.</p>';
+        return;
+      }
+
+      let html = '';
+      Object.keys(CORRALES_DEMO).forEach(evId => {
+        const lotes = CORRALES_DEMO[evId];
+        lotes.forEach(c => {
+          const esRemitente = c.remitente && c.remitente.toLowerCase().includes(miNombre);
+          const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
+          const esComprador = v && v.comprador_nombre.toLowerCase().includes(miNombre);
+
+          if (esComprador || esRemitente) {
+            const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+            const montoLote = v ? (v.monto_final || (kilosLote > 0 ? kilosLote * v.precio_kg : c.cabezas * v.precio_kg)) : 0;
+            const fechaVenc = calcularFechaVencimiento(HOY_STR, c.plazo_dias);
+
+            html += `
+              <div class="card corral-card ${c.estado === 'Vendido' ? 'vendido' : ''}">
+                <div style="display:flex; justify-content:space-between; font-weight:bold;">
+                  <span>Corral #${c.numero_corral} (${c.categoria} ${c.raza}) ${esRemitente ? '<span style="color:#0369a1;">[REMITIDO]</span>' : '[COMPRADO]'}</span>
+                  <span style="color:#10b981;">${v ? '$' + v.precio_kg + ' / kg' : 'EN PISTA'}</span>
+                </div>
+                <div style="font-size:13px; margin-top:4px;">
+                  ${c.cabezas} Cabezas | Subtotal: <strong>$${montoLote.toLocaleString('es-AR')}</strong><br>
+                  <span>Plazo: ${c.cuotas || 1} Cuotas</span> — <strong>Vencimiento: ${fechaVenc}</strong>
+                </div>
+              </div>
+            `;
+          }
+        });
+      });
+
+      container.innerHTML = html || '<p style="color:#888; text-align:center;">No hay operaciones registradas para ese nombre.</p>';
+    }
+
+    // ==========================================
+    // 📊 CONSOLIDADOS Y REPORTES GLOBALES
+    // ==========================================
     function toggleModoReporteMAG() {
       const modo = document.getElementById('f_modo_reporte').value;
       document.getElementById('grpFiltrosEstandar').classList.toggle('hidden', modo !== 'general');
       document.getElementById('grpFiltrosMAG').classList.toggle('hidden', modo !== 'mag_comparativo');
+    }
+
+    function adaptarCategoriasFiltroPorTipoEvento() {
+      // Re-evalúa filtros si cambia el selector
+    }
+
+    function ejecutarReporteGlobal() {
+      const container = document.getElementById('reporteGlobalTablaContainer');
+      const tipoSel = document.getElementById('f_tipo_remate_reporte').value;
+      const catSel = document.getElementById('f_categoria_reporte').value;
+      const plazoSel = document.getElementById('f_plazo_reporte').value;
+
+      let totalCab = 0, totalKilos = 0, totalMonto = 0;
+      let filas = '';
+
+      Object.keys(CORRALES_DEMO).forEach(evId => {
+        const ev = EVENTOS_DEMO.find(e => e.id == evId) || { tipo_evento: 'Feria', fecha: HOY_STR };
+        if (tipoSel !== 'TODOS' && ev.tipo_evento !== tipoSel) return;
+
+        CORRALES_DEMO[evId].forEach(c => {
+          if (catSel && c.categoria !== catSel) return;
+          if (plazoSel && c.plazo_dias != plazoSel) return;
+
+          const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
+          const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+          const monto = v ? (v.monto_final || (kilosLote > 0 ? kilosLote * v.precio_kg : c.cabezas * v.precio_kg)) : 0;
+          const fechaVenc = calcularFechaVencimiento(ev.fecha, c.plazo_dias);
+
+          totalCab += c.cabezas;
+          totalKilos += kilosLote;
+          totalMonto += monto;
+
+          filas += `
+            <tr>
+              <td><strong>Corral #${c.numero_corral}</strong> (${ev.tipo_evento})</td>
+              <td>${c.remitente}</td>
+              <td>${v ? v.comprador_nombre : 'Pendiente'}</td>
+              <td>${c.cabezas}</td>
+              <td>${c.categoria} (${c.raza})</td>
+              <td>${c.peso_promedio || '-'} kg</td>
+              <td>$${v ? v.precio_kg : '-'}</td>
+              <td><strong>$${monto.toLocaleString('es-AR')}</strong></td>
+              <td>${fechaVenc}</td>
+            </tr>
+          `;
+        });
+      });
+
+      const html = `
+        <h4 style="margin-bottom:8px; color:var(--primary);">📊 Consolidado General de Hacienda & Liquidaciones</h4>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>CORRAL / EVENTO</th>
+              <th>REMITENTE</th>
+              <th>COMPRADOR</th>
+              <th>CAB.</th>
+              <th>CAT.</th>
+              <th>PESO PROM.</th>
+              <th>$ / KG</th>
+              <th>TOTAL ($)</th>
+              <th>VENCIMIENTO</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filas || '<tr><td colspan="9" style="text-align:center; color:#888;">No se encontraron registros con los filtros seleccionados.</td></tr>'}
+          </tbody>
+          <tfoot>
+            <tr style="background:#f0fdf4; font-weight:bold;">
+              <td colspan="3">TOTALES CONSOLIDADOS:</td>
+              <td>${totalCab} cab.</td>
+              <td>-</td>
+              <td>${totalCab > 0 ? Math.round(totalKilos / totalCab) : 0} kg prom</td>
+              <td>-</td>
+              <td style="color:#166534;">$${totalMonto.toLocaleString('es-AR')}</td>
+              <td>-</td>
+            </tr>
+          </tfoot>
+        </table>
+      `;
+
+      container.innerHTML = html;
+      document.getElementById('seccionGraficos').classList.remove('hidden');
     }
 
     function ejecutarReporteComparativoMAG() {
@@ -1234,7 +1598,7 @@ HTLM
       const metrica = document.getElementById('f_mag_metrica').value;
       const container = document.getElementById('reporteGlobalTablaContainer');
 
-      let html = `
+      const html = `
         <h4 style="margin-bottom:8px; color:var(--primary);">📊 Reporte Comparativo MAG — Comparación: ${periodo.toUpperCase()}</h4>
         <table class="report-table">
           <thead>
@@ -1271,6 +1635,71 @@ HTLM
       document.getElementById('seccionGraficos').classList.remove('hidden');
     }
 
+    function imprimirBoletinPapel() {
+      const area = document.getElementById('printArea');
+      if (!area || !eventoActivoObj) return;
+
+      let filas = '';
+      corralesGlobales.forEach(c => {
+        filas += `
+          <tr>
+            <td>${c.numero_corral}</td>
+            <td>${c.remitente}</td>
+            <td>${c.cabezas}</td>
+            <td>${c.categoria}</td>
+            <td>${c.raza}</td>
+            <td>${c.peso_promedio || ''} kg</td>
+            <td>${c.pesada_observaciones || ''}</td>
+            <td style="width:120px;"></td>
+            <td style="width:100px;"></td>
+          </tr>
+        `;
+      });
+
+      area.innerHTML = `
+        <h2 style="text-align:center;">PLANILLA DE PISTA DE REMATE — ${eventoActivoObj.nombre}</h2>
+        <p style="text-align:center; font-size:12px;">Fecha: ${eventoActivoObj.fecha} | Lugar: ${eventoActivoObj.lugar}</p>
+        <table class="print-table">
+          <thead>
+            <tr>
+              <th>CORRAL</th>
+              <th>REMITENTE</th>
+              <th>CAB.</th>
+              <th>CAT.</th>
+              <th>RAZA</th>
+              <th>PESO</th>
+              <th>OBSERVACIONES</th>
+              <th>COMPRADOR</th>
+              <th>PRECIO ($)</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filas}
+          </tbody>
+        </table>
+      `;
+
+      window.print();
+    }
+
+    function exportarReporteConsignatariaCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,Corral,Remitente,Cabezas,Categoria,Raza,PesoPromedio,Estado\n";
+      corralesGlobales.forEach(c => {
+        csvContent += `${c.numero_corral},"${c.remitente}",${c.cabezas},${c.categoria},${c.raza},${c.peso_promedio || 0},${c.estado}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Cierre_Remate_${HOY_STR}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function enviarMailsResumenCierreEvento() {
+      alert('📧 Resúmenes de liquidación y vencimientos enviados por mail a todos los clientes del remate.');
+    }
+
     function dispararAlertaLive(msg) {
       document.getElementById('bannerText').textContent = msg;
       document.getElementById('liveBanner').classList.remove('hidden');
@@ -1279,8 +1708,9 @@ HTLM
     function cerrarBanner() { document.getElementById('liveBanner').classList.add('hidden'); }
 
     document.addEventListener('DOMContentLoaded', () => {
+      evaluarFechaYNombreEvento();
       renderListaCompradoresAutorizados();
     });
   </script>
 </body>
-</html>
+</html>    
