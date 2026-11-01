@@ -11,9 +11,8 @@ HTLM
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1b4332">
 
-  <!-- Supabase & Chart.js CDNs -->
+  <!-- Supabase CDNs -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root {
@@ -118,9 +117,10 @@ HTLM
     .corral-card { border-left: 6px solid #9ca3af; transition: all 0.3s ease; position: relative; }
     .corral-card.en-pista { border-left-color: #d97706; background: #fffbeb; }
     .corral-card.vendido { border-left-color: #10b981; background: #f0fdf4; }
-    .corral-card.observado { border-left-color: #dc2626; background: #fef2f2; }
 
     .badge-pista { background: #d97706; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
     .actions-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
     .btn-action { flex: 1; min-width: 110px; padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
     .btn-pista { background: #d97706; color: white; }
@@ -163,7 +163,7 @@ HTLM
     </div>
 
     <div id="subnavComprador" class="subnav-comprador hidden">
-      <button type="button" id="btnTabRemate" class="subnav-btn active" onclick="setTabComprador('remate')">📋 Corrales en Remate</button>
+      <button type="button" id="btnTabRemate" class="subnav-btn active" onclick="setTabComprador('remate')">📋 Eventos del Día & Pista</button>
       <button type="button" id="btnTabMisCompras" class="subnav-btn" onclick="setTabComprador('compras')">🛒 Mis Operaciones / Remites</button>
     </div>
   </header>
@@ -205,8 +205,7 @@ HTLM
           <div class="demo-presets-title">Acceso Rápido de Evaluación</div>
           <button type="button" class="btn-preset" onclick="autocompletarLogin('ventas@ventasdelsur.com', 'demo123')">🏢 Vendedor (Ventas del Sur SA)</button>
           <button type="button" class="btn-preset" onclick="autocompletarLogin('compras@eltrebol.com', '30711223348-T')">🛒 Cliente (El Trébol SA)</button>
-          <button type="button" class="btn-preset" onclick="autocompletarLogin('dual@demo.com', 'demo123')">🔄 Usuario Dual (Vendedor y Cliente)</button>
-          <button type="button" class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador del Sistema</button>
+          <button type="button" class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador (Acceso Global)</button>
         </div>
       </div>
     </div>
@@ -219,11 +218,11 @@ HTLM
           <p>Tenés habilitados múltiples accesos con este usuario. ¿Cómo querés ingresar hoy?</p>
         </div>
         <div style="display:flex; flex-direction:column; gap:10px; margin-top:14px;">
-          <button type="button" class="btn-submit" style="background:var(--primary);" onclick="confirmarIngresoModo('vendedor')">
+          <button type="button" id="btnModoVendedor" class="btn-submit" style="background:var(--primary);" onclick="confirmarIngresoModo('vendedor')">
             🏢 Operar como VENDEDOR (Consignataria)
           </button>
           <button type="button" class="btn-submit" style="background:#0284c7;" onclick="confirmarIngresoModo('comprador')">
-            🛒 Operar como CLIENTE (Comprador / Remitente)
+            🛒 Operar como CLIENTE (Comprador / Remitente / Pruebas)
           </button>
         </div>
       </div>
@@ -233,7 +232,7 @@ HTLM
     <div id="secMenuPrincipal" class="hidden">
       <div class="card">
         <div class="card-title">
-          <span>🏠 Menú Principal de Gestión — <strong id="lblEmpresaName">Ventas del Sur SA</strong></span>
+          <span>🏠 Menú Principal — <strong id="lblEmpresaName">Ventas del Sur SA</strong></span>
         </div>
         
         <!-- OPCIONES PARA VENDEDOR / CONSIGNATARIA -->
@@ -262,13 +261,13 @@ HTLM
           <div class="menu-card-btn" onclick="abrirSeccionRemates()">
             <span class="menu-icon">🐂</span>
             <div class="menu-title">1. Eventos del Día & Pista</div>
-            <div class="menu-desc">Consultar hacienda disponible y seguir remates en vivo.</div>
+            <div class="menu-desc">Filtrar consignatarias, consultar hacienda y seguir remates en vivo.</div>
           </div>
 
           <div class="menu-card-btn" onclick="abrirSeccionReportesComprador()">
             <span class="menu-icon">📈</span>
             <div class="menu-title">2. Mis Operaciones & Remites</div>
-            <div class="menu-desc">Ver compras, ventas como remitente, vencimientos y reclamos.</div>
+            <div class="menu-desc">Ver historial de compras, ventas como remitente y estadísticas.</div>
           </div>
         </div>
 
@@ -281,8 +280,8 @@ HTLM
           </div>
           <div class="menu-card-btn" onclick="abrirSeccionReportes()">
             <span class="menu-icon">⚙️</span>
-            <div class="menu-title">2. Monitoreo del Sistema</div>
-            <div class="menu-desc">Estatus técnico de base de datos y consolidado general.</div>
+            <div class="menu-title">2. Monitoreo & Estadísticas de Uso</div>
+            <div class="menu-desc">Uso global de la app, remates cargados y volumen por firma.</div>
           </div>
         </div>
 
@@ -296,7 +295,16 @@ HTLM
       </div>
 
       <div class="card">
-        <div class="card-title">📅 Remates Registrados</div>
+        <div class="card-title">
+          <span>📅 Eventos del Día & Remates Disponibles</span>
+          <div id="divFiltroVendedorEvento" class="hidden">
+            <select id="f_vendedor_evento" style="padding:4px 8px; font-size:12px;" onchange="cargarEventosDisponibles()">
+              <option value="ALL">Todas las Consignatarias</option>
+              <option value="CONS_SUR" selected>Ventas del Sur SA</option>
+              <option value="CONS_OESTE">Ganadera del Oeste SA</option>
+            </select>
+          </div>
+        </div>
         <div id="listaEventosDisponibles">
           <p style="color:#888; text-align:center;">Cargando remates...</p>
         </div>
@@ -531,20 +539,6 @@ HTLM
           <p style="color:#888; text-align:center;">Hacé clic en "Generar Reporte" para calcular los totales y vencimientos.</p>
         </div>
 
-        <div id="seccionGraficos" class="hidden" style="margin-top:20px; border-top:2px solid #e5e7eb; padding-top:14px;">
-          <h4 style="margin-bottom:10px; color:var(--primary);">📈 Comportamiento de Precios & Pesos</h4>
-          <div class="grid-2">
-            <div style="background:#fff; border:1px solid #e5e7eb; padding:10px; border-radius:8px;">
-              <label style="text-align:center;">Dispersión: Peso (kg) vs Precio ($/kg)</label>
-              <canvas id="chartScatter" height="200"></canvas>
-            </div>
-            <div style="background:#fff; border:1px solid #e5e7eb; padding:10px; border-radius:8px;">
-              <label style="text-align:center;">Cabezas por Rango / Comparativa</label>
-              <canvas id="chartBar" height="200"></canvas>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
 
@@ -664,9 +658,10 @@ HTLM
         <button type="button" class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
       </div>
 
+      <!-- TAB 1: CORRALES EN VIVO EN PISTA (CON ALERTA EN PISTA HABILITADA) -->
       <div id="secCompradorRemate">
         <div class="card" style="background:#e0e7ff; border: 1px solid #c7d2fe;">
-          <div class="card-title" style="color:#1e40af;">🔍 Filtros de Búsqueda Rápida</div>
+          <div class="card-title" style="color:#1e40af;">🔍 Filtros de Búsqueda en Pista</div>
           <div class="grid-2">
             <div class="form-group">
               <label>Raza</label>
@@ -685,14 +680,26 @@ HTLM
         </div>
       </div>
 
+      <!-- TAB 2: MIS OPERACIONES & HISTORIAL CONSOLIDADO (LIMPIO DE CARTELES DE PISTA) -->
       <div id="secCompradorCompras" class="hidden">
         <div class="card" style="background:#f0fdf4; border: 1px solid #bbf7d0;">
-          <div class="grid-2">
+          <div class="card-title" style="color:#166534;">📈 Filtros de Historial & Estadísticas de Operaciones</div>
+          <div class="grid-3">
             <div class="form-group" style="margin-bottom:0;">
               <label>🏢 Consignataria / Vendedor:</label>
               <select id="f_cliente_vendedor_id" onchange="renderMisCompras()">
                 <option value="ALL" selected>Todas las Consignatarias</option>
                 <option value="CONS_SUR">Ventas del Sur SA</option>
+                <option value="CONS_OESTE">Ganadera del Oeste SA</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label>📅 Tipo de Evento:</label>
+              <select id="f_cliente_tipo_evento" onchange="renderMisCompras()">
+                <option value="ALL" selected>Todos los Tipos</option>
+                <option value="Mercado">Mercado Agroganadero (MAG)</option>
+                <option value="Feria">Remate Feria</option>
+                <option value="Cabaña">Remate Cabaña</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
@@ -702,8 +709,37 @@ HTLM
           </div>
         </div>
 
+        <!-- KPIS EXCLUSIVOS DEL CLIENTE -->
+        <div class="grid-4" style="margin-bottom: 12px;">
+          <div class="kpi-card">
+            <div class="kpi-val" id="cliKpiCabezas">0</div>
+            <div class="kpi-lbl">Cabezas Operadas</div>
+          </div>
+          <div class="kpi-card" style="background:#eff6ff; border-color:#bfdbfe;">
+            <div class="kpi-val" style="color:#1e40af;" id="cliKpiMonto">$0</div>
+            <div class="kpi-lbl" style="color:#1d4ed8;">Monto Total ($)</div>
+          </div>
+          <div class="kpi-card" style="background:#fef3c7; border-color:#fde68a;">
+            <div class="kpi-val" style="color:#92400e;" id="cliKpiPromedio">$0</div>
+            <div class="kpi-lbl" style="color:#b45309;">Prom. $/kg</div>
+          </div>
+          <div class="kpi-card" style="background:#fdf2f8; border-color:#fbcfe8;">
+            <div class="kpi-val" style="color:#be185d;" id="cliKpiVencimiento">-</div>
+            <div class="kpi-lbl" style="color:#9d174d;">Próx. Vencimiento</div>
+          </div>
+        </div>
+
+        <!-- RESUMEN ESTADÍSTICO POR CATEGORÍA PARA EL CLIENTE -->
         <div class="card">
-          <div class="card-title">🧾 Detalle de Lotes Adjudicados / Remitidos</div>
+          <div class="card-title">📊 Resumen Estadístico por Categoría (Compras & Remites)</div>
+          <div id="resumenEstadisticoCliente">
+            <p style="color:#888; text-align:center;">Cargando reporte de cliente...</p>
+          </div>
+        </div>
+
+        <!-- LISTADO EXCLUSIVO DE OPERACIONES CERRADAS (SIN AVISO EN PISTA) -->
+        <div class="card">
+          <div class="card-title">🧾 Detalle de Lotes Adjudicados / Remitidos Históricos</div>
           <div id="listaMisCompras"></div>
         </div>
       </div>
@@ -715,7 +751,7 @@ HTLM
   <div id="modalFichaCabana" class="modal-overlay hidden">
     <div class="modal-content">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:8px; margin-bottom:12px;">
-        <h3 id="modalTituloCorral" style="color:var(--primary);">🐂 Ficha Técnica Cabaña</h3>
+        <h3 id="modalTituloCorral" style="color:var(--primary);">ox Ficha Técnica Cabaña</h3>
         <button type="button" onclick="cerrarModalFicha()" style="background:none; border:none; font-size:18px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
       <div id="modalCuerpoFicha"></div>
@@ -726,7 +762,7 @@ HTLM
     // ==========================================
     // 🔑 CONFIGURACIÓN Y DATOS DEMO UNIFICADOS
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';                
 
     let sb = null;
@@ -773,7 +809,7 @@ HTLM
         { id: 41, evento_id: 103, numero_corral: 'CAB-V1', remitente: 'Cabaña Don Luis', cabezas: 120, categoria: 'VQP', raza: 'Angus', peso_promedio: 460, pesada_observaciones: 'Vaquillonas preñadas IATF', cuotas: 3, plazo_dias: 90, estado: 'Disponible' }
       ],
       201: [
-        { id: 80, evento_id: 201, numero_corral: 'HIST-1', remitente: 'La Julia Ganadera', cabezas: 40, categoria: 'NOV', raza: 'Angus', peso_promedio: 430, pesada_observaciones: 'Vendido MAG', cuotas: 1, plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Frigorífico Guaraní SA (Guaraní)', precio_kg: 4650, monto_final: 79980000 }] },
+        { id: 80, evento_id: 201, numero_corral: 'HIST-1', remitente: 'La Julia Ganadera', cabezas: 40, categoria: 'NOV', raza: 'Angus', peso_promedio: 430, pesada_observaciones: 'Vendido MAG', cuotas: 1, plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Agropecuaria El Trébol SA (El Trébol)', precio_kg: 4650, monto_final: 79980000 }] },
         { id: 81, evento_id: 201, numero_corral: 'HIST-2', remitente: 'Don Esteban Agrícola', cabezas: 38, categoria: 'VQ', raza: 'Careta', peso_promedio: 330, pesada_observaciones: 'Vendido MAG', cuotas: 1, plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Ganadera San Miguel SRL (San Miguel)', precio_kg: 4400, monto_final: 55176000 }] }
       ]
     };
@@ -852,7 +888,7 @@ HTLM
     }
 
     // ==========================================
-    // 🔐 VALIDACIÓN DE LOGIN CORREGIDA
+    // 🔐 VALIDACIÓN DE LOGIN CORREGIDA & ADMIN CLIENTE
     // ==========================================
     async function procesarLogin(e) {
       if (e) e.preventDefault();
@@ -864,10 +900,17 @@ HTLM
         return;
       }
 
-      // 1. Verificación Admin
+      // 1. Verificación Admin (Monitoreo Vendedor + Operar como Cliente de Pruebas Universal)
       if (email.includes('admin') && (pass === 'admin123' || pass.length > 0)) {
-        usuarioActual = { rol: 'admin', nombre: 'Administrador General', consignataria_id: 'ALL' };
-        confirmarIngresoModo('admin');
+        usuarioActual = { 
+          rol: 'admin', 
+          nombre: 'Administrador General', 
+          alias: 'Admin Pruebas',
+          cuit: '30-00000000-0',
+          consignataria_id: 'ALL' 
+        };
+        document.getElementById('secLogin').classList.add('hidden');
+        document.getElementById('secSelectorModo').classList.remove('hidden');
         return;
       }
 
@@ -896,7 +939,7 @@ HTLM
           usuarioEncontrado = { tipo_cliente: 'vendedor', nombre: 'Ventas del Sur SA (Operador)', alias: 'Ventas del Sur', cuit: '30-88776655-4', consignataria_id: 'CONS_SUR' };
         } else if (email === 'dual@demo.com' && pass === 'demo123') {
           usuarioEncontrado = { tipo_cliente: 'ambos', nombre: 'Usuario Dual Demo', alias: 'El Trébol', cuit: '30-71122334-8', consignataria_id: 'CONS_SUR' };
-        } else if (email === 'comprador@demo.com' && pass === 'demo123') {
+        } else if (email === 'compras@eltrebol.com' && pass === '30711223348-T') {
           usuarioEncontrado = { tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', consignataria_id: 'CONS_SUR' };
         }
       }
@@ -924,7 +967,7 @@ HTLM
           };
           document.getElementById('secLogin').classList.add('hidden');
           document.getElementById('secSelectorModo').classList.remove('hidden');
-        } else { // cliente / comprador / remitente
+        } else {
           usuarioActual = {
             rol: 'comprador',
             nombre: usuarioEncontrado.nombre,
@@ -1002,6 +1045,7 @@ HTLM
       document.getElementById('secSeleccionEvento').classList.remove('hidden');
       const esVendedorOAdmin = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
       document.getElementById('cardCrearEvento').classList.toggle('hidden', !esVendedorOAdmin);
+      document.getElementById('divFiltroVendedorEvento').classList.toggle('hidden', esVendedorOAdmin);
       if (esVendedorOAdmin) evaluarFechaYNombreEvento();
       cargarEventosDisponibles();
     }
@@ -1075,7 +1119,12 @@ HTLM
       const container = document.getElementById('listaEventosDisponibles');
       if (!container) return;
 
+      const fCons = document.getElementById('f_vendedor_evento')?.value || 'ALL';
       let lista = EVENTOS_DEMO;
+
+      if (fCons !== 'ALL') {
+        lista = lista.filter(e => e.consignataria_id === fCons);
+      }
 
       if (sb) {
         try {
@@ -1107,7 +1156,7 @@ HTLM
           </div>
         `;
       });
-      container.innerHTML = html || '<p style="color:#888;">No hay remates cargados.</p>';
+      container.innerHTML = html || '<p style="color:#888;">No hay remates cargados para el vendedor seleccionado.</p>';
     }
 
     async function seleccionarEvento(id, nombre, tipo) {
@@ -1225,6 +1274,7 @@ HTLM
       volverAlMenuPrincipal();
     }
 
+    // EL ADMIN NUNCA APARECE LISTADO EN EL PADRÓN PÚBLICO DE CLIENTES
     async function renderListaCompradoresAutorizados() {
       const container = document.getElementById('listaCompradoresAutorizados');
       const datalistRemitentes = document.getElementById('listRemitentesPadron');
@@ -1420,7 +1470,8 @@ HTLM
       const c = corralesGlobales.find(item => item.id === loteId);
       if (!c) return;
 
-      const compradorInput = prompt(`📄 Comprador / Alias del Corral #${numeroCorral}:`, 'Agropecuaria El Trébol SA');
+      const defaultComprador = usuarioActual && usuarioActual.rol === 'admin' ? 'Admin Pruebas (Test Admin)' : 'Agropecuaria El Trébol SA';
+      const compradorInput = prompt(`📄 Comprador / Alias del Corral #${numeroCorral}:`, defaultComprador);
       if (!compradorInput) return;
 
       const precio = parseFloat(prompt(`💲 Precio acordado ($ / kg o $ / unidad):`, '4500'));
@@ -1489,12 +1540,15 @@ HTLM
         if (fCat && c.categoria !== fCat) return;
 
         const esCabana = eventoActivoObj && eventoActivoObj.tipo_evento === 'Cabaña';
+        const enPista = c.estado === 'En Pista';
 
         html += `
-          <div class="card corral-card ${c.estado === 'Vendido' ? 'vendido' : ''}">
+          <div class="card corral-card ${enPista ? 'en-pista' : (c.estado === 'Vendido' ? 'vendido' : '')}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>Corral #${c.numero_corral} — ${c.categoria} ${c.raza}</strong>
-              <span class="event-type-badge">${c.estado}</span>
+              <div>
+                ${enPista ? '<span class="badge-pista">🔨 EN PISTA AHORA</span>' : `<span class="event-type-badge">${c.estado}</span>`}
+              </div>
             </div>
             <div style="font-size:13px; margin-top:6px;">
               ${c.cabezas} Cabezas | Peso Promedio: <strong>${c.peso_promedio || '-'} kg</strong> | Plazo: ${c.cuotas || 1} Cuotas<br>
@@ -1502,7 +1556,7 @@ HTLM
             </div>
             ${esCabana ? `
               <div style="margin-top:8px;">
-                <button type="button" class="btn-preset" style="background:#1b4332; color:white;" onclick="verFichaTecnicaCabana('${c.numero_corral}', '${c.categoria}', '${c.raza}', '${c.peso_promedio}')">🐂 Ver Ficha Genealógica / Pedigree</button>
+                <button type="button" class="btn-preset" style="background:#1b4332; color:white;" onclick="verFichaTecnicaCabana('${c.numero_corral}', '${c.categoria}', '${c.raza}', '${c.peso_promedio}')">ox Ver Ficha Genealógica / Pedigree</button>
               </div>
             ` : ''}
           </div>
@@ -1532,36 +1586,60 @@ HTLM
       document.getElementById('modalFichaCabana').classList.add('hidden');
     }
 
+    // ==========================================
+    // 📈 OPERACIONES & ESTADÍSTICAS DEL CLIENTE (LIMPIO DE CARTELES DE PISTA)
+    // ==========================================
     function renderMisCompras() {
       const container = document.getElementById('listaMisCompras');
-      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || '';
+      const containerResumen = document.getElementById('resumenEstadisticoCliente');
+      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || (usuarioActual ? (usuarioActual.alias || usuarioActual.nombre).toLowerCase() : '');
+      const fTipoEv = document.getElementById('f_cliente_tipo_evento')?.value || 'ALL';
 
-      if (!miNombre) {
+      if (!miNombre && usuarioActual?.rol !== 'admin') {
         container.innerHTML = '<p style="color:#888; text-align:center;">Ingresá tu Razón Social o Alias arriba.</p>';
+        if (containerResumen) containerResumen.innerHTML = '<p style="color:#888; text-align:center;">Sin datos.</p>';
         return;
       }
 
-      let html = '';
+      let totalCab = 0, totalKilos = 0, totalMonto = 0;
+      let proxVencimiento = '-';
+      let html = '', resumenCategorias = {};
+
       Object.keys(CORRALES_DEMO).forEach(evId => {
+        const ev = EVENTOS_DEMO.find(e => e.id == evId) || { tipo_evento: 'Feria', fecha: HOY_STR };
+        if (fTipoEv !== 'ALL' && ev.tipo_evento !== fTipoEv) return;
+
         const lotes = CORRALES_DEMO[evId];
         lotes.forEach(c => {
+          // SOLO OPERACIONES CERRADAS / VENDIDAS (SIN PISTA)
+          if (c.estado !== 'Vendido') return;
+
           const esRemitente = c.remitente && c.remitente.toLowerCase().includes(miNombre);
           const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
           const esComprador = v && v.comprador_nombre.toLowerCase().includes(miNombre);
+          const esAdminPruebas = usuarioActual && usuarioActual.rol === 'admin';
 
-          if (esComprador || esRemitente) {
+          if (esComprador || esRemitente || esAdminPruebas) {
             const kilosLote = (c.cabezas * c.peso_promedio) || 0;
             const montoLote = v ? (v.monto_final || (kilosLote > 0 ? kilosLote * v.precio_kg : c.cabezas * v.precio_kg)) : 0;
-            const fechaVenc = calcularFechaVencimiento(HOY_STR, c.plazo_dias);
+            const fechaVenc = calcularFechaVencimiento(ev.fecha, c.plazo_dias);
+
+            totalCab += c.cabezas; totalKilos += kilosLote; totalMonto += montoLote;
+            if (proxVencimiento === '-') proxVencimiento = fechaVenc;
+
+            if (!resumenCategorias[c.categoria]) resumenCategorias[c.categoria] = { cabezas: 0, kilos: 0, monto: 0 };
+            resumenCategorias[c.categoria].cabezas += c.cabezas;
+            resumenCategorias[c.categoria].kilos += kilosLote;
+            resumenCategorias[c.categoria].monto += montoLote;
 
             html += `
-              <div class="card corral-card ${c.estado === 'Vendido' ? 'vendido' : ''}">
+              <div class="card corral-card vendido">
                 <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                  <span>Corral #${c.numero_corral} (${c.categoria} ${c.raza}) ${esRemitente ? '<span style="color:#0369a1;">[REMITIDO]</span>' : '[COMPRADO]'}</span>
-                  <span style="color:#10b981;">${v ? '$' + v.precio_kg + ' / kg' : 'EN PISTA'}</span>
+                  <span>Corral #${c.numero_corral} (${c.categoria} ${c.raza}) ${esRemitente ? '<span style="color:#0369a1;">[REMITIDO]</span>' : '<span style="color:#166534;">[COMPRADO]</span>'}</span>
+                  <span style="color:#10b981;">$${v ? v.precio_kg : 0} / kg</span>
                 </div>
                 <div style="font-size:13px; margin-top:4px;">
-                  ${c.cabezas} Cabezas | Subtotal: <strong>$${montoLote.toLocaleString('es-AR')}</strong><br>
+                  ${c.cabezas} Cabezas | Peso Promedio: ${c.peso_promedio || '-'} kg | Subtotal: <strong>$${montoLote.toLocaleString('es-AR')}</strong><br>
                   <span>Plazo: ${c.cuotas || 1} Cuotas</span> — <strong>Vencimiento: ${fechaVenc}</strong>
                 </div>
               </div>
@@ -1570,11 +1648,50 @@ HTLM
         });
       });
 
-      container.innerHTML = html || '<p style="color:#888; text-align:center;">No hay operaciones registradas para ese nombre.</p>';
+      // Actualizar KPIS del Cliente
+      document.getElementById('cliKpiCabezas').textContent = totalCab;
+      document.getElementById('cliKpiMonto').textContent = `$${(totalMonto / 1000000).toFixed(1)}M`;
+      const promKg = totalKilos > 0 ? Math.round(totalMonto / totalKilos) : 0;
+      document.getElementById('cliKpiPromedio').textContent = `$${promKg}/kg`;
+      document.getElementById('cliKpiVencimiento').textContent = proxVencimiento;
+
+      // Render Cuadro Estadístico por Categoría para Cliente
+      if (containerResumen) {
+        let tablaHtml = `
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>CATEGORÍA</th>
+                <th>CABEZAS</th>
+                <th>KILOS TOT.</th>
+                <th>SUBTOTAL ($)</th>
+                <th>PROM. PONDERADO</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        Object.keys(resumenCategorias).forEach(cat => {
+          const item = resumenCategorias[cat];
+          const promCat = item.kilos > 0 ? Math.round(item.monto / item.kilos) : 0;
+          tablaHtml += `
+            <tr>
+              <td><strong>${cat}</strong></td>
+              <td>${item.cabezas} cab.</td>
+              <td>${item.kilos.toLocaleString('es-AR')} kg</td>
+              <td>$${item.monto.toLocaleString('es-AR')}</td>
+              <td>$${promCat} / kg</td>
+            </tr>
+          `;
+        });
+        tablaHtml += '</tbody></table>';
+        containerResumen.innerHTML = Object.keys(resumenCategorias).length > 0 ? tablaHtml : '<p style="color:#888; text-align:center;">No hay registros acumulados para la búsqueda.</p>';
+      }
+
+      container.innerHTML = html || '<p style="color:#888; text-align:center;">No hay operaciones cerradas registradas para esa razón social.</p>';
     }
 
     // ==========================================
-    // 📊 CONSOLIDADOS Y REPORTES GLOBALES
+    // 📊 CONSOLIDADOS Y REPORTES GLOBALES / ADMIN STATS
     // ==========================================
     function toggleModoReporteMAG() {
       const modo = document.getElementById('f_modo_reporte').value;
@@ -1587,6 +1704,45 @@ HTLM
     function ejecutarReporteGlobal() {
       const container = document.getElementById('reporteGlobalTablaContainer');
       if (!container) return;
+
+      // SI EL USUARIO ES ADMIN, SE MUESTRA REPORTE DE USO Y ESTADÍSTICAS DE PLATAFORMA
+      if (usuarioActual && usuarioActual.rol === 'admin') {
+        let htmlAdmin = `
+          <h4 style="margin-bottom:8px; color:#7e22ce;">⚙️ Panel Admin — Estadísticas Globales de Uso de la Aplicación</h4>
+          <table class="report-table">
+            <thead>
+              <tr>
+                <th>CONSIGNATARIA / FIRMA</th>
+                <th>CUIT</th>
+                <th>REMATES CREADOS</th>
+                <th>CORRALES CARGADOS</th>
+                <th>CABEZAS OFRECIDAS</th>
+                <th>ESTADO CONEXIÓN</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Ventas del Sur SA</strong></td>
+                <td>30-88776655-4</td>
+                <td>5 Remates</td>
+                <td>16 Corrales</td>
+                <td>1.583 Cabezas</td>
+                <td><span style="color:#10b981; font-weight:bold;">🟢 ACTIVO</span></td>
+              </tr>
+              <tr style="background:#fafafa;">
+                <td>Ganadera del Oeste SA</td>
+                <td>30-99881122-3</td>
+                <td>2 Remates</td>
+                <td>8 Corrales</td>
+                <td>420 Cabezas</td>
+                <td><span style="color:#10b981; font-weight:bold;">🟢 ACTIVO</span></td>
+              </tr>
+            </tbody>
+          </table>
+        `;
+        container.innerHTML = htmlAdmin;
+        return;
+      }
 
       const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
       const catSel = document.getElementById('f_categoria_reporte')?.value || '';
@@ -1664,13 +1820,10 @@ HTLM
       `;
 
       container.innerHTML = html;
-      const secG = document.getElementById('seccionGraficos');
-      if (secG) secG.classList.remove('hidden');
     }
 
     function ejecutarReporteComparativoMAG() {
       const periodo = document.getElementById('f_mag_periodo').value;
-      const metrica = document.getElementById('f_mag_metrica').value;
       const container = document.getElementById('reporteGlobalTablaContainer');
 
       const html = `
@@ -1707,7 +1860,6 @@ HTLM
         </table>
       `;
       container.innerHTML = html;
-      document.getElementById('seccionGraficos').classList.remove('hidden');
     }
 
     function imprimirBoletinPapel() {
@@ -1788,4 +1940,4 @@ HTLM
     });
   </script>
 </body>
-</html>      
+</html>
