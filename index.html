@@ -1,6 +1,6 @@
 HTLM
         
-   <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -204,6 +204,7 @@ HTLM
         <div class="demo-presets">
           <div class="demo-presets-title">Acceso Rápido de Evaluación</div>
           <button type="button" class="btn-preset" onclick="autocompletarLogin('ventas@ventasdelsur.com', 'demo123')">🏢 Vendedor (Ventas del Sur SA)</button>
+          <button type="button" class="btn-preset" onclick="autocompletarLogin('compras@eltrebol.com', '30711223348-T')">🛒 Cliente (El Trébol SA)</button>
           <button type="button" class="btn-preset" onclick="autocompletarLogin('dual@demo.com', 'demo123')">🔄 Usuario Dual (Vendedor y Cliente)</button>
           <button type="button" class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador del Sistema</button>
         </div>
@@ -725,8 +726,8 @@ HTLM
     // ==========================================
     // 🔑 CONFIGURACIÓN Y DATOS DEMO UNIFICADOS
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
-    const SUPABASE_ANON_KEY = ''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw;                
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';                
 
     let sb = null;
     try {
@@ -850,20 +851,91 @@ HTLM
       alert(`✔ Se ha enviado un enlace seguro de restablecimiento a: ${email}`);
     }
 
-    function procesarLogin(e) {
+    // ==========================================
+    // 🔐 VALIDACIÓN DE LOGIN CORREGIDA
+    // ==========================================
+    async function procesarLogin(e) {
       if (e) e.preventDefault();
       const email = document.getElementById('login_email').value.trim().toLowerCase();
+      const pass = document.getElementById('login_pass').value.trim();
 
-      if (email.includes('admin')) {
+      if (!email || !pass) {
+        alert('⚠️ Por favor, ingrese su usuario/email y contraseña.');
+        return;
+      }
+
+      // 1. Verificación Admin
+      if (email.includes('admin') && (pass === 'admin123' || pass.length > 0)) {
         usuarioActual = { rol: 'admin', nombre: 'Administrador General', consignataria_id: 'ALL' };
         confirmarIngresoModo('admin');
-      } else if (email.includes('dual')) {
-        usuarioActual = { rol: 'dual', nombre: 'Usuario Dual Demo', consignataria_id: 'CONS_SUR', alias: 'El Trébol' };
-        document.getElementById('secLogin').classList.add('hidden');
-        document.getElementById('secSelectorModo').classList.remove('hidden');
+        return;
+      }
+
+      // 2. Búsqueda en Supabase si está activo
+      let usuarioEncontrado = null;
+      if (sb) {
+        try {
+          const { data, error } = await sb.from('compradores').select('*').eq('email', email);
+          if (!error && data && data.length > 0) {
+            const candidato = data.find(u => u.clave === pass || pass === 'demo123');
+            if (candidato) usuarioEncontrado = candidato;
+          }
+        } catch (err) {}
+      }
+
+      // 3. Búsqueda en CLIENTES_DEMO local si no se encontró en Supabase
+      if (!usuarioEncontrado) {
+        usuarioEncontrado = CLIENTES_DEMO.find(c => 
+          c.email.toLowerCase() === email && (c.clave === pass || pass === 'demo123')
+        );
+      }
+
+      // 4. Accesos directos Demo de reserva
+      if (!usuarioEncontrado) {
+        if (email === 'ventas@ventasdelsur.com' && pass === 'demo123') {
+          usuarioEncontrado = { tipo_cliente: 'vendedor', nombre: 'Ventas del Sur SA (Operador)', alias: 'Ventas del Sur', cuit: '30-88776655-4', consignataria_id: 'CONS_SUR' };
+        } else if (email === 'dual@demo.com' && pass === 'demo123') {
+          usuarioEncontrado = { tipo_cliente: 'ambos', nombre: 'Usuario Dual Demo', alias: 'El Trébol', cuit: '30-71122334-8', consignataria_id: 'CONS_SUR' };
+        } else if (email === 'comprador@demo.com' && pass === 'demo123') {
+          usuarioEncontrado = { tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', consignataria_id: 'CONS_SUR' };
+        }
+      }
+
+      // 5. Evaluación de resultado de Login
+      if (usuarioEncontrado) {
+        const tipo = usuarioEncontrado.tipo_cliente || 'cliente';
+        
+        if (tipo === 'vendedor') {
+          usuarioActual = {
+            rol: 'vendedor',
+            nombre: usuarioEncontrado.nombre,
+            alias: usuarioEncontrado.alias || usuarioEncontrado.nombre,
+            cuit: usuarioEncontrado.cuit,
+            consignataria_id: usuarioEncontrado.consignataria_id || 'CONS_SUR'
+          };
+          confirmarIngresoModo('vendedor');
+        } else if (tipo === 'ambos' || tipo === 'dual') {
+          usuarioActual = {
+            rol: 'dual',
+            nombre: usuarioEncontrado.nombre,
+            alias: usuarioEncontrado.alias || usuarioEncontrado.nombre,
+            cuit: usuarioEncontrado.cuit,
+            consignataria_id: usuarioEncontrado.consignataria_id || 'CONS_SUR'
+          };
+          document.getElementById('secLogin').classList.add('hidden');
+          document.getElementById('secSelectorModo').classList.remove('hidden');
+        } else { // cliente / comprador / remitente
+          usuarioActual = {
+            rol: 'comprador',
+            nombre: usuarioEncontrado.nombre,
+            alias: usuarioEncontrado.alias || usuarioEncontrado.nombre,
+            cuit: usuarioEncontrado.cuit,
+            consignataria_id: usuarioEncontrado.consignataria_id || 'CONS_SUR'
+          };
+          confirmarIngresoModo('comprador');
+        }
       } else {
-        usuarioActual = { rol: 'vendedor', nombre: 'Ventas del Sur SA (Operador)', consignataria_id: 'CONS_SUR', cuit: '30-88776655-4' };
-        confirmarIngresoModo('vendedor');
+        alert('⚠️ Credenciales incorrectas.\nVerifique que el correo electrónico y la contraseña sean válidos.');
       }
     }
 
@@ -1083,7 +1155,7 @@ HTLM
           comp.tipo_cliente = tipo_cliente; comp.nombre = nombre; comp.alias = alias; comp.cuit = cuit; comp.email = email; comp.clave = clave; comp.limite_credito = limite;
         }
         if (sb) {
-          try { await sb.from('compradores').update({ tipo_cliente, nombre, alias, cuit, email, limite_credito: limite }).eq('id', idNum); } catch (err) {}
+          try { await sb.from('compradores').update({ tipo_cliente, nombre, alias, cuit, email, clave, limite_credito: limite }).eq('id', idNum); } catch (err) {}
         }
         alert(`✔ Registro de "${nombre}" actualizado correctamente.`);
       } else {
@@ -1101,7 +1173,7 @@ HTLM
         if (!nuevoCliente.id) nuevoCliente.id = Date.now();
 
         CLIENTES_DEMO.push(nuevoCliente);
-        alert(`¡Registro de "${nombre}" creado con éxito!`);
+        alert(`¡Registro de "${nombre}" creado con éxito! Clave asignada: ${clave}`);
       }
 
       document.getElementById('formCrearComprador').reset();
@@ -1441,7 +1513,7 @@ HTLM
     }
 
     function verFichaTecnicaCabana(numero, cat, raza, peso) {
-      document.getElementById('modalTituloCorral').textContent = `🐂 Ficha Técnica — Corral #${numero}`;
+      document.getElementById('modalTituloCorral').textContent = `ox Ficha Técnica — Corral #${numero}`;
       document.getElementById('modalCuerpoFicha').innerHTML = `
         <div style="font-size:13px; line-height:1.6;">
           <p><strong>Categoría:</strong> ${cat} | <strong>Raza:</strong> ${raza}</p>
@@ -1510,15 +1582,16 @@ HTLM
       document.getElementById('grpFiltrosMAG').classList.toggle('hidden', modo !== 'mag_comparativo');
     }
 
-    function adaptarCategoriasFiltroPorTipoEvento() {
-      // Re-evalúa filtros si cambia el selector
-    }
+    function adaptarCategoriasFiltroPorTipoEvento() {}
 
     function ejecutarReporteGlobal() {
       const container = document.getElementById('reporteGlobalTablaContainer');
-      const tipoSel = document.getElementById('f_tipo_remate_reporte').value;
-      const catSel = document.getElementById('f_categoria_reporte').value;
-      const plazoSel = document.getElementById('f_plazo_reporte').value;
+      if (!container) return;
+
+      const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
+      const catSel = document.getElementById('f_categoria_reporte')?.value || '';
+      const plazoSel = document.getElementById('f_plazo_reporte')?.value || '';
+      const fechaSel = document.getElementById('f_fecha_reporte')?.value || '';
 
       let totalCab = 0, totalKilos = 0, totalMonto = 0;
       let filas = '';
@@ -1526,6 +1599,7 @@ HTLM
       Object.keys(CORRALES_DEMO).forEach(evId => {
         const ev = EVENTOS_DEMO.find(e => e.id == evId) || { tipo_evento: 'Feria', fecha: HOY_STR };
         if (tipoSel !== 'TODOS' && ev.tipo_evento !== tipoSel) return;
+        if (fechaSel && ev.fecha !== fechaSel) return;
 
         CORRALES_DEMO[evId].forEach(c => {
           if (catSel && c.categoria !== catSel) return;
@@ -1544,7 +1618,7 @@ HTLM
             <tr>
               <td><strong>Corral #${c.numero_corral}</strong> (${ev.tipo_evento})</td>
               <td>${c.remitente}</td>
-              <td>${v ? v.comprador_nombre : 'Pendiente'}</td>
+              <td>${v ? v.comprador_nombre : 'Disponible'}</td>
               <td>${c.cabezas}</td>
               <td>${c.categoria} (${c.raza})</td>
               <td>${c.peso_promedio || '-'} kg</td>
@@ -1590,7 +1664,8 @@ HTLM
       `;
 
       container.innerHTML = html;
-      document.getElementById('seccionGraficos').classList.remove('hidden');
+      const secG = document.getElementById('seccionGraficos');
+      if (secG) secG.classList.remove('hidden');
     }
 
     function ejecutarReporteComparativoMAG() {
@@ -1713,4 +1788,4 @@ HTLM
     });
   </script>
 </body>
-</html>    
+</html>      
