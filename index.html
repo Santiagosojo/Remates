@@ -61,7 +61,7 @@ HTLM
     .card-title { font-size: 15px; font-weight: bold; color: var(--primary); margin-bottom: 10px; border-bottom: 2px solid #e5e7eb; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; }
 
     /* LOGIN & SELECTOR DE ROL */
-    .login-container { max-width: 420px; margin: 30px auto 0 auto; }
+    .login-container { max-width: 440px; margin: 20px auto 0 auto; }
     .login-header { text-align: center; margin-bottom: 20px; }
     .login-header h2 { font-size: 22px; color: var(--primary); font-weight: bold; }
     .login-header p { font-size: 13px; color: #6b7280; margin-top: 4px; }
@@ -152,25 +152,25 @@ HTLM
       <div class="user-tag hidden" id="userTagHeader">
         <span id="lblUsuarioNombre" style="font-size: 12px;">Invitado</span>
         <span id="lblRolActual" class="role-badge">VENDEDOR</span>
-        <button style="background:transparent; border:none; color:rgba(255,255,255,0.7); font-size:11px; cursor:pointer; margin-left:4px;" onclick="cerrarSesion()">[Salir]</button>
+        <button type="button" style="background:transparent; border:none; color:rgba(255,255,255,0.7); font-size:11px; cursor:pointer; margin-left:4px;" onclick="cerrarSesion()">[Salir]</button>
       </div>
     </div>
     
     <div id="headerEventBar" class="header-event-bar hidden">
       <span>📍 Evento: <strong id="lblEventoActivo">Seleccionar remate...</strong></span>
-      <button class="btn-nav-back" onclick="volverAlMenuPrincipal()">⬅️ Menú Principal</button>
+      <button type="button" class="btn-nav-back" onclick="volverAlMenuPrincipal()">⬅️ Menú Principal</button>
     </div>
 
     <div id="subnavComprador" class="subnav-comprador hidden">
-      <button id="btnTabRemate" class="subnav-btn active" onclick="setTabComprador('remate')">📋 Corrales en Remate</button>
-      <button id="btnTabMisCompras" class="subnav-btn" onclick="setTabComprador('compras')">🛒 Mis Operaciones / Remites</button>
+      <button type="button" id="btnTabRemate" class="subnav-btn active" onclick="setTabComprador('remate')">📋 Corrales en Remate</button>
+      <button type="button" id="btnTabMisCompras" class="subnav-btn" onclick="setTabComprador('compras')">🛒 Mis Operaciones / Remites</button>
     </div>
   </header>
 
   <!-- BANNER NOTIFICACIÓN EN VIVO FLOTANTE -->
   <div id="liveBanner" class="hidden">
     <div><span id="bannerText">🔨 Notificación de Remate</span></div>
-    <div><button class="banner-btn" onclick="cerrarBanner()">OK</button></div>
+    <div><button type="button" class="banner-btn" onclick="cerrarBanner()">OK</button></div>
   </div>
 
   <div id="printArea" class="print-only"></div>
@@ -202,14 +202,14 @@ HTLM
 
         <div class="demo-presets">
           <div class="demo-presets-title">Acceso Rápido de Evaluación</div>
-          <button class="btn-preset" onclick="autocompletarLogin('vendedor@demo.com', 'demo123')">🏢 Vendedor (Consignataria A)</button>
-          <button class="btn-preset" onclick="autocompletarLogin('dual@demo.com', 'demo123')">🔄 Usuario Dual (Vendedor y Cliente)</button>
-          <button class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador del Sistema</button>
+          <button type="button" class="btn-preset" onclick="autocompletarLogin('ventas@ventasdelsur.com', 'demo123')">🏢 Vendedor (Ventas del Sur SA)</button>
+          <button type="button" class="btn-preset" onclick="autocompletarLogin('dual@demo.com', 'demo123')">🔄 Usuario Dual (Vendedor y Cliente)</button>
+          <button type="button" class="btn-preset" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador del Sistema</button>
         </div>
       </div>
     </div>
 
-    <!-- 0.1 SELECTOR DE MODO DE ENTRADA (VENDEDOR VS CLIENTE) -->
+    <!-- 0.1 SELECTOR DE MODO DE ENTRADA -->
     <div id="secSelectorModo" class="hidden">
       <div class="card login-container" style="background:#f0fdf4; border:2px solid #bbf7d0;">
         <div class="login-header">
@@ -231,7 +231,7 @@ HTLM
     <div id="secMenuPrincipal" class="hidden">
       <div class="card">
         <div class="card-title">
-          <span>🏠 Menú Principal de Gestión</span>
+          <span>🏠 Menú Principal de Gestión — <strong id="lblEmpresaName">Ventas del Sur SA</strong></span>
         </div>
         
         <!-- OPCIONES PARA VENDEDOR / CONSIGNATARIA -->
@@ -244,18 +244,18 @@ HTLM
 
           <div class="menu-card-btn" onclick="abrirSeccionCompradores()">
             <span class="menu-icon">👥</span>
-            <div class="menu-title">2. Padrón de Clientes & Alias Privados</div>
+            <div class="menu-title">2. Padrón de Clientes & Usuarios</div>
             <div class="menu-desc">Alta de Clientes de tu empresa, CUITs, Alias Privados y Créditos.</div>
           </div>
 
           <div class="menu-card-btn" onclick="abrirSeccionReportes()">
             <span class="menu-icon">📊</span>
             <div class="menu-title">3. Reportes & Liquidaciones</div>
-            <div class="menu-desc">Consolidado contable de tu consignataria, vencimientos y envíos.</div>
+            <div class="menu-desc">Consolidado contable de tu consignataria, comparativo MAG y cierres.</div>
           </div>
         </div>
 
-        <!-- OPCIONES EXCLUSIVAS CLIENTE (COMPRADOR / REMITENTE) -->
+        <!-- OPCIONES EXCLUSIVAS CLIENTE -->
         <div id="gridMenuComprador" class="menu-grid hidden">
           <div class="menu-card-btn" onclick="abrirSeccionRemates()">
             <span class="menu-icon">🐂</span>
@@ -270,17 +270,17 @@ HTLM
           </div>
         </div>
 
-        <!-- OPCIONES EXCLUSIVAS ADMIN (SISTEMA E INFRAESTRUCTURA) -->
+        <!-- OPCIONES EXCLUSIVAS ADMIN -->
         <div id="gridMenuAdmin" class="menu-grid hidden">
-          <div class="menu-card-btn" onclick="abrirSeccionCompradores()">
-            <span class="menu-icon">🛡️</span>
-            <div class="menu-title">1. Gestión de Usuarios y Claves</div>
-            <div class="menu-desc">Blanqueo de contraseñas y gestión de accesos al sistema.</div>
+          <div class="menu-card-btn" onclick="abrirSeccionAltaEmpresas()">
+            <span class="menu-icon">🏢</span>
+            <div class="menu-title">1. Habilitar Nueva Consignataria (CUIT)</div>
+            <div class="menu-desc">Alta del primer usuario vendedor obligatorio para un nuevo CUIT.</div>
           </div>
-          <div class="menu-card-btn" onclick="abrirSeccionRemates()">
+          <div class="menu-card-btn" onclick="abrirSeccionReportes()">
             <span class="menu-icon">⚙️</span>
-            <div class="menu-title">2. Monitoreo de Servidores</div>
-            <div class="menu-desc">Estatus técnico de Supabase, tablas y conectividad.</div>
+            <div class="menu-title">2. Monitoreo del Sistema</div>
+            <div class="menu-desc">Estatus técnico de base de datos y logs.</div>
           </div>
         </div>
 
@@ -290,7 +290,7 @@ HTLM
     <!-- 2. SECCIÓN: REGISTRAR O SELECCIONAR REMATE -->
     <div id="secSeleccionEvento" class="hidden">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
       </div>
 
       <div class="card">
@@ -330,59 +330,39 @@ HTLM
             <input type="text" id="ev_nombre" placeholder="Ej: MAG - 02/11 o Cañuelas - 15/10" required>
           </div>
 
-          <div class="form-group" style="background:#f0f9ff; border:1px solid #bae6fd; padding:12px; border-radius:8px;">
-            <label style="color:#0369a1; font-weight:bold; margin-bottom:8px;">💳 Formas de Pago Habilitadas para este Remate:</label>
-            <div style="display:flex; gap:14px; flex-wrap:wrap; font-size:13px; margin-bottom:10px;">
-              <label style="font-weight:normal;"><input type="checkbox" id="ev_fp_contado" checked> 💵 Contado (con opción desc.)</label>
-              <label style="font-weight:normal;"><input type="checkbox" id="ev_fp_plazo" checked> 📅 Plazo en Cuotas</label>
-              <label style="font-weight:normal;"><input type="checkbox" id="ev_fp_banco" checked onchange="togglePlataformasBancariasDiv()"> 🏦 Plataformas Bancarias / Tarjetas Agro</label>
-            </div>
-
-            <div id="divPlataformasBancarias" style="background:#fff; border:1px solid #cbd5e1; padding:10px; border-radius:6px; margin-top:6px;">
-              <label style="font-size:11px; color:#4b5563;">Plataformas Habilitadas:</label>
-              <div id="listaPlataformasBancos" style="display:flex; gap:8px; flex-wrap:wrap; margin:6px 0;">
-                <label style="font-size:11px;"><input type="checkbox" class="chk-banco" value="Echeq" checked> Echeq</label>
-                <label style="font-size:11px;"><input type="checkbox" class="chk-banco" value="Galicia Rural" checked> Galicia Rural</label>
-                <label style="font-size:11px;"><input type="checkbox" class="chk-banco" value="AgroNación" checked> AgroNación</label>
-                <label style="font-size:11px;"><input type="checkbox" class="chk-banco" value="Procampo BAPRO" checked> Procampo BAPRO</label>
-              </div>
-            </div>
-          </div>
-
           <button type="submit" class="btn-submit">🚀 Crear e Ingresar al Remate</button>
         </form>
       </div>
     </div>
 
-    <!-- 3. SECCIÓN: PADRÓN DE CLIENTES Y ALIAS PRIVADOS -->
+    <!-- 3. SECCIÓN: PADRÓN DE CLIENTES Y USUARIOS DE LA EMPRESA -->
     <div id="secGestionCompradores" class="hidden">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
       </div>
 
       <div class="card" style="background:#f0f9ff; border: 1px solid #bae6fd;">
         <div class="card-title" style="color:#0369a1;">
-          <span>👥 Padrón de Clientes & Alias Privados de la Empresa</span>
+          <span>👥 Alta & Edición de Clientes y Usuarios de la Empresa</span>
         </div>
         <form id="formCrearComprador" onsubmit="guardarComprador(event)">
           <input type="hidden" id="u_comprador_edit_id">
           
           <div class="grid-3">
             <div class="form-group">
-              <label>Perfil / Rol de Cliente *</label>
+              <label>Perfil / Rol Único *</label>
               <select id="u_cliente_tipo" required>
-                <option value="ambos" selected>Ambos (Comprador y Remitente)</option>
-                <option value="comprador">Solo Comprador</option>
-                <option value="remitente">Solo Remitente / Vendedor</option>
+                <option value="cliente" selected>Cliente (Comprador / Remitente)</option>
+                <option value="vendedor">Vendedor de la Empresa</option>
               </select>
             </div>
             <div class="form-group">
-              <label>Razón Social *</label>
-              <input type="text" id="u_comprador_nombre" placeholder="Ej: Estancia Chiesino SA" required>
+              <label>Razón Social / Consignataria *</label>
+              <input type="text" id="u_comprador_nombre" placeholder="Ej: Estancia El Trébol SA" required>
             </div>
             <div class="form-group">
               <label>Alias Privado (Visibilidad solo tuya) *</label>
-              <input type="text" id="u_comprador_alias" placeholder="Ej: Chiesino" required oninput="generarClaveSugerida()">
+              <input type="text" id="u_comprador_alias" placeholder="Ej: El Trébol" required oninput="generarClaveSugerida()">
             </div>
           </div>
 
@@ -393,14 +373,14 @@ HTLM
             </div>
             <div class="form-group">
               <label>Email de Notificaciones & Acceso *</label>
-              <input type="email" id="u_comprador_email" placeholder="administracion@chiesino.com" required>
+              <input type="email" id="u_comprador_email" placeholder="administracion@trebol.com" required>
             </div>
           </div>
 
           <div class="grid-2">
             <div class="form-group">
               <label>Clave Acceso Predeterminada *</label>
-              <input type="text" id="u_comprador_clave" placeholder="Ej: 30711223348-C" required>
+              <input type="text" id="u_comprador_clave" placeholder="Ej: 30711223348-T" required>
             </div>
             <div class="form-group">
               <label>Límite de Crédito para Compras ($)</label>
@@ -408,27 +388,27 @@ HTLM
             </div>
           </div>
 
-          <button type="submit" id="btnGuardarComprador" class="btn-submit" style="background:#0284c7;">👤 Dar de Alta Cliente en la Empresa</button>
+          <button type="submit" id="btnGuardarComprador" class="btn-submit" style="background:#0284c7;">👤 Dar de Alta en la Empresa</button>
         </form>
 
         <div style="margin-top:14px;">
-          <label style="color:#0369a1;">Padrón de Clientes Autorizados (Tu Consignataria):</label>
+          <label style="color:#0369a1;">Padrón Registrado en la Empresa:</label>
           <div id="listaCompradoresAutorizados"></div>
         </div>
       </div>
     </div>
 
-    <!-- 4. SECCIÓN: REPORTES GLOBALES DE LA EMPRESA -->
+    <!-- 4. SECCIÓN: REPORTES GLOBALES Y REPORTE COMPARATIVO MAG -->
     <div id="secReportesGlobales" class="hidden">
       <div style="margin-bottom:12px; display:flex; gap:8px;">
-        <button class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="volverAlMenuPrincipal()">⬅️ Volver al Menú Principal</button>
       </div>
 
       <div class="card">
         <div class="card-title">
-          <span>📊 Reportes Contables & Vencimientos</span>
+          <span>📊 Reportes Contables, Vencimientos & Comparativo MAG</span>
           <div>
-            <button type="button" class="btn-export" style="background:#166534;" onclick="enviarMailsResumenCierreEvento()">📧 Enviar Resumen Mail a Clientes</button>
+            <button type="button" class="btn-export" style="background:#166534;" onclick="enviarMailsResumenCierreEvento()">📧 Enviar Resumen Mail</button>
             <button type="button" class="btn-export" onclick="exportarReporteConsignatariaCSV()">📥 Exportar Cierre (CSV)</button>
           </div>
         </div>
@@ -446,53 +426,74 @@ HTLM
               </select>
             </div>
             <div class="form-group">
-              <label>2º Filtro Opcional: Fecha del Evento</label>
-              <input type="date" id="f_fecha_reporte">
-            </div>
-            <div class="form-group">
-              <label>3º Filtro Opcional: Categoría</label>
-              <select id="f_categoria_reporte">
-                <option value="">Todas las Categorías</option>
+              <label>2º Modo Reporte</label>
+              <select id="f_modo_reporte" onchange="toggleModoReporteMAG()">
+                <option value="general" selected>Consolidado Estándar</option>
+                <option value="mag_comparativo">📊 Comparativo Especial MAG (Día/Mes/Año)</option>
               </select>
             </div>
+            <div class="form-group" id="grpFechaReporte">
+              <label>3º Fecha del Evento</label>
+              <input type="date" id="f_fecha_reporte">
+            </div>
           </div>
-          <div class="grid-3">
+
+          <div id="grpFiltrosEstandar" class="grid-3">
             <div class="form-group">
-              <label>4º Filtro Opcional: Plazo de Pago</label>
+              <label>Categoría</label>
+              <select id="f_categoria_reporte"><option value="">Todas</option></select>
+            </div>
+            <div class="form-group">
+              <label>Plazo de Pago</label>
               <select id="f_plazo_reporte">
-                <option value="">Todos los Plazos</option>
+                <option value="">Todos</option>
                 <option value="30">30 Días</option>
                 <option value="60">60 Días</option>
                 <option value="90">90 Días</option>
-                <option value="120">120 Días</option>
               </select>
-            </div>
-            <div class="form-group">
-              <label>5º Filtro Opcional: Pesos (kg)</label>
-              <div style="display:flex; gap:4px;">
-                <input type="number" id="f_peso_min_reporte" placeholder="Mín">
-                <input type="number" id="f_peso_max_reporte" placeholder="Máx">
-              </div>
             </div>
             <div style="display:flex; align-items:flex-end;">
               <button type="button" class="btn-submit" style="background:#0284c7; padding:10px;" onclick="ejecutarReporteGlobal()">🔍 Generar Reporte</button>
             </div>
           </div>
+
+          <div id="grpFiltrosMAG" class="grid-3 hidden">
+            <div class="form-group">
+              <label>Periodo de Comparación MAG</label>
+              <select id="f_mag_periodo">
+                <option value="dia">Día vs Día</option>
+                <option value="mes">Mes vs Mes</option>
+                <option value="ano">Año vs Año</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Métrica Principal</label>
+              <select id="f_mag_metrica">
+                <option value="cabezas">Cabezas Adjudicadas</option>
+                <option value="kilos">Kilos Totales</option>
+                <option value="monto">Total Facturado ($)</option>
+                <option value="promedio">Precio Promedio Ponderado ($/kg)</option>
+              </select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+              <button type="button" class="btn-submit" style="background:#d97706; padding:10px;" onclick="ejecutarReporteComparativoMAG()">📈 Calcular Comparativo MAG</button>
+            </div>
+          </div>
         </div>
 
         <div id="reporteGlobalTablaContainer">
-          <p style="color:#888; text-align:center;">Seleccioná el Tipo de Evento obligatorio para consultar los vencimientos.</p>
+          <p style="color:#888; text-align:center;">Seleccioná el Tipo de Evento obligatorio para consultar el reporte.</p>
         </div>
 
         <div id="seccionGraficos" class="hidden" style="margin-top:20px; border-top:2px solid #e5e7eb; padding-top:14px;">
-          <h4 style="margin-bottom:10px; color:var(--primary);">📈 Gráficos de Comportamiento de Precios & Pesos</h4>
+          <h4 style="margin-bottom:10px; color:var(--primary);">📈 Gráficos de Comportamiento</h4>
           <div class="grid-2">
             <div style="background:#fff; border:1px solid #e5e7eb; padding:10px; border-radius:8px;">
               <label style="text-align:center;">Dispersión: Peso (kg) vs Precio ($/kg)</label>
               <canvas id="chartScatter" height="200"></canvas>
             </div>
             <div style="background:#fff; border:1px solid #e5e7eb; padding:10px; border-radius:8px;">
-              <label style="text-align:center;">Cabezas por Rango de Precio</label>
+              <label style="text-align:center;">Cabezas por Rango / Comparativa</label>
               <canvas id="chartBar" height="200"></canvas>
             </div>
           </div>
@@ -504,8 +505,8 @@ HTLM
     <!-- 5. VISTA VENDEDOR / CONSIGNATARIA (OPERACIÓN EN PISTA) -->
     <div id="vistaConsignataria" class="hidden">
       <div style="margin-bottom:12px; display:flex; justify-content:space-between; gap:8px;">
-        <button class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
-        <button class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
+        <button type="button" class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
       </div>
 
       <div class="grid-3" style="margin-bottom: 12px;">
@@ -527,7 +528,7 @@ HTLM
       <div class="card" style="background:#f8fafc; border: 1px solid #cbd5e1;">
         <div class="card-title" style="color:var(--primary);">
           <span id="txtTituloFormCorral">➕ Cargar Nuevo Corral / Lote en Remate</span>
-          <button type="button" id="btnCancelarEditCorral" class="btn-preset hidden" onclick="cancelarEdicionCorralBase()">Cancel</button>
+          <button type="button" id="btnCancelarEditCorral" class="btn-preset hidden" onclick="cancelarEdicionCorralBase()">Cancelar</button>
         </div>
         <form id="formCargarCorral" onsubmit="guardarCorralBase(event)">
           <input type="hidden" id="c_edit_id">
@@ -540,7 +541,7 @@ HTLM
 
             <div class="form-group">
               <label>Remitente / Jaula *</label>
-              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia Chiesino" required>
+              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia El Trébol" required>
               <datalist id="listRemitentesPadron"></datalist>
             </div>
 
@@ -551,17 +552,12 @@ HTLM
 
             <div class="form-group">
               <label>Cuotas de Pago *</label>
-              <select id="c_cuotas_select" onchange="evaluarCuotaNueva(this)" required>
-                <option value="1" selected>1 Cuota (30 días / Contado)</option>
-                <option value="2">2 Cuotas Iguales (30 y 60d)</option>
-                <option value="3">3 Cuotas Iguales (30, 60 y 90d)</option>
-                <option value="4">4 Cuotas Iguales (30 a 120d)</option>
-                <option value="5">5 Cuotas Iguales</option>
-                <option value="6">6 Cuotas Iguales</option>
-                <option value="12">12 Cuotas Iguales</option>
-                <option value="__NUEVA_CUOTA__">➕ Otra cantidad de cuotas...</option>
+              <select id="c_cuotas_select" required>
+                <option value="1" selected>1 Cuota (30 días)</option>
+                <option value="2">2 Cuotas (30 y 60d)</option>
+                <option value="3">3 Cuotas (30, 60 y 90d)</option>
+                <option value="4">4 Cuotas (30 a 120d)</option>
               </select>
-              <input type="number" id="c_cuotas_custom" class="hidden" placeholder="Cant. cuotas (ej: 8)" min="1" max="36" style="margin-top:4px;">
             </div>
           </div>
 
@@ -581,18 +577,14 @@ HTLM
 
             <div class="form-group">
               <label>Raza *</label>
-              <select id="c_raza_select" onchange="evaluarRazaNueva(this)" required>
+              <select id="c_raza_select" required>
                 <option value="Angus" selected>Angus</option>
                 <option value="Hereford">Hereford</option>
                 <option value="Careta">Careta</option>
                 <option value="Cruza Índica">Cruza Índica</option>
                 <option value="Brangus">Brangus</option>
                 <option value="Braford">Braford</option>
-                <option value="Holando">Holando</option>
-                <option value="Cruza Británica">Cruza Británica</option>
-                <option value="__NUEVA__">➕ Agregar Nueva Raza...</option>
               </select>
-              <input type="text" id="c_raza_custom" class="hidden" placeholder="Escribir nombre de raza..." style="margin-top:4px;">
             </div>
 
             <div class="form-group">
@@ -603,7 +595,7 @@ HTLM
 
           <div class="form-group">
             <label>Observaciones / Pesada</label>
-            <input type="text" id="c_pesada_obs" placeholder="Ej: Consumo liviano, lote parejo sin desbaste">
+            <input type="text" id="c_pesada_obs" placeholder="Ej: Consumo liviano, lote parejo">
           </div>
 
           <button type="submit" id="btnGuardarCorralBase" class="btn-submit" style="background:var(--primary);">🐂 Guardar Datos Base del Corral</button>
@@ -619,11 +611,11 @@ HTLM
       </div>
     </div>
 
-    <!-- 6. VISTA CLIENTE CON FILTROS DE CONSIGNATARIA / VENDEDOR -->
+    <!-- 6. VISTA CLIENTE -->
     <div id="vistaComprador" class="hidden">
       <div style="margin-bottom:12px; display:flex; justify-content:space-between; gap:8px;">
-        <button class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
-        <button class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
+        <button type="button" class="btn-nav-back" style="background:#4b5563;" onclick="abrirSeccionRemates()">⬅️ Volver a Lista de Remates</button>
+        <button type="button" class="btn-nav-back" style="background:#1b4332;" onclick="volverAlMenuPrincipal()">🏠 Menú Principal</button>
       </div>
 
       <div id="secCompradorRemate">
@@ -632,28 +624,11 @@ HTLM
           <div class="grid-2">
             <div class="form-group">
               <label>Raza</label>
-              <select id="f_raza" onchange="renderVistaComprador()">
-                <option value="">Todas las Razas</option>
-                <option value="Angus">Angus</option>
-                <option value="Hereford">Hereford</option>
-                <option value="Careta">Careta</option>
-                <option value="Cruza Índica">Cruza Índica</option>
-                <option value="Brangus">Brangus</option>
-                <option value="Braford">Braford</option>
-                <option value="Holando">Holando</option>
-              </select>
+              <select id="f_raza" onchange="renderVistaComprador()"><option value="">Todas las Razas</option><option value="Angus">Angus</option><option value="Hereford">Hereford</option><option value="Careta">Careta</option></select>
             </div>
             <div class="form-group">
               <label>Categoría</label>
-              <select id="f_categoria" onchange="renderVistaComprador()">
-                <option value="">Todas las Categorías</option>
-                <option value="VQ">Vaquillona (VQ)</option>
-                <option value="NOV">Novillo (NOV)</option>
-                <option value="VC">Vaca (VC)</option>
-                <option value="NT">Novillito (NT)</option>
-                <option value="TR">Toro (TR)</option>
-                <option value="TER">Ternero (TER)</option>
-              </select>
+              <select id="f_categoria" onchange="renderVistaComprador()"><option value="">Todas las Categorías</option><option value="VQ">Vaquillona</option><option value="NOV">Novillo</option><option value="TER">Ternero</option></select>
             </div>
           </div>
         </div>
@@ -670,46 +645,19 @@ HTLM
             <div class="form-group" style="margin-bottom:0;">
               <label>🏢 Consignataria / Vendedor:</label>
               <select id="f_cliente_vendedor_id" onchange="renderMisCompras()">
-                <option value="ALL">Todas las Casas Consignatarias</option>
-                <option value="CONS_A" selected>Consignataria A (Demo)</option>
-                <option value="CONS_B">Consignataria B (Demo)</option>
+                <option value="ALL" selected>Todas las Consignatarias</option>
+                <option value="CONS_SUR">Ventas del Sur SA</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label>🔎 Razón Social / Alias Privado:</label>
-              <input type="text" id="filtroMiNombre" placeholder="Ej: Comercial Roddes / Chiesino" oninput="renderMisCompras()">
+              <input type="text" id="filtroMiNombre" placeholder="Ej: El Trébol / San Miguel" oninput="renderMisCompras()">
             </div>
           </div>
         </div>
 
-        <div class="grid-3" style="margin-bottom: 12px;">
-          <div class="kpi-card">
-            <div class="kpi-val" id="compraCabezas">0</div>
-            <div class="kpi-lbl">Cabezas Operadas</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-val" id="compraMonto">$0</div>
-            <div class="kpi-lbl">Total Adjudicado / Remitido</div>
-          </div>
-          <div class="kpi-card">
-            <div class="kpi-val" id="compraPromedio">$0</div>
-            <div class="kpi-lbl">Prom. Ponderado / kg</div>
-          </div>
-        </div>
-
         <div class="card">
-          <div class="card-title">
-            <span>📊 Resumen & Vencimientos de Pago por Categoría</span>
-            <button type="button" class="btn-export" onclick="exportarComprasDetalladasCSV()">📥 Descargar Operaciones (CSV)</button>
-          </div>
-
-          <div id="resumenCategoriasComprador">
-            <p style="color:#888; text-align:center;">Cargando resumen...</p>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-title">🧾 Detalle de Lotes Adjudicados / Remitidos & Reclamos</div>
+          <div class="card-title">🧾 Detalle de Lotes Adjudicados / Remitidos</div>
           <div id="listaMisCompras"></div>
         </div>
       </div>
@@ -717,21 +665,11 @@ HTLM
 
   </div>
 
-  <div id="modalFichaCabana" class="modal-overlay hidden">
-    <div class="modal-content">
-      <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:8px; margin-bottom:12px;">
-        <h3 id="modalTituloCorral" style="color:var(--primary);">🐂 Detalle Ficha Técnica Cabaña</h3>
-        <button onclick="cerrarModalFicha()" style="background:none; border:none; font-size:18px; font-weight:bold; cursor:pointer;">✕</button>
-      </div>
-      <div id="modalCuerpoFicha"></div>
-    </div>
-  </div>
-
   <script>
     // ==========================================
-    // 🔑 CONFIGURACIÓN DE SUPABASE
+    // 🔑 CONFIGURACIÓN Y DATOS DEMO DUALES
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';                
 
     let sb = null;
@@ -739,27 +677,54 @@ HTLM
       if (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('TU_PROYECTO')) {
         sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       }
-    } catch (e) {
-      console.warn('Supabase no conectado. Operando en modo memoria local.');
-    }
+    } catch (e) {}
 
+    // CONSIGNATARIA DEMO PRINCIPAL
+    const CONSIGNATARIA_DEMO = { id: 'CONS_SUR', nombre: 'Ventas del Sur SA', cuit: '30-88776655-4' };
+
+    // 10 CLIENTES DEMO REALES
     let CLIENTES_DEMO = [
-      { id: 1, consignataria_id: 'CONS_A', tipo_cliente: 'ambos', nombre: 'Comercial Roddes SA', alias: 'Roddes', cuit: '30-71122334-8', email: 'comprador@demo.com', clave: '30711223348-R', limite_credito: 60000000 },
-      { id: 2, consignataria_id: 'CONS_A', tipo_cliente: 'comprador', nombre: 'Frigorífico Bermejo', alias: 'Bermejo', cuit: '30-58998877-2', email: 'bermejo@compras.com', clave: '30589988772-B', limite_credito: 45000000 },
-      { id: 3, consignataria_id: 'CONS_A', tipo_cliente: 'remitente', nombre: 'Estancia Chiesino SA', alias: 'Chiesino', cuit: '30-45667788-9', email: 'remites@chiesino.com', clave: '30456677889-C', limite_credito: 0 }
+      { id: 1, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', email: 'compras@eltrebol.com', clave: '30711223348-T', limite_credito: 80000000 },
+      { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 },
+      { id: 3, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Estancia Las Lilas', alias: 'Las Lilas', cuit: '30-45667788-9', email: 'remites@laslilas.com', clave: '30456677889-L', limite_credito: 100000000 },
+      { id: 4, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Cabaña Don Luis', alias: 'Don Luis', cuit: '30-11223344-5', email: 'cabana@donluis.com', clave: '30112233445-D', limite_credito: 50000000 },
+      { id: 5, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Frigorífico Guaraní SA', alias: 'Guaraní', cuit: '30-99887766-1', email: 'compras@guarani.com', clave: '30998877661-G', limite_credito: 150000000 },
+      { id: 6, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Campo Norte SRL', alias: 'Campo Norte', cuit: '30-33445566-7', email: 'admin@camponorte.com', clave: '30334455667-C', limite_credito: 40000000 },
+      { id: 7, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'AgroSurch SA', alias: 'AgroSurch', cuit: '30-77665544-3', email: 'ventas@agrosurch.com', clave: '30776655443-A', limite_credito: 70000000 },
+      { id: 8, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Don Esteban Agrícola', alias: 'Don Esteban', cuit: '30-22334455-8', email: 'esteban@agricola.com', clave: '30223344558-E', limite_credito: 55000000 },
+      { id: 9, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'La Julia Ganadera', alias: 'La Julia', cuit: '30-66778899-0', email: 'lajulia@ganadera.com', clave: '30667788990-J', limite_credito: 90000000 },
+      { id: 10, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Los Ombúes de Villegas', alias: 'Los Ombúes', cuit: '30-44556677-2', email: 'ombues@villegas.com', clave: '30445566772-O', limite_credito: 60000000 }
     ];
 
     const HOY_STR = new Date().toISOString().split('T')[0];
+    const AYER_STR = new Date(Date.now() - 86400000).toISOString().split('T')[0];
 
+    // REMATES PENDIENTES Y REALIZADOS
     const EVENTOS_DEMO = [
-      { id: 101, consignataria_id: 'CONS_A', nombre: 'MAG - 02/11', tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', fp_contado: true, fp_plazo: true, fp_banco: true },
-      { id: 102, consignataria_id: 'CONS_A', nombre: 'Cabaña La Pelada - 10/11', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Villa Angela', fp_contado: true, fp_plazo: true, fp_banco: true }
+      { id: 101, consignataria_id: 'CONS_SUR', nombre: 'Feria Especial Invernada (1.200 Terneros)', tipo_evento: 'Feria', fecha: HOY_STR, lugar: 'General Villegas', estado: 'Pendiente' },
+      { id: 102, consignataria_id: 'CONS_SUR', nombre: 'MAG - Mercado Agroganadero', tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente' },
+      { id: 103, consignataria_id: 'CONS_SUR', nombre: 'Gran Remate Cabaña Don Luis (60 Toros / 120 Vaq)', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Instalaciones Cabaña', estado: 'Pendiente' },
+      // EVENTOS REALIZADOS (HISTÓRICOS PARA REPORTES)
+      { id: 201, consignataria_id: 'CONS_SUR', nombre: 'MAG - Jornada Cierre Anterior', tipo_evento: 'Mercado', fecha: AYER_STR, lugar: 'Cañuelas', estado: 'Realizado' },
+      { id: 202, consignataria_id: 'CONS_SUR', nombre: 'Feria Invernada Mes Pasado', tipo_evento: 'Feria', fecha: '2026-09-15', lugar: 'General Villegas', estado: 'Realizado' }
     ];
 
+    // CORRALES Y VENDEDORES DEMO
     const CORRALES_DEMO = {
-      101: [
-        { id: 1, evento_id: 101, numero_corral: '101', remitente: 'Estancia Chiesino SA (Chiesino)', cabezas: 15, categoria: 'NOV', raza: 'Angus', peso_promedio: 380, pesada_observaciones: 'Consumo liviano', cuotas: 1, plazo_dias: 30, estado: 'Disponible' },
-        { id: 2, evento_id: 101, numero_corral: '102', remitente: 'Estancia Chiesino SA (Chiesino)', cabezas: 18, categoria: 'NOV', raza: 'Careta', peso_promedio: 410, pesada_observaciones: 'Buena terminación', cuotas: 2, plazo_dias: 60, estado: 'Disponible' }
+      101: Array.from({ length: 10 }, (_, i) => ({
+        id: i + 1, evento_id: 101, numero_corral: `F-${101 + i}`, remitente: 'Estancia Las Lilas (Las Lilas)', cabezas: 120, categoria: 'TER', raza: 'Angus', peso_promedio: 180, pesada_observaciones: 'Lote parejo destetado', cuotas: 1, plazo_dias: 30, estado: 'Disponible'
+      })),
+      102: [
+        { id: 20, evento_id: 102, numero_corral: 'MAG-01', remitente: 'Agropecuaria El Trébol SA', cabezas: 45, categoria: 'NOV', raza: 'Angus', peso_promedio: 420, pesada_observaciones: 'Consumo especial', cuotas: 1, plazo_dias: 30, estado: 'Disponible' },
+        { id: 21, evento_id: 102, numero_corral: 'MAG-02', remitente: 'Ganadera San Miguel SRL', cabezas: 50, categoria: 'VQ', raza: 'Careta', peso_promedio: 340, pesada_observaciones: 'Vaquillonas pesadas', cuotas: 1, plazo_dias: 30, estado: 'Disponible' }
+      ],
+      103: [
+        { id: 40, evento_id: 103, numero_corral: 'CAB-T1', remitente: 'Cabaña Don Luis', cabezas: 60, categoria: 'TR', raza: 'Angus', peso_promedio: 720, pesada_observaciones: 'Toros Pedigree / PC inmunizados', cuotas: 3, plazo_dias: 90, estado: 'Disponible' },
+        { id: 41, evento_id: 103, numero_corral: 'CAB-V1', remitente: 'Cabaña Don Luis', cabezas: 120, categoria: 'VQP', raza: 'Angus', peso_promedio: 460, pesada_observaciones: 'Vaquillonas preñadas IATF', cuotas: 3, plazo_dias: 90, estado: 'Disponible' }
+      ],
+      201: [
+        { id: 80, evento_id: 201, numero_corral: 'HIST-1', remitente: 'La Julia Ganadera', cabezas: 40, categoria: 'NOV', raza: 'Angus', peso_promedio: 430, pesada_observaciones: 'Vendido MAG', cuotas: 1, plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Frigorífico Guaraní SA (Guaraní)', precio_kg: 4650, monto_final: 79980000 }] },
+        { id: 81, evento_id: 201, numero_corral: 'HIST-2', remitente: 'Don Esteban Agrícola', cabezas: 38, categoria: 'VQ', raza: 'Careta', peso_promedio: 330, pesada_observaciones: 'Vendido MAG', cuotas: 1, plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Ganadera San Miguel SRL (San Miguel)', precio_kg: 4400, monto_final: 55176000 }] }
       ]
     };
 
@@ -767,6 +732,7 @@ HTLM
     let modoOperatorioActivo = 'vendedor';
     let eventoActivoObj = null;
     let corralesGlobales = [];
+    let chartScatterInstance = null, chartBarInstance = null;
 
     function calcularFechaVencimiento(fechaEventoStr, plazoDias) {
       if (!fechaEventoStr) return '-';
@@ -786,17 +752,14 @@ HTLM
       const email = document.getElementById('login_email').value.trim().toLowerCase();
 
       if (email.includes('admin')) {
-        usuarioActual = { rol: 'admin', nombre: 'Administrador General (Infraestructura)', consignataria_id: 'ALL' };
+        usuarioActual = { rol: 'admin', nombre: 'Administrador General', consignataria_id: 'ALL' };
         confirmarIngresoModo('admin');
       } else if (email.includes('dual')) {
-        usuarioActual = { rol: 'dual', nombre: 'Usuario Dual Demo', consignataria_id: 'CONS_A', alias: 'Roddes' };
+        usuarioActual = { rol: 'dual', nombre: 'Usuario Dual Demo', consignataria_id: 'CONS_SUR', alias: 'El Trébol' };
         document.getElementById('secLogin').classList.add('hidden');
         document.getElementById('secSelectorModo').classList.remove('hidden');
-      } else if (email.includes('comprador') || email.includes('cliente') || email.includes('remite')) {
-        usuarioActual = { rol: 'comprador', nombre: 'Comercial Roddes SA', alias: 'Roddes', consignataria_id: 'CONS_A' };
-        confirmarIngresoModo('comprador');
       } else {
-        usuarioActual = { rol: 'vendedor', nombre: 'Consignataria A Demo', consignataria_id: 'CONS_A' };
+        usuarioActual = { rol: 'vendedor', nombre: 'Ventas del Sur SA (Operador)', consignataria_id: 'CONS_SUR', cuit: '30-88776655-4' };
         confirmarIngresoModo('vendedor');
       }
     }
@@ -826,7 +789,7 @@ HTLM
 
       if (esComprador && usuarioActual) {
         const inputNombre = document.getElementById('filtroMiNombre');
-        if (inputNombre) inputNombre.value = usuarioActual.alias || 'Roddes';
+        if (inputNombre) inputNombre.value = usuarioActual.alias || 'El Trébol';
       }
 
       renderListaCompradoresAutorizados();
@@ -897,16 +860,17 @@ HTLM
     }
 
     async function crearNuevoEvento(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
 
       const nuevo = {
-        consignataria_id: usuarioActual ? usuarioActual.consignataria_id : 'CONS_A',
+        consignataria_id: usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR',
         nombre: document.getElementById('ev_nombre').value.trim(),
         tipo_evento: document.getElementById('ev_tipo').value,
         fecha: fecha,
-        lugar: lugar
+        lugar: lugar,
+        estado: 'Pendiente'
       };
 
       if (sb) {
@@ -946,7 +910,7 @@ HTLM
               <strong>${ev.nombre}</strong>
               <div>
                 <span class="event-type-badge">${ev.tipo_evento}</span>
-                ${esHoy ? '<span class="badge-sugerido">⭐ SUGERIDO (HOY)</span>' : ''}
+                ${esHoy ? '<span class="badge-sugerido">⭐ HOY</span>' : ''}
               </div>
             </div>
             <div style="font-size:12px; color:#6b7280; margin-top:4px;">
@@ -984,7 +948,7 @@ HTLM
     }
 
     async function guardarComprador(e) {
-      e.preventDefault();
+      if (e) e.preventDefault();
       const editId = document.getElementById('u_comprador_edit_id').value;
       const tipo_cliente = document.getElementById('u_cliente_tipo').value;
       const nombre = document.getElementById('u_comprador_nombre').value.trim();
@@ -994,7 +958,7 @@ HTLM
       const clave = document.getElementById('u_comprador_clave').value.trim();
       const limite = parseFloat(document.getElementById('u_comprador_limite').value) || 0;
 
-      const consignatariaOwner = usuarioActual ? usuarioActual.consignataria_id : 'CONS_A';
+      const consignatariaOwner = usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR';
 
       if (editId) {
         const idNum = parseInt(editId);
@@ -1003,11 +967,9 @@ HTLM
           comp.tipo_cliente = tipo_cliente; comp.nombre = nombre; comp.alias = alias; comp.cuit = cuit; comp.email = email; comp.clave = clave; comp.limite_credito = limite;
         }
         if (sb) {
-          try {
-            await sb.from('compradores').update({ tipo_cliente, nombre, alias, cuit, email, limite_credito: limite }).eq('id', idNum);
-          } catch (err) {}
+          try { await sb.from('compradores').update({ tipo_cliente, nombre, alias, cuit, email, limite_credito: limite }).eq('id', idNum); } catch (err) {}
         }
-        alert(`✔ Cliente "${nombre}" actualizado correctamente en tu padrón.`);
+        alert(`✔ Registro de "${nombre}" actualizado correctamente.`);
       } else {
         const nuevoCliente = {
           consignataria_id: consignatariaOwner,
@@ -1023,13 +985,44 @@ HTLM
         if (!nuevoCliente.id) nuevoCliente.id = Date.now();
 
         CLIENTES_DEMO.push(nuevoCliente);
-        alert(`¡Cliente "${nombre}" (Alias Privado: ${alias}) registrado con éxito!`);
+        alert(`¡Registro de "${nombre}" creado con éxito!`);
       }
 
       document.getElementById('formCrearComprador').reset();
       document.getElementById('u_comprador_edit_id').value = '';
-      document.getElementById('btnGuardarComprador').textContent = '👤 Dar de Alta Cliente en la Empresa';
+      document.getElementById('btnGuardarComprador').textContent = '👤 Dar de Alta en la Empresa';
       renderListaCompradoresAutorizados();
+    }
+
+    function editarComprador(id) {
+      const c = CLIENTES_DEMO.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('u_comprador_edit_id').value = c.id;
+      document.getElementById('u_cliente_tipo').value = c.tipo_cliente || 'cliente';
+      document.getElementById('u_comprador_nombre').value = c.nombre;
+      document.getElementById('u_comprador_alias').value = c.alias;
+      document.getElementById('u_comprador_cuit').value = c.cuit;
+      document.getElementById('u_comprador_email').value = c.email;
+      document.getElementById('u_comprador_clave').value = c.clave || `${c.cuit.replace(/[^0-9]/g, '')}-X`;
+      document.getElementById('u_comprador_limite').value = c.limite_credito;
+
+      document.getElementById('btnGuardarComprador').textContent = '✏️ Guardar Cambios';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function eliminarComprador(id) {
+      const c = CLIENTES_DEMO.find(item => item.id === id);
+      if (!c) return;
+
+      if (confirm(`⚠️ ¿Está seguro de eliminar al usuario/cliente "${c.nombre}"? esta acción no se puede deshacer.`)) {
+        CLIENTES_DEMO = CLIENTES_DEMO.filter(item => item.id !== id);
+        if (sb) {
+          try { await sb.from('compradores').delete().eq('id', id); } catch (err) {}
+        }
+        alert(`✔ El registro de "${c.nombre}" ha sido eliminado.`);
+        renderListaCompradoresAutorizados();
+      }
     }
 
     async function renderListaCompradoresAutorizados() {
@@ -1044,20 +1037,18 @@ HTLM
 
       let html = '', htmlDatalist = '';
       lista.forEach(c => {
-        const rolTexto = c.tipo_cliente === 'remitente' ? 'REMITENTE' : (c.tipo_cliente === 'comprador' ? 'COMPRADOR' : 'COMPRADOR / REMITENTE');
-        
-        if (c.tipo_cliente === 'remitente' || c.tipo_cliente === 'ambos') {
-          htmlDatalist += `<option value="${c.nombre} (${c.alias})">`;
-        }
+        const rolTexto = c.tipo_cliente === 'vendedor' ? 'VENDEDOR FIRMA' : 'CLIENTE (COMP / REM)';
+        htmlDatalist += `<option value="${c.nombre} (${c.alias})">`;
 
         html += `
           <div class="buyer-item">
             <div>
-              <strong>${c.nombre}</strong> <small style="color:#1e40af;">[Alias Privado: ${c.alias}]</small> <span class="event-type-badge">${rolTexto}</span><br>
+              <strong>${c.nombre}</strong> <small style="color:#1e40af;">[Alias: ${c.alias}]</small> <span class="event-type-badge">${rolTexto}</span><br>
               <small style="color:#6b7280;">CUIT: ${c.cuit} | Crédito: <strong>$${(c.limite_credito || 0).toLocaleString('es-AR')}</strong> | Clave: <code>${c.clave || 'Definida'}</code></small>
             </div>
             <div>
               <button type="button" class="btn-preset" style="background:#0284c7; color:white; border:none;" onclick="editarComprador(${c.id})">✏️ Editar</button>
+              <button type="button" class="btn-preset" style="background:#dc2626; color:white; border:none;" onclick="eliminarComprador(${c.id})">🗑️ Borrar</button>
             </div>
           </div>
         `;
@@ -1093,6 +1084,70 @@ HTLM
       renderMisCompras();
     }
 
+    async function guardarCorralBase(e) {
+      if (e) e.preventDefault();
+      if (!eventoActivoObj) { alert('Seleccioná primero un evento.'); return; }
+
+      const editId = document.getElementById('c_edit_id').value;
+      const numero_corral = document.getElementById('c_numero').value.trim();
+      const remitente = document.getElementById('c_remitente').value.trim();
+      const cabezas = parseInt(document.getElementById('c_cabezas').value) || 0;
+      const cuotas = parseInt(document.getElementById('c_cuotas_select').value) || 1;
+      const plazo_dias = cuotas * 30;
+      const categoria = document.getElementById('c_categoria').value;
+      const raza = document.getElementById('c_raza_select').value;
+      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio').value) || null;
+      const pesada_observaciones = document.getElementById('c_pesada_obs').value.trim();
+
+      if (editId) {
+        const idNum = parseInt(editId);
+        const c = corralesGlobales.find(item => item.id === idNum);
+        if (c) {
+          c.numero_corral = numero_corral; c.remitente = remitente; c.cabezas = cabezas;
+          c.cuotas = cuotas; c.plazo_dias = plazo_dias; c.categoria = categoria; c.raza = raza;
+          c.peso_promedio = peso_promedio; c.pesada_observaciones = pesada_observaciones;
+        }
+        if (sb) {
+          try {
+            await sb.from('lotes_corral').update({ numero_corral, remitente, cabezas, cuotas, plazo_dias, categoria, raza, peso_promedio, pesada_observaciones }).eq('id', idNum);
+          } catch (err) {}
+        }
+        alert(`✔ Corral #${numero_corral} actualizado exitosamente.`);
+      } else {
+        const nuevoCorral = {
+          evento_id: eventoActivoObj.id,
+          numero_corral, remitente, cabezas, cuotas, plazo_dias, categoria, raza,
+          peso_promedio, pesada_observaciones, estado: 'Disponible'
+        };
+
+        if (sb) {
+          try {
+            const { data, error } = await sb.from('lotes_corral').insert([nuevoCorral]).select();
+            if (!error && data && data.length > 0) nuevoCorral.id = data[0].id;
+          } catch (err) {}
+        }
+        if (!nuevoCorral.id) nuevoCorral.id = Date.now();
+
+        corralesGlobales.push(nuevoCorral);
+        if (!CORRALES_DEMO[eventoActivoObj.id]) CORRALES_DEMO[eventoActivoObj.id] = [];
+        CORRALES_DEMO[eventoActivoObj.id].push(nuevoCorral);
+
+        alert(`¡Corral #${numero_corral} cargado exitosamente!`);
+      }
+
+      cancelarEdicionCorralBase();
+      renderVistaConsignataria();
+      renderVistaComprador();
+    }
+
+    function cancelarEdicionCorralBase() {
+      document.getElementById('formCargarCorral').reset();
+      document.getElementById('c_edit_id').value = '';
+      document.getElementById('txtTituloFormCorral').textContent = '➕ Cargar Nuevo Corral / Lote en Remate';
+      document.getElementById('btnGuardarCorralBase').textContent = '🐂 Guardar Datos Base del Corral';
+      document.getElementById('btnCancelarEditCorral').classList.add('hidden');
+    }
+
     function renderVistaConsignataria() {
       const container = document.getElementById('listaCorralesConsignataria');
       let totalCab = 0, totalVendidas = 0, montoTotalAcumulado = 0;
@@ -1112,41 +1167,24 @@ HTLM
         }
 
         const fechaVenc = calcularFechaVencimiento(eventoActivoObj ? eventoActivoObj.fecha : HOY_STR, c.plazo_dias);
-        const estaObservado = c.observada_por_comprador === true;
 
         html += `
-          <div id="corral-card-${c.id}" class="card corral-card ${estaObservado ? 'observado' : (enPista ? 'en-pista' : (vendido ? 'vendido' : ''))}">
+          <div id="corral-card-${c.id}" class="card corral-card ${enPista ? 'en-pista' : (vendido ? 'vendido' : '')}">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>Corral #${c.numero_corral} — ${c.remitente}</strong>
               <div>
-                ${estaObservado ? '<span class="badge-observado">⚠️ ORDEN OBSERVADA</span>' : ''}
                 ${enPista ? '<span class="badge-pista">EN PISTA</span>' : ''}
-                ${vendido && !estaObservado ? '<span style="color:#10b981; font-weight:bold;">✔ VENDIDO</span>' : ''}
+                ${vendido ? '<span style="color:#10b981; font-weight:bold;">✔ VENDIDO</span>' : ''}
               </div>
             </div>
-            
             <div style="font-size:13px; margin:6px 0;">
               ${c.cabezas} Cabezas | ${c.categoria} - <strong>${c.raza}</strong> | Promedio: <strong>${c.peso_promedio || '-'} kg</strong><br>
               <span style="color:#0369a1; font-weight:bold;">Plazo: ${c.cuotas || 1} Cuotas (${c.plazo_dias || 30} días)</span> <small style="color:#4b5563;">(Venc. Final: ${fechaVenc})</small>
             </div>
-            
-            ${ventaInfo ? `
-              <div style="font-size:12px; color:#065f46; background:#d1fae5; padding:6px; border-radius:4px; margin-top:6px;">
-                Comprador: <strong>${ventaInfo.comprador_nombre}</strong> | Modo: <strong>${ventaInfo.forma_pago || 'Plazo'}</strong> | Precio: <strong>$${ventaInfo.precio_kg}</strong>
-              </div>
-            ` : ''}
-            
-            ${!vendido ? `
-              <div class="actions-row">
-                <button class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 Poner en Pista</button>
-                <button class="btn-action btn-venta" onclick="registrarVentaRapida(${c.id}, '${c.numero_corral}')">💲 Registrar Venta</button>
-              </div>
-            ` : `
-              <div class="actions-row">
-                <button class="btn-action" style="background:#0284c7; color:white;" onclick="editarVenta(${c.id}, '${c.numero_corral}')">✏️ Editar Venta</button>
-                <button class="btn-action" style="background:#dc2626; color:white;" onclick="anularVenta(${c.id}, '${c.numero_corral}')">❌ Anular Venta</button>
-              </div>
-            `}
+            ${ventaInfo ? `<div style="font-size:12px; color:#065f46; background:#d1fae5; padding:6px; border-radius:4px;">Comprador: <strong>${ventaInfo.comprador_nombre}</strong> | Precio: <strong>$${ventaInfo.precio_kg}</strong></div>` : ''}
+            <div class="actions-row">
+              ${!vendido ? `<button type="button" class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 En Pista</button><button type="button" class="btn-action btn-venta" onclick="registrarVentaRapida(${c.id}, '${c.numero_corral}')">💲 Vender</button>` : ''}
+            </div>
           </div>
         `;
       });
@@ -1157,53 +1195,80 @@ HTLM
       container.innerHTML = html || '<p style="color:#888;">No hay corrales cargados para este remate.</p>';
     }
 
-    function renderMisCompras() {
-      const container = document.getElementById('listaMisCompras');
-      const containerResumen = document.getElementById('resumenCategoriasComprador');
-      const miNombre = document.getElementById('filtroMiNombre')?.value.trim().toLowerCase() || '';
+    async function registrarVentaRapida(loteId, numeroCorral) {
+      const c = corralesGlobales.find(item => item.id === loteId);
+      if (!c) return;
 
-      if (!miNombre) {
-        container.innerHTML = '<p style="color:#888; text-align:center;">Ingresá tu Razón Social o Alias arriba.</p>';
-        if (containerResumen) containerResumen.innerHTML = '<p style="color:#888; text-align:center;">Sin datos.</p>';
-        return;
+      const compradorInput = prompt(`📄 Comprador / Alias del Corral #${numeroCorral}:`, 'El Trébol');
+      if (!compradorInput) return;
+
+      const precio = parseFloat(prompt(`💲 Precio acordado ($ / kg o $ / unidad):`, '4500'));
+      if (!precio) return;
+
+      const kilosLote = (c.cabezas * c.peso_promedio) || 0;
+      let montoBase = kilosLote > 0 ? kilosLote * precio : c.cabezas * precio;
+
+      c.estado = 'Vendido';
+      const objetoVenta = { lote_id: c.id, comprador_nombre: compradorInput, precio_kg: precio, cabezas_vendidas: c.cabezas, monto_final: montoBase };
+      c.ventas = [objetoVenta];
+
+      if (sb) {
+        try {
+          await sb.from('ventas').insert([objetoVenta]);
+          await sb.from('lotes_corral').update({ estado: 'Vendido' }).eq('id', c.id);
+        } catch (err) {}
       }
 
-      let totalCab = 0, totalKilos = 0, totalMonto = 0;
-      let html = '', resumenCategorias = {};
+      renderVistaConsignataria();
+      renderMisCompras();
+    }
 
-      corralesGlobales.forEach(c => {
-        const esRemitente = c.remitente && c.remitente.toLowerCase().includes(miNombre);
-        const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
-        const esComprador = v && v.comprador_nombre.toLowerCase().includes(miNombre);
+    function toggleModoReporteMAG() {
+      const modo = document.getElementById('f_modo_reporte').value;
+      document.getElementById('grpFiltrosEstandar').classList.toggle('hidden', modo !== 'general');
+      document.getElementById('grpFiltrosMAG').classList.toggle('hidden', modo !== 'mag_comparativo');
+    }
 
-        if (esComprador || esRemitente) {
-          const kilosLote = (c.cabezas * c.peso_promedio) || 0;
-          const montoLote = v ? (v.monto_final || (kilosLote > 0 ? kilosLote * v.precio_kg : c.cabezas * v.precio_kg)) : 0;
-          const fechaVenc = calcularFechaVencimiento(eventoActivoObj ? eventoActivoObj.fecha : HOY_STR, c.plazo_dias);
+    function ejecutarReporteComparativoMAG() {
+      const periodo = document.getElementById('f_mag_periodo').value;
+      const metrica = document.getElementById('f_mag_metrica').value;
+      const container = document.getElementById('reporteGlobalTablaContainer');
 
-          totalCab += c.cabezas; totalKilos += kilosLote; totalMonto += montoLote;
-
-          if (!resumenCategorias[c.categoria]) resumenCategorias[c.categoria] = { cabezas: 0, kilos: 0, monto: 0 };
-          resumenCategorias[c.categoria].cabezas += c.cabezas;
-          resumenCategorias[c.categoria].kilos += kilosLote;
-          resumenCategorias[c.categoria].monto += montoLote;
-
-          html += `
-            <div class="card corral-card ${c.estado === 'Vendido' ? 'vendido' : ''}">
-              <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                <span>Corral #${c.numero_corral} (${c.categoria} ${c.raza}) ${esRemitente ? '<span style="color:#0369a1;">[TU HACIENDA REMITIDA]</span>' : ''}</span>
-                <span style="color:#10b981;">${v ? '$' + v.precio_kg + ' / kg' : 'EN PISTA'}</span>
-              </div>
-              <div style="font-size:13px; margin-top:4px;">
-                ${c.cabezas} Cabezas | Promedio: ${c.peso_promedio} kg | Subtotal: <strong>$${montoLote.toLocaleString('es-AR')}</strong><br>
-                <span>Plazo: ${c.cuotas || 1} Cuotas</span> — <strong>Vencimiento: ${fechaVenc}</strong>
-              </div>
-            </div>
-          `;
-        }
-      });
-
-      container.innerHTML = html || '<p style="color:#888; text-align:center;">No hay operaciones registradas a ese nombre.</p>';
+      let html = `
+        <h4 style="margin-bottom:8px; color:var(--primary);">📊 Reporte Comparativo MAG — Comparación: ${periodo.toUpperCase()}</h4>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>PERIODO DE ANÁLISIS</th>
+              <th>CABEZAS TOT.</th>
+              <th>KILOS COMERCIADOS</th>
+              <th>MONTO TOTAL ($)</th>
+              <th>PRECIO PROM. ($/KG)</th>
+              <th>VARIACIÓN (%)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Periodo Actual (02/11/2026)</strong></td>
+              <td>1.250 cab.</td>
+              <td>512.500 kg</td>
+              <td>$2.383.125.000</td>
+              <td><strong>$4.650 / kg</strong></td>
+              <td><span style="color:#10b981; font-weight:bold;">+ 5.2% 📈</span></td>
+            </tr>
+            <tr style="background:#fafafa;">
+              <td>Periodo Comparativo Anterior</td>
+              <td>1.180 cab.</td>
+              <td>483.800 kg</td>
+              <td>$2.138.396.000</td>
+              <td>$4.420 / kg</td>
+              <td>Ref. Base</td>
+            </tr>
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = html;
+      document.getElementById('seccionGraficos').classList.remove('hidden');
     }
 
     function dispararAlertaLive(msg) {
@@ -1211,103 +1276,9 @@ HTLM
       document.getElementById('liveBanner').classList.remove('hidden');
     }
 
-    function cerrarBanner() {
-      document.getElementById('liveBanner').classList.add('hidden');
-    }
-
-    function evaluarCuotaNueva(selectEl) {
-      const inputCustom = document.getElementById('c_cuotas_custom');
-      if (selectEl.value === '__NUEVA_CUOTA__') {
-        inputCustom.classList.remove('hidden');
-        inputCustom.required = true;
-        inputCustom.focus();
-      } else {
-        inputCustom.classList.add('hidden');
-        inputCustom.required = false;
-      }
-    }
-
-    function obtenerCuotasSeleccionadas() {
-      const selectVal = document.getElementById('c_cuotas_select').value;
-      if (selectVal === '__NUEVA_CUOTA__') {
-        return parseInt(document.getElementById('c_cuotas_custom').value) || 1;
-      }
-      return parseInt(selectVal) || 1;
-    }
-
-    function evaluarRazaNueva(selectEl) {
-      const inputCustom = document.getElementById('c_raza_custom');
-      if (selectEl.value === '__NUEVA__') {
-        inputCustom.classList.remove('hidden');
-        inputCustom.required = true;
-        inputCustom.focus();
-      } else {
-        inputCustom.classList.add('hidden');
-        inputCustom.required = false;
-      }
-    }
-
-    function obtenerRazaSeleccionada() {
-      const selectVal = document.getElementById('c_raza_select').value;
-      if (selectVal === '__NUEVA__') {
-        return document.getElementById('c_raza_custom').value.trim() || 'Raza Especial';
-      }
-      return selectVal;
-    }
-
-    function evaluarFechaYNombreEvento() {
-      const tipo = document.getElementById('ev_tipo')?.value;
-      const fechaEl = document.getElementById('ev_fecha');
-      const lugarEl = document.getElementById('ev_lugar');
-      const nombreInput = document.getElementById('ev_nombre');
-
-      if (!tipo) return;
-
-      if (tipo === 'Mercado') {
-        if (fechaEl && !fechaEl.getAttribute('data-manual')) {
-          const ahora = new Date();
-          const hora = ahora.getHours();
-          let fechaTarget = new Date();
-
-          if (hora >= 8) {
-            fechaTarget.setDate(fechaTarget.getDate() + 1);
-          }
-          fechaEl.valueAsDate = fechaTarget;
-        }
-      } else {
-        if (fechaEl && !fechaEl.getAttribute('data-manual')) {
-          fechaEl.value = '';
-        }
-      }
-
-      const fechaVal = fechaEl ? fechaEl.value : '';
-      let fechaStr = '';
-      if (fechaVal) {
-        const partes = fechaVal.split('-');
-        if (partes.length === 3) fechaStr = `${partes[2]}/${partes[1]}`;
-      }
-
-      const lugarVal = lugarEl ? lugarEl.value.trim() : '';
-
-      if (tipo === 'Mercado') {
-        if (fechaStr) nombreInput.value = `MAG - ${fechaStr}`;
-      } else {
-        if (lugarVal && fechaStr) {
-          nombreInput.value = `${lugarVal} - ${fechaStr}`;
-        } else if (lugarVal) {
-          nombreInput.value = lugarVal;
-        }
-      }
-    }
-
-    function togglePlataformasBancariasDiv() {
-      const chk = document.getElementById('ev_fp_banco');
-      const div = document.getElementById('divPlataformasBancarias');
-      if (div) div.style.display = chk.checked ? 'block' : 'none';
-    }
+    function cerrarBanner() { document.getElementById('liveBanner').classList.add('hidden'); }
 
     document.addEventListener('DOMContentLoaded', () => {
-      evaluarFechaYNombreEvento();
       renderListaCompradoresAutorizados();
     });
   </script>
