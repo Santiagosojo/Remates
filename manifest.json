@@ -1,0 +1,17 @@
+JSON
+{
+  "name": "Remates En Vivo",
+  "short_name": "Remates",
+  "start_url": "./REMATES.html",
+  "display": "standalone",
+  "background_color": "#1b4332",
+  "theme_color": "#1b4332",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3067/3067256.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
