@@ -2883,14 +2883,60 @@ HTLM
     }
 
     function exportarReporteConsignatariaCSV() {
-      let csvContent = "data:text/csv;charset=utf-8,Corral,Remitente,Cabezas,Categoria,Raza,PesoPromedio,Plazo,Estado\n";
+      if (!eventoActivoObj) {
+        alert("Seleccione un evento para exportar su liquidación.");
+        return;
+      }
+
+      // Cabeceras adaptadas para importar en sistemas contables (Mantis, Albor, etc.)
+      let csvContent = "data:text/csv;charset=utf-8,FECHA,CORRAL,REMITENTE,CUIT_COMPRADOR,RAZON_SOCIAL_COMPRADOR,CATEGORIA,CABEZAS,KILOS_TOTALES,PRECIO_KG,MONTO_TOTAL,PLAZO_DIAS_CALCULADO\n";
+
+      let hayVentas = false;
+
       corralesGlobales.forEach(c => {
-        csvContent += `${c.numero_corral},"${c.remitente}",${c.cabezas},${c.categoria},${c.raza},${c.peso_promedio || 0},"${c.plazo_texto || c.plazo_dias}",${c.estado}\n`;
+        // Para el ERP contable solo nos interesan los lotes que efectivamente se vendieron
+        if (c.ventas && c.ventas.length > 0) {
+          c.ventas.forEach(v => {
+            hayVentas = true;
+
+            // 1. Buscar CUIT del comprador en el padrón
+            const compradorBuscado = v.comprador_nombre.toLowerCase();
+            const compradorObj = CLIENTES_DEMO.find(cliente => 
+              compradorBuscado.includes(cliente.alias.toLowerCase()) || 
+              compradorBuscado.includes(cliente.nombre.toLowerCase())
+            );
+            const cuitComprador = compradorObj ? compradorObj.cuit : "A Confirmar";
+            
+            // 2. Cálculos financieros
+            const cabezas = v.cabezas_vendidas || c.cabezas;
+            const kilosTotales = cabezas * (c.peso_promedio || 0);
+            const montoTotal = v.monto_final || (kilosTotales > 0 ? kilosTotales * v.precio_kg : cabezas * v.precio_kg);
+            const plazoDias = c.plazo_dias || 30; // El valor numérico exacto para que el ERP calcule vencimientos
+
+            // 3. Limpiar textos de comas para no romper el formato CSV
+            const remitenteLimpio = (c.remitente || '').replace(/,/g, ' ');
+            const compLimpio = (v.comprador_nombre || '').replace(/,/g, ' ');
+
+            // 4. Agregar fila al archivo
+            csvContent += `${eventoActivoObj.fecha},${c.numero_corral},"${remitenteLimpio}","${cuitComprador}","${compLimpio}",${c.categoria},${cabezas},${kilosTotales},${v.precio_kg},${montoTotal},${plazoDias}\n`;
+          });
+        }
       });
+
+      if (!hayVentas) {
+        alert("No hay ventas registradas en este evento para exportar al sistema contable.");
+        return;
+      }
+
+      // Descargar el archivo
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Cierre_Remate_${HOY_STR}.csv`);
+      
+      // Nombre del archivo limpio: ej. "Liquidacion_ERP_MAG_02_11.csv"
+      const nombreArchivo = `Liquidacion_ERP_${eventoActivoObj.nombre.replace(/\s+/g, '_')}.csv`;
+      link.setAttribute("download", nombreArchivo);
+      
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
