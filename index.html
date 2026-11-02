@@ -2909,6 +2909,14 @@ HTLM
       poblarSelectPlazos('c_cuotas_select');
       actualizarEtiquetaSugeridaPlazo();
     });
+ // REGISTRO DEL SERVICE WORKER (OFFLINE)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('✔ Service Worker listo (Modo Offline Activado):', reg.scope))
+          .catch((err) => console.warn('Error al registrar Service Worker:', err));
+      });
+    }
   </script>
 </body>
 </html>
