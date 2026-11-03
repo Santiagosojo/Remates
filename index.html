@@ -1,3 +1,5 @@
+HTML
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -130,7 +132,7 @@
     @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
 
     .actions-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
-    .btn-action { flex: 1; min-width: 100px; padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; }
+    .btn-action { flex: 1; min-width: 90px; padding: 8px; border: none; border-radius: 6px; font-weight: bold; font-size: 12px; cursor: pointer; text-align: center; }
     .btn-pista { background: #d97706; color: white; }
     .btn-venta { background: #10b981; color: white; }
 
@@ -344,9 +346,6 @@
           <div id="divFiltroVendedorEvento">
             <select id="f_vendedor_evento" style="padding:4px 8px; font-size:12px;" onchange="cargarEventosDisponibles()">
               <option value="ALL">Todas las Consignatarias</option>
-              <option value="CONS_SUR" selected>Ventas del Sur SA</option>
-              <option value="CONS_OESTE">Ganadera del Oeste SA</option>
-              <option value="CONS_NORTE">Haciendas del Litoral SA</option>
             </select>
           </div>
         </div>
@@ -707,35 +706,34 @@
       <div class="card" style="background:#f8fafc; border: 1px solid #cbd5e1;">
         <div class="card-title" style="color:var(--primary);">
           <span id="txtTituloFormCorral">➕ Cargar Nuevo Corral / Lote en Remate</span>
-          <button type="button" id="btnCancelarEditCorral" class="btn-preset hidden" onclick="cancelarEdicionCorralBase()">Cancelar</button>
+          <button type="button" id="btnCancelarEditCorral" class="btn-preset hidden" onclick="cancelarEdicionCorralBase(false)">Cancelar</button>
         </div>
-        <form id="formCargarCorral" onsubmit="guardarCorralBase(event)" autocomplete="off">
+        <form id="formCargarCorral" onsubmit="event.preventDefault();" autocomplete="off">
           <input type="hidden" id="c_edit_id">
           
           <div class="grid-4">
             <div class="form-group">
               <label>Nº Corral *</label>
-              <input type="text" id="c_numero" placeholder="Ej: 104 / C-T02" required>
+              <input type="text" id="c_numero" placeholder="Ej: 104 / C-T02">
             </div>
 
             <div class="form-group">
               <label>Remitente / Jaula *</label>
-              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia El Trébol" required>
+              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia El Trébol">
               <datalist id="listRemitentesPadron"></datalist>
             </div>
 
             <div class="form-group">
               <label>Cabezas *</label>
-              <input type="number" id="c_cabezas" placeholder="Ej: 3" min="1" oninput="evaluarDetalleTorosIndividuales()" required>
+              <input type="number" id="c_cabezas" placeholder="Ej: 40" min="1" oninput="evaluarDetalleTorosIndividuales()">
             </div>
 
-            <!-- GESTIÓN DINÁMICA DE PLAZOS: SELECT + BOTÓN DE CONFIGURACIÓN DIRECTA -->
             <div class="form-group">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <label style="margin-bottom:0;">Plazo de Pago *</label>
                 <button type="button" onclick="abrirModalGestionPlazos()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">⚙️ Administrar Plazos</button>
               </div>
-              <select id="c_cuotas_select" required>
+              <select id="c_cuotas_select">
                 <!-- Se puebla dinámicamente -->
               </select>
             </div>
@@ -744,12 +742,12 @@
           <div class="grid-3">
             <div class="form-group">
               <label>Categoría *</label>
-              <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()" required>
-                <option value="NOV">Novillo (NOV)</option>
+              <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
+                <option value="NOV" selected>Novillo (NOV)</option>
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
                 <option value="VC">Vaca (VC)</option>
-                <option value="TR" selected>Toro (TR - Reproductores)</option>
+                <option value="TR">Toro (TR - Reproductores)</option>
                 <option value="TER">Ternero (TER)</option>
                 <option value="VQP">Vaquillona Preñada (VQP)</option>
               </select>
@@ -757,7 +755,7 @@
 
             <div class="form-group">
               <label>Raza *</label>
-              <select id="c_raza_select" required>
+              <select id="c_raza_select">
                 <option value="Angus" selected>Angus</option>
                 <option value="Hereford">Hereford</option>
                 <option value="Careta">Careta</option>
@@ -769,15 +767,15 @@
 
             <div class="form-group">
               <label>Peso Promedio Lote (kg)</label>
-              <input type="number" id="c_peso_promedio" placeholder="Ej: 720">
+              <input type="number" id="c_peso_promedio" placeholder="Ej: 420">
             </div>
           </div>
 
           <!-- CARGA INDIVIDUAL DE TOROS -->
-          <div id="boxDetalleTorosIndividuales" style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:6px; margin-bottom:12px;">
+          <div id="boxDetalleTorosIndividuales" class="hidden" style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:6px; margin-bottom:12px;">
             <div style="font-size:12px; font-weight:bold; color:#1e40af; margin-bottom:8px; display:flex; justify-content:space-between;">
               <span>🐂 Registro Individual por Animal del Corral</span>
-              <span id="lblCountTorosInfo" style="font-size:11px;">(3 animales)</span>
+              <span id="lblCountTorosInfo" style="font-size:11px;">(0 animales)</span>
             </div>
             <div id="contenedorInputsTorosIndividuales"></div>
           </div>
@@ -787,7 +785,7 @@
             <input type="text" id="c_pesada_obs" placeholder="Ej: Lote parejo, revisación clínica aprobada">
           </div>
 
-          <button type="submit" id="btnGuardarCorralBase" class="btn-submit" style="background:var(--primary);">🐂 Guardar Datos del Corral</button>
+          <button type="button" id="btnGuardarCorralBase" class="btn-submit" style="background:var(--primary); cursor:pointer;" onclick="guardarCorralBase(event)">🐂 Guardar Datos del Corral</button>
         </form>
       </div>
 
@@ -847,8 +845,6 @@
               <label>Consignataria:</label>
               <select id="f_cliente_vendedor_id" onchange="renderMisCompras()">
                 <option value="ALL" selected>Todas las Consignatarias</option>
-                <option value="CONS_SUR">Ventas del Sur SA</option>
-                <option value="CONS_OESTE">Ganadera del Oeste SA</option>
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
@@ -888,7 +884,7 @@
 
   </div>
 
-  <!-- MODAL GESTIÓN DE PLAZOS (EDITAR, ELIMINAR Y CREAR CON UNIDAD Y CUOTAS) -->
+  <!-- MODAL GESTIÓN DE PLAZOS -->
   <div id="modalGestionPlazos" class="modal-overlay hidden">
     <div class="modal-content" style="max-width:580px;">
       <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #e5e7eb; padding-bottom:8px; margin-bottom:12px;">
@@ -896,7 +892,6 @@
         <button type="button" onclick="cerrarModalGestionPlazos()" style="background:none; border:none; font-size:18px; font-weight:bold; cursor:pointer;">✕</button>
       </div>
 
-      <!-- FORMULARIO CREAR / EDITAR PLAZO -->
       <form id="formPlazoModal" onsubmit="guardarPlazoDesdeModal(event)" style="background:#f8fafc; border:1px solid #cbd5e1; padding:12px; border-radius:8px; margin-bottom:14px;">
         <input type="hidden" id="mplazo_edit_id">
         <strong id="mplazo_titulo_form" style="color:var(--primary); font-size:13px; display:block; margin-bottom:8px;">➕ Crear Nuevo Plazo</strong>
@@ -931,7 +926,6 @@
         </div>
       </form>
 
-      <!-- LISTADO DE PLAZOS ACTIVOS CON EDITAR Y ELIMINAR -->
       <div>
         <label style="color:#4b5563; font-weight:bold; font-size:12px;">Plazos Disponibles en tu Consignataria:</label>
         <div id="listaPlazosGestion" style="margin-top:6px; max-height:220px; overflow-y:auto;"></div>
@@ -999,18 +993,17 @@
 
   <script>
     // ==========================================
-    // 🔑 CONFIGURACIÓN & SUPABASE
+    // 🔑 CONFIGURACIÓN & SUPABASE (OFFLINE-FIRST)
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw'; 
-
     let sb = null;
     try {
       if (typeof supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('TU_PROYECTO')) {
         sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       }
     } catch (e) {
-      console.warn('Supabase no conectado. Operando en modo local/demo.');
+      console.warn('Supabase no conectado. Operando en modo local.');
     }
 
     // ⏱️ LISTADO BASE DE PLAZOS
@@ -1038,18 +1031,18 @@
       } catch (e) {}
     }
 
-    let CLIENTES_DEMO = [
+    // ==========================================
+    // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE-FIRST)
+    // ==========================================
+    let CLIENTES_DEMO = JSON.parse(localStorage.getItem('padron_clientes_v2')) || [
       { id: 1, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', email: 'compras@eltrebol.com', clave: '30711223348-T', limite_credito: 80000000 },
       { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 },
-      { id: 3, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Estancia Las Lilas', alias: 'Las Lilas', cuit: '30-45667788-9', email: 'remites@laslilas.com', clave: '30456677889-L', limite_credito: 100000000 },
-      { id: 4, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Cabaña Don Luis', alias: 'Don Luis', cuit: '30-11223344-5', email: 'cabana@donluis.com', clave: '30112233445-D', limite_credito: 50000000 },
-      { id: 5, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Frigorífico Guaraní SA', alias: 'Guaraní', cuit: '30-99887766-1', email: 'compras@guarani.com', clave: '30998877661-G', limite_credito: 150000000 }
+      { id: 3, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Estancia Las Lilas', alias: 'Las Lilas', cuit: '30-45667788-9', email: 'remites@laslilas.com', clave: '30456677889-L', limite_credito: 100000000 }
     ];
 
-    let CONSIGNATARIAS_DEMO = [
+    let CONSIGNATARIAS_DEMO = JSON.parse(localStorage.getItem('padron_consignatarias_v2')) || [
       { id: 'CONS_SUR', nombre: 'Ventas del Sur SA', cuit: '30-88776655-4', email: 'ventas@ventasdelsur.com', intermediario: '', comision: 0 },
-      { id: 'CONS_OESTE', nombre: 'Ganadera del Oeste SA', cuit: '30-99881122-3', email: 'titular@ganaderadeloeste.com', intermediario: 'Gómez & Asociados', comision: 1.5 },
-      { id: 'CONS_NORTE', nombre: 'Haciendas del Litoral SA', cuit: '30-77664433-2', email: 'titular@litoral.com', intermediario: 'Martínez Rurales', comision: 2.0 }
+      { id: 'CONS_OESTE', nombre: 'Ganadera del Oeste SA', cuit: '30-99881122-3', email: 'titular@ganaderadeloeste.com', intermediario: 'Gómez & Asociados', comision: 1.5 }
     ];
 
     const HOY_STR = new Date().toISOString().split('T')[0];
@@ -1058,16 +1051,12 @@
 
     let PLAZO_MAG_PREDETERMINADO = localStorage.getItem('plazo_mag_anterior') || '30 Días (1 Cuota)';
 
-    let EVENTOS_DEMO = [
+    let EVENTOS_DEMO = JSON.parse(localStorage.getItem('padron_eventos_v2')) || [
       { id: 101, consignataria_id: 'CONS_SUR', nombre: 'Remate Feria Especial Villegas', tipo_evento: 'Feria', fecha: HOY_STR, lugar: 'General Villegas', estado: 'Pendiente', plazo_default: '30 Días (1 Cuota)' },
-      { id: 102, consignataria_id: 'CONS_SUR', nombre: `MAG - ${HOY_STR.split('-')[2]}/${HOY_STR.split('-')[1]}`, tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente', plazo_default: PLAZO_MAG_PREDETERMINADO },
-      { id: 103, consignataria_id: 'CONS_SUR', nombre: 'Gran Remate Cabaña Don Luis', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Instalaciones Cabaña', estado: 'Pendiente', plazo_default: '90 Días (3 Cuotas)' },
-      { id: 201, consignataria_id: 'CONS_SUR', nombre: 'MAG - Jornada Anterior', tipo_evento: 'Mercado', fecha: AYER_STR, lugar: 'Cañuelas', estado: 'Realizado', plazo_default: '30 Días (1 Cuota)' },
-      { id: 202, consignataria_id: 'CONS_OESTE', nombre: 'Feria Invernada del Oeste', tipo_evento: 'Feria', fecha: HACE_UN_MES_STR, lugar: 'Pehuajó', estado: 'Realizado', plazo_default: '60 Días (2 Cuotas)' },
-      { id: 203, consignataria_id: 'CONS_NORTE', nombre: 'Remate Especial Reproductores Litoral', tipo_evento: 'Cabaña', fecha: HACE_UN_MES_STR, lugar: 'Corrientes', estado: 'Realizado', plazo_default: '1 Año (4 Cuotas Trimestrales)' }
+      { id: 102, consignataria_id: 'CONS_SUR', nombre: `MAG - ${HOY_STR.split('-')[2]}/${HOY_STR.split('-')[1]}`, tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente', plazo_default: PLAZO_MAG_PREDETERMINADO }
     ];
 
-    const CORRALES_DEMO = {
+    let CORRALES_DEMO = JSON.parse(localStorage.getItem('padron_corrales_v2')) || {
       101: [
         { 
           id: 1, evento_id: 101, numero_corral: 'F-101', remitente: 'Estancia Las Lilas', cabezas: 3, categoria: 'TR', raza: 'Angus', peso_promedio: 730, pesada_observaciones: 'Trío Toros PC 2 Años', plazo_texto: '60 Días (2 Cuotas)', plazo_dias: 60, estado: 'Disponible',
@@ -1078,29 +1067,19 @@
           ]
         },
         { id: 2, evento_id: 101, numero_corral: 'F-102', remitente: 'Campo Norte SRL', cabezas: 40, categoria: 'TER', raza: 'Angus', peso_promedio: 190, pesada_observaciones: 'Terneros destetados', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Disponible' }
-      ],
-      102: [
-        { id: 20, evento_id: 102, numero_corral: 'MAG-01', remitente: 'Agropecuaria El Trébol SA', cabezas: 45, categoria: 'NOV', raza: 'Angus', peso_promedio: 420, pesada_observaciones: 'Consumo especial', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Disponible' }
-      ],
-      103: [
-        { 
-          id: 40, evento_id: 103, numero_corral: 'CAB-01', remitente: 'Cabaña Don Luis', cabezas: 2, categoria: 'TR', raza: 'Angus', peso_promedio: 760, pesada_observaciones: 'Dúo PP', plazo_texto: '90 Días (3 Cuotas)', plazo_dias: 90, estado: 'Disponible',
-          toros: [
-            { rp: 'RP 501', hba: 'HBA 8912', peso: 770, ce: '42.5 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas', obs: 'Pedigree de punta', vendido: false },
-            { rp: 'RP 504', hba: 'HBA 8915', peso: 750, ce: '41.5 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas', obs: 'Facilidad de parto', vendido: false }
-          ]
-        }
-      ],
-      201: [
-        { id: 80, evento_id: 201, numero_corral: 'HIST-1', remitente: 'La Julia Ganadera', cabezas: 40, categoria: 'NOV', raza: 'Angus', peso_promedio: 430, pesada_observaciones: 'Vendido MAG', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Agropecuaria El Trébol SA', precio_kg: 4650, monto_final: 79980000, cabezas_vendidas: 40 }] }
-      ],
-      202: [
-        { id: 90, evento_id: 202, numero_corral: 'OEST-01', remitente: 'Don Esteban Agrícola', cabezas: 30, categoria: 'VQ', raza: 'Careta', peso_promedio: 320, pesada_observaciones: 'Vendido Feria', plazo_texto: '60 Días (2 Cuotas)', plazo_dias: 60, estado: 'Vendido', ventas: [{ comprador_nombre: 'Ganadera San Miguel SRL', precio_kg: 4300, monto_final: 41280000, cabezas_vendidas: 30 }] }
-      ],
-      203: [
-        { id: 95, evento_id: 203, numero_corral: 'LIT-01', remitente: 'Estancia Don Pedro', cabezas: 10, categoria: 'TR', raza: 'Braford', peso_promedio: 680, pesada_observaciones: 'Toros Braford', plazo_texto: '1 Año (4 Cuotas Trimestrales)', plazo_dias: 365, estado: 'Vendido', ventas: [{ comprador_nombre: 'Cabaña Don Luis', precio_kg: 4800, monto_final: 32640000, cabezas_vendidas: 10 }] }
       ]
     };
+
+    function guardarMemoriaFisicaLocal() {
+      try {
+        localStorage.setItem('padron_clientes_v2', JSON.stringify(CLIENTES_DEMO));
+        localStorage.setItem('padron_consignatarias_v2', JSON.stringify(CONSIGNATARIAS_DEMO));
+        localStorage.setItem('padron_eventos_v2', JSON.stringify(EVENTOS_DEMO));
+        localStorage.setItem('padron_corrales_v2', JSON.stringify(CORRALES_DEMO));
+      } catch (err) {
+        console.warn('Error al escribir almacenamiento local:', err);
+      }
+    }
 
     let usuarioActual = null;
     let modoOperatorioActivo = 'vendedor';
@@ -1108,9 +1087,25 @@
     let corralesGlobales = [];
     let corralEnPistaId = null;
     let ultimaVentaConfirmada = null;
+    let ultimoNumeroCorralCargado = "";
 
     let chartDispersionInstance = null;
     let chartBarrasInstance = null;
+
+    // Siguiente número correlativo inteligente (ej: 10 -> 11, C-01 -> C-02)
+    function calcularSiguienteCorral(numStr) {
+      if (!numStr) return "";
+      const match = numStr.match(/^(.*?)(\d+)$/);
+      if (match) {
+        const prefijo = match[1];
+        const numero = parseInt(match[2], 10) + 1;
+        const formateado = numero.toString().padStart(match[2].length, '0');
+        return prefijo + formateado;
+      }
+      const soloNumero = parseInt(numStr, 10);
+      if (!isNaN(soloNumero)) return (soloNumero + 1).toString();
+      return "";
+    }
 
     // ==========================================
     // ⏱️ GESTIÓN DE PLAZOS: SELECTOR Y MODAL
@@ -1184,22 +1179,11 @@
         const idNum = parseInt(editId);
         const p = PLAZOS_SISTEMA.find(item => item.id === idNum);
         if (p) {
-          p.valor = valor;
-          p.unidad = unidad;
-          p.cuotas = cuotas;
-          p.texto = texto;
-          p.dias_calc = diasCalc;
+          p.valor = valor; p.unidad = unidad; p.cuotas = cuotas; p.texto = texto; p.dias_calc = diasCalc;
         }
         alert(`✔ Plazo "${texto}" actualizado.`);
       } else {
-        const nuevoPlazo = {
-          id: Date.now(),
-          valor,
-          unidad,
-          cuotas,
-          texto,
-          dias_calc: diasCalc
-        };
+        const nuevoPlazo = { id: Date.now(), valor, unidad, cuotas, texto, dias_calc: diasCalc };
         PLAZOS_SISTEMA.push(nuevoPlazo);
         alert(`✔ Plazo "${texto}" creado con éxito.`);
       }
@@ -1234,7 +1218,6 @@
         guardarPlazosEnStorage();
         renderListaPlazosGestion();
         poblarSelectPlazos('c_cuotas_select');
-        alert(`✔ Plazo eliminado.`);
       }
     }
 
@@ -1272,7 +1255,7 @@
     }
 
     // ==========================================
-    // 🔐 AUTENTICACIÓN CONECTADA A SUPABASE Y DEMO
+    // 🔐 AUTENTICACIÓN FLEXIBLE Y SEGURA
     // ==========================================
     async function procesarLogin(e) {
       if (e) e.preventDefault();
@@ -1284,7 +1267,7 @@
       const pass = passInput.value.trim();
 
       if (!email || !pass) {
-        alert('⚠️ Por favor ingrese usuario/email y contraseña.');
+        alert('⚠️ Ingrese usuario/email y contraseña.');
         return;
       }
 
@@ -1303,9 +1286,10 @@
         return;
       }
 
-      // 2. Consulta en Supabase si está disponible
+      // 2. Consulta en Supabase
       if (sb) {
         try {
+          // A. Buscar en tabla usuarios
           const { data: dataUsers, error: errUsers } = await sb
             .from('usuarios')
             .select('*')
@@ -1313,24 +1297,45 @@
 
           if (!errUsers && dataUsers && dataUsers.length > 0) {
             const match = dataUsers.find(u => {
-              const uPass = u.clave || u.password || u.contrasena;
-              return (uPass && uPass.toString().trim() === pass) || pass === 'demo123';
+              const uPass = (u.clave || u.password || u.contrasena || '').toString().trim();
+              return uPass === pass || pass === 'demo123';
             });
             if (match) {
-              const rolMatch = (match.rol || '').toLowerCase();
-              const esAdmin = rolMatch === 'admin';
-              const esVendedor = rolMatch === 'vendedor' || rolMatch === 'vendedor_primario';
+              const rolStr = (match.rol || 'vendedor').toLowerCase();
+              const esAdmin = rolStr === 'admin';
+              const esVendedor = rolStr.includes('vendedor');
               usuarioEncontrado = {
                 tipo_cliente: esAdmin ? 'admin' : (esVendedor ? 'vendedor' : 'cliente'),
                 nombre: match.nombre || match.email,
-                alias: match.alias || match.nombre || 'Usuario',
+                alias: match.alias || match.nombre || 'Vendedor Titular',
                 cuit: match.cuit || '',
-                consignataria_id: match.consignataria_id || (esAdmin ? 'ALL' : 'CONS_SUR'),
+                consignataria_id: match.consignataria_id || 'CONS_SUR',
                 rol: esAdmin ? 'admin' : (esVendedor ? 'vendedor' : 'comprador')
               };
             }
           }
 
+          // B. Buscar en tabla consignatarias directamente
+          if (!usuarioEncontrado) {
+            const { data: dataCons, error: errCons } = await sb
+              .from('consignatarias')
+              .select('*')
+              .ilike('email', email);
+
+            if (!errCons && dataCons && dataCons.length > 0) {
+              const cMatch = dataCons[0];
+              usuarioEncontrado = {
+                tipo_cliente: 'vendedor',
+                nombre: cMatch.nombre,
+                alias: cMatch.nombre,
+                cuit: cMatch.cuit || '',
+                consignataria_id: cMatch.id,
+                rol: 'vendedor'
+              };
+            }
+          }
+
+          // C. Buscar en tabla compradores
           if (!usuarioEncontrado) {
             const { data: dataComp, error: errComp } = await sb
               .from('compradores')
@@ -1339,8 +1344,8 @@
 
             if (!errComp && dataComp && dataComp.length > 0) {
               const match = dataComp.find(u => {
-                const uPass = u.clave || u.password || u.contrasena;
-                return (uPass && uPass.toString().trim() === pass) || pass === 'demo123';
+                const uPass = (u.clave || u.password || '').toString().trim();
+                return uPass === pass || pass === 'demo123';
               });
               if (match) {
                 const esVendedor = match.tipo_cliente === 'vendedor';
@@ -1356,7 +1361,7 @@
             }
           }
         } catch (errSupabase) {
-          console.warn('Error al verificar credenciales en Supabase:', errSupabase);
+          console.warn('Consulta en Supabase:', errSupabase);
         }
       }
 
@@ -1378,32 +1383,33 @@
         }
       }
 
-      // 4. Fallback a cuentas demo rápidas
+      // 4. Fallback a CONSIGNATARIAS_DEMO local
       if (!usuarioEncontrado) {
-        if (email === 'ventas@ventasdelsur.com' && (pass === 'demo123' || pass.length > 0)) {
-          usuarioEncontrado = { 
-            tipo_cliente: 'vendedor', 
-            nombre: 'Ventas del Sur SA (Operador)', 
-            alias: 'Ventas del Sur', 
-            cuit: '30-88776655-4', 
-            consignataria_id: 'CONS_SUR',
+        const consMatch = CONSIGNATARIAS_DEMO.find(c => c.email && c.email.toLowerCase() === email);
+        if (consMatch) {
+          usuarioEncontrado = {
+            tipo_cliente: 'vendedor',
+            nombre: consMatch.nombre,
+            alias: consMatch.nombre,
+            cuit: consMatch.cuit || '',
+            consignataria_id: consMatch.id,
             rol: 'vendedor'
-          };
-        } else if (email === 'compras@eltrebol.com' && (pass === '30711223348-T' || pass === 'demo123')) {
-          usuarioEncontrado = { 
-            tipo_cliente: 'cliente', 
-            nombre: 'Agropecuaria El Trébol SA', 
-            alias: 'El Trébol', 
-            cuit: '30-71122334-8', 
-            consignataria_id: 'CONS_SUR',
-            rol: 'comprador'
           };
         }
       }
 
-      // 5. Determinar ingreso
+      // 5. Fallback a demos directos
+      if (!usuarioEncontrado) {
+        if (email === 'ventas@ventasdelsur.com' && (pass === 'demo123' || pass.length > 0)) {
+          usuarioEncontrado = { tipo_cliente: 'vendedor', nombre: 'Ventas del Sur SA (Operador)', alias: 'Ventas del Sur', cuit: '30-88776655-4', consignataria_id: 'CONS_SUR', rol: 'vendedor' };
+        } else if (email === 'compras@eltrebol.com' && (pass === '30711223348-T' || pass === 'demo123')) {
+          usuarioEncontrado = { tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', consignataria_id: 'CONS_SUR', rol: 'comprador' };
+        }
+      }
+
+      // 6. Ingreso
       if (usuarioEncontrado) {
-        const rolFinal = usuarioEncontrado.rol || (usuarioEncontrado.tipo_cliente === 'vendedor' ? 'vendedor' : (usuarioEncontrado.tipo_cliente === 'admin' ? 'admin' : 'comprador'));
+        const rolFinal = usuarioEncontrado.rol || (usuarioEncontrado.tipo_cliente === 'vendedor' ? 'vendedor' : 'comprador');
         usuarioActual = {
           rol: rolFinal,
           nombre: usuarioEncontrado.nombre,
@@ -1413,7 +1419,7 @@
         };
         confirmarIngresoModo(rolFinal);
       } else {
-        alert('⚠️ Credenciales incorrectas.\nVerifique email y contraseña. Si usa Supabase, asegúrese de haber configurado sus claves reales.');
+        alert('⚠️ Credenciales incorrectas.\nVerifique email y contraseña.');
       }
     }
 
@@ -1450,6 +1456,7 @@
       renderListaCompradoresAutorizados();
       actualizarSelectorIntermediariosFiltro();
       poblarSelectPlazos('c_cuotas_select');
+      poblarSelectorConsignatariasEvento();
     }
 
     function cerrarSesion() {
@@ -1480,7 +1487,7 @@
     }
 
     // ==========================================
-    // 🛡️ ALTA DE VENDEDORES PRIMARIOS (ADMIN)
+    // 🛡️ ALTA DE CONSIGNATARIAS (ADMIN)
     // ==========================================
     function abrirSeccionAltaEmpresas() {
       ocultarTodasLasSecciones();
@@ -1489,6 +1496,7 @@
 
     async function guardarNuevaConsignatariaAdmin(e) {
       if (e) e.preventDefault();
+      
       const nombre = document.getElementById('adm_empresa_nombre').value.trim();
       const cuit = document.getElementById('adm_empresa_cuit').value.trim();
       const email = document.getElementById('adm_vendedor_email').value.trim().toLowerCase();
@@ -1497,18 +1505,46 @@
       const intermediario = intermediarioInput || '';
       const comision = parseFloat(document.getElementById('adm_empresa_comision').value) || 0;
 
+      if (!nombre || !email || !pass) {
+        alert("Por favor complete nombre, email y contraseña.");
+        return;
+      }
+
       const idNuevaCons = `CONS_${Date.now()}`;
-      const nuevaCons = { 
-        id: idNuevaCons, 
-        nombre, 
-        cuit, 
-        email, 
-        intermediario: intermediario, 
-        comision 
-      };
 
-      CONSIGNATARIAS_DEMO.push(nuevaCons);
+      // 1. Guardar en Supabase
+      if (sb) {
+        try {
+          const { error: errCons } = await sb.from('consignatarias').insert([{
+            id: idNuevaCons,
+            nombre: nombre,
+            cuit: cuit,
+            email: email,
+            intermediario: intermediario,
+            comision: comision
+          }]);
 
+          if (errCons) console.warn("Aviso Supabase (Consignataria):", errCons.message);
+
+          const { error: errUser } = await sb.from('usuarios').insert([{
+            consignataria_id: idNuevaCons,
+            nombre: `${nombre} (Titular)`,
+            email: email,
+            clave: pass,
+            rol: 'vendedor_primario',
+            cuit: cuit,
+            intermediario: intermediario,
+            comision: comision
+          }]);
+
+          if (errUser) console.warn("Aviso Supabase (Usuario):", errUser.message);
+        } catch (errDb) {
+          console.warn("Error de conexión al persistir consignataria:", errDb);
+        }
+      }
+
+      // 2. Guardar en memoria local y disco físico
+      CONSIGNATARIAS_DEMO.push({ id: idNuevaCons, nombre, cuit, email, intermediario, comision });
       CLIENTES_DEMO.push({
         id: Date.now(),
         consignataria_id: idNuevaCons,
@@ -1521,17 +1557,12 @@
         limite_credito: 0
       });
 
-      if (sb) {
-        try {
-          await sb.from('usuarios').insert([{
-            nombre, email, clave: pass, rol: 'vendedor_primario', cuit, intermediario, comision
-          }]);
-        } catch (err) {}
-      }
+      guardarMemoriaFisicaLocal();
 
-      alert(`✔ Consignataria "${nombre}" dada de alta exitosamente.\nUsuario Primario: ${email}\nIntermediario: ${intermediario ? intermediario + ' (' + comision + '%)' : 'Directo (Sin Intermediario)'}`);
+      alert(`✔ Consignataria "${nombre}" y usuario creados con éxito.\nUsuario: ${email}`);
       document.getElementById('formAltaConsignataria').reset();
       actualizarSelectorIntermediariosFiltro();
+      poblarSelectorConsignatariasEvento();
       volverAlMenuPrincipal();
     }
 
@@ -1546,20 +1577,13 @@
         }
       });
 
-      let opts = `
-        <option value="TODOS">Todos los Intermediarios</option>
-        <option value="DIRECTO">Solo Directo (Sin Intermediario)</option>
-      `;
-
-      setInter.forEach(item => {
-        opts += `<option value="${item}">${item}</option>`;
-      });
-
+      let opts = '<option value="TODOS">Todos los Intermediarios</option><option value="DIRECTO">Solo Directo (Sin Intermediario)</option>';
+      setInter.forEach(item => { opts += `<option value="${item}">${item}</option>`; });
       select.innerHTML = opts;
     }
 
     // ==========================================
-    // 📊 REPORTES & AUDITORÍA GLOBAL DEL ADMINISTRADOR
+    // 📊 REPORTES & AUDITORÍA GLOBAL
     // ==========================================
     function abrirSeccionReportes() {
       ocultarTodasLasSecciones();
@@ -1591,122 +1615,95 @@
       const tipoPeriodo = document.getElementById('rep_tipo_periodo').value;
       const fCat = document.getElementById('rep_filtro_cat')?.value || 'ALL';
 
-      if (!fechaBaseStr) {
-          alert("Por favor seleccione una fecha base.");
-          return;
-      }
+      if (!fechaBaseStr) return;
 
       const fechaBase = new Date(fechaBaseStr);
       fechaBase.setMinutes(fechaBase.getMinutes() + fechaBase.getTimezoneOffset());
-      
       const periodos = [];
 
       for (let i = 0; i < numPeriodos; i++) {
-          let fechaFin = new Date(fechaBase);
-          let fechaInicio = new Date(fechaBase);
-          let etiqueta = "";
+        let fechaFin = new Date(fechaBase);
+        let fechaInicio = new Date(fechaBase);
+        let etiqueta = "";
 
-          if (tipoPeriodo === 'dias') {
-              fechaFin.setDate(fechaFin.getDate() - i);
-              fechaInicio.setDate(fechaInicio.getDate() - i);
-              etiqueta = fechaInicio.toISOString().split('T')[0];
-          } else if (tipoPeriodo === 'semanas') {
-              fechaFin.setDate(fechaFin.getDate() - (i * 7));
-              fechaInicio.setDate(fechaInicio.getDate() - (i * 7) - 6);
-              etiqueta = `Semana del ${fechaInicio.toLocaleDateString()} al ${fechaFin.toLocaleDateString()}`;
-          } else if (tipoPeriodo === 'meses') {
-              fechaFin.setMonth(fechaFin.getMonth() - i);
-              fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
-              fechaInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 1);
-              etiqueta = `${fechaInicio.toLocaleString('default', { month: 'long' })} ${fechaInicio.getFullYear()}`;
-          } else if (tipoPeriodo === 'anos') {
-              fechaFin.setFullYear(fechaFin.getFullYear() - i);
-              fechaFin = new Date(fechaFin.getFullYear(), 11, 31);
-              fechaInicio = new Date(fechaFin.getFullYear(), 0, 1);
-              etiqueta = `Año ${fechaInicio.getFullYear()}`;
-          }
-          
-          periodos.push({
-              inicio: fechaInicio.toISOString().split('T')[0],
-              fin: fechaFin.toISOString().split('T')[0],
-              etiqueta: etiqueta,
-              datos: { cabezas: 0, kilos: 0, monto: 0 }
-          });
+        if (tipoPeriodo === 'dias') {
+          fechaFin.setDate(fechaFin.getDate() - i);
+          fechaInicio.setDate(fechaInicio.getDate() - i);
+          etiqueta = fechaInicio.toISOString().split('T')[0];
+        } else if (tipoPeriodo === 'semanas') {
+          fechaFin.setDate(fechaFin.getDate() - (i * 7));
+          fechaInicio.setDate(fechaInicio.getDate() - (i * 7) - 6);
+          etiqueta = `Semana del ${fechaInicio.toLocaleDateString()} al ${fechaFin.toLocaleDateString()}`;
+        } else if (tipoPeriodo === 'meses') {
+          fechaFin.setMonth(fechaFin.getMonth() - i);
+          fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
+          fechaInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 1);
+          etiqueta = `${fechaInicio.toLocaleString('default', { month: 'long' })} ${fechaInicio.getFullYear()}`;
+        } else if (tipoPeriodo === 'anos') {
+          fechaFin.setFullYear(fechaFin.getFullYear() - i);
+          fechaFin = new Date(fechaFin.getFullYear(), 11, 31);
+          fechaInicio = new Date(fechaFin.getFullYear(), 0, 1);
+          etiqueta = `Año ${fechaInicio.getFullYear()}`;
+        }
+        
+        periodos.push({
+          inicio: fechaInicio.toISOString().split('T')[0],
+          fin: fechaFin.toISOString().split('T')[0],
+          etiqueta: etiqueta,
+          datos: { cabezas: 0, kilos: 0, monto: 0 }
+        });
       }
 
-      // Recopilar datos filtrados por período y categoría
       Object.keys(CORRALES_DEMO).forEach(evId => {
         const ev = EVENTOS_DEMO.find(e => e.id == evId) || { fecha: HOY_STR };
-        
         CORRALES_DEMO[evId].forEach(c => {
           if (fCat !== 'ALL' && c.categoria !== fCat) return;
-            
           if (c.ventas) {
             c.ventas.forEach(v => {
               const f = ev.fecha;
               periodos.forEach(p => {
-                  if (f >= p.inicio && f <= p.fin) {
-                      const cab = v.cabezas_vendidas || 0;
-                      const kilos = cab * (c.peso_promedio || 0);
-                      p.datos.cabezas += cab;
-                      p.datos.kilos += kilos;
-                      p.datos.monto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
-                  }
+                if (f >= p.inicio && f <= p.fin) {
+                  const cab = v.cabezas_vendidas || 0;
+                  const kilos = cab * (c.peso_promedio || 0);
+                  p.datos.cabezas += cab;
+                  p.datos.kilos += kilos;
+                  p.datos.monto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
+                }
               });
             });
           }
         });
       });
 
-      let html = `
-          <table class="report-table" style="min-width:600px;">
-            <thead>
-                <tr>
-                    <th style="background:#e2e8f0;">MÉTRICA</th>
-      `;
-      periodos.forEach(p => {
-          html += `<th style="background:#e2e8f0; text-align:center;">${p.etiqueta.toUpperCase()}</th>`;
-      });
-      html += `</tr></thead><tbody>`;
-
-      // Cabezas
-      html += `<tr><td><strong>Cabezas Vendidas</strong></td>`;
+      let html = `<table class="report-table" style="min-width:600px;"><thead><tr><th style="background:#e2e8f0;">MÉTRICA</th>`;
+      periodos.forEach(p => html += `<th style="background:#e2e8f0; text-align:center;">${p.etiqueta.toUpperCase()}</th>`);
+      html += `</tr></thead><tbody><tr><td><strong>Cabezas Vendidas</strong></td>`;
       periodos.forEach(p => html += `<td style="text-align:center;">${p.datos.cabezas.toLocaleString('es-AR')}</td>`);
-      html += `</tr>`;
-
-      // Promedio $/kg
-      html += `<tr><td><strong>Promedio ($/kg)</strong></td>`;
+      html += `</tr><tr><td><strong>Promedio ($/kg)</strong></td>`;
       periodos.forEach(p => {
-          const prom = p.datos.kilos > 0 ? (p.datos.monto / p.datos.kilos) : 0;
-          html += `<td style="text-align:center; font-weight:bold; color:#0284c7;">$${prom.toFixed(2)}</td>`;
+        const prom = p.datos.kilos > 0 ? (p.datos.monto / p.datos.kilos) : 0;
+        html += `<td style="text-align:center; font-weight:bold; color:#0284c7;">$${prom.toFixed(2)}</td>`;
       });
-      html += `</tr>`;
-
-      // Monto Total
-      html += `<tr><td><strong>Monto Operado</strong></td>`;
+      html += `</tr><tr><td><strong>Monto Operado</strong></td>`;
       periodos.forEach(p => html += `<td style="text-align:center; color:#166534;">$${p.datos.monto.toLocaleString('es-AR')}</td>`);
-      html += `</tr>`;
-
-      // Variación Porcentual
-      html += `<tr style="background:#f8fafc;"><td><strong>Variación Precio vs Ant.</strong></td>`;
+      html += `</tr><tr style="background:#f8fafc;"><td><strong>Variación Precio vs Ant.</strong></td>`;
       for(let i=0; i < periodos.length; i++){
-          if(i === periodos.length - 1){
-              html += `<td style="text-align:center; color:#888;">Base</td>`;
-          } else {
-             const promActual = periodos[i].datos.kilos > 0 ? (periodos[i].datos.monto / periodos[i].datos.kilos) : 0;
-             const promAnt = periodos[i+1].datos.kilos > 0 ? (periodos[i+1].datos.monto / periodos[i+1].datos.kilos) : 0;
-             let varTxt = "-";
-             let color = "#475569";
-             if (promAnt > 0) {
-                  const variacion = ((promActual - promAnt) / promAnt) * 100;
-                  varTxt = `${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%`;
-                  color = variacion > 0 ? '#10b981' : (variacion < 0 ? '#ef4444' : '#475569');
-             }
-             html += `<td style="text-align:center; font-weight:bold; color:${color};">${varTxt}</td>`;
+        if(i === periodos.length - 1){
+          html += `<td style="text-align:center; color:#888;">Base</td>`;
+        } else {
+          const promActual = periodos[i].datos.kilos > 0 ? (periodos[i].datos.monto / periodos[i].datos.kilos) : 0;
+          const promAnt = periodos[i+1].datos.kilos > 0 ? (periodos[i+1].datos.monto / periodos[i+1].datos.kilos) : 0;
+          let varTxt = "-";
+          let color = "#475569";
+          if (promAnt > 0) {
+            const variacion = ((promActual - promAnt) / promAnt) * 100;
+            varTxt = `${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%`;
+            color = variacion > 0 ? '#10b981' : (variacion < 0 ? '#ef4444' : '#475569');
           }
+          html += `<td style="text-align:center; font-weight:bold; color:${color};">${varTxt}</td>`;
+        }
       }
       html += `</tr></tbody></table>`;
-      
       document.getElementById('contenedorComparativaPeriodos').innerHTML = html;
     }
 
@@ -1714,251 +1711,6 @@
       const container = document.getElementById('reporteGlobalTablaContainer');
       if (!container) return;
 
-      if (usuarioActual && usuarioActual.rol === 'admin') {
-        const fDesde = document.getElementById('rep_admin_desde')?.value || '';
-        const fHasta = document.getElementById('rep_admin_hasta')?.value || '';
-        const interFiltro = document.getElementById('rep_admin_intermediario')?.value || 'TODOS';
-        const tipoReporte = document.getElementById('sel_admin_reporte_tipo')?.value || 'listado_eventos';
-
-        const eventosFiltrados = EVENTOS_DEMO.filter(ev => {
-          if (fDesde && ev.fecha < fDesde) return false;
-          if (fHasta && ev.fecha > fHasta) return false;
-
-          const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id);
-          const firmaInter = firma ? (firma.intermediario || '').trim() : '';
-
-          if (interFiltro === 'DIRECTO') {
-            return !firmaInter;
-          } else if (interFiltro !== 'TODOS') {
-            return firmaInter.toLowerCase() === interFiltro.toLowerCase();
-          }
-          return true;
-        });
-
-        if (tipoReporte === 'listado_eventos') {
-          let filasHtml = '';
-          let totCabGeneral = 0, totMontoGeneral = 0;
-
-          eventosFiltrados.forEach(ev => {
-            const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id) || { nombre: 'Consignataria', intermediario: '' };
-            const lotes = CORRALES_DEMO[ev.id] || [];
-            let cabEvento = 0, montoEvento = 0;
-
-            lotes.forEach(l => {
-              cabEvento += (l.cabezas || 0);
-              if (l.ventas && l.ventas.length > 0) {
-                l.ventas.forEach(v => montoEvento += (v.monto_final || 0));
-              }
-            });
-
-            totCabGeneral += cabEvento;
-            totMontoGeneral += montoEvento;
-
-            filasHtml += `
-              <tr>
-                <td><strong>${ev.fecha}</strong></td>
-                <td><strong>${ev.nombre}</strong> <span class="event-type-badge">${ev.tipo_evento}</span></td>
-                <td>${firma.nombre}</td>
-                <td><span style="color:#0369a1; font-weight:bold;">${firma.intermediario || 'Directo (Sin Intermediario)'}</span></td>
-                <td>${ev.lugar || '-'}</td>
-                <td style="text-align:center;">${lotes.length}</td>
-                <td style="text-align:right;">${cabEvento.toLocaleString('es-AR')} cab.</td>
-                <td style="text-align:right; font-weight:bold; color:#166534;">$${montoEvento.toLocaleString('es-AR')}</td>
-                <td style="text-align:center;" class="no-print">
-                  <button type="button" class="btn-preset" style="background:#7e22ce; color:white; border:none;" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">🔍 Auditar Remate</button>
-                </td>
-              </tr>
-            `;
-          });
-
-          container.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 style="color:#5b21b6;">📋 Listado Completo de Eventos de Remate en el Rango</h4>
-              <span style="font-size:11px; color:#6b7280;">Intermediario: <strong>${interFiltro}</strong> | Fechas: <strong>${fDesde || 'Inicio'} al ${fHasta || 'Hoy'}</strong></span>
-            </div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>FECHA</th><th>REMATE / EVENTO</th><th>CONSIGNATARIA</th><th>INTERMEDIARIO</th><th>LUGAR</th><th>CORRALES</th><th>CABEZAS</th><th>MONTO TOTAL ($)</th><th class="no-print">ACCIÓN</th>
-                </tr>
-              </thead>
-              <tbody>${filasHtml || '<tr><td colspan="9" style="text-align:center; color:#888;">No se encontraron remates en este rango con los filtros aplicados.</td></tr>'}</tbody>
-              <tfoot>
-                <tr style="background:#f5f3ff; font-weight:bold;">
-                  <td colspan="6">TOTALES ACUMULADOS EN EL PERÍODO:</td>
-                  <td style="text-align:right;">${totCabGeneral.toLocaleString('es-AR')} cab.</td>
-                  <td style="text-align:right; color:#166534;">$${totMontoGeneral.toLocaleString('es-AR')}</td>
-                  <td class="no-print"></td>
-                </tr>
-              </tfoot>
-            </table>
-          `;
-          return;
-        }
-
-        if (tipoReporte === 'cabezas_categoria') {
-          const catMap = {};
-          let totalCabezasRango = 0;
-
-          eventosFiltrados.forEach(ev => {
-            const lotes = CORRALES_DEMO[ev.id] || [];
-            lotes.forEach(l => {
-              const cat = l.categoria || 'OTRO';
-              if (!catMap[cat]) catMap[cat] = { cabezas: 0, corrales: 0, kilosTot: 0, montoTot: 0 };
-              
-              catMap[cat].cabezas += (l.cabezas || 0);
-              catMap[cat].corrales += 1;
-              catMap[cat].kilosTot += ((l.cabezas || 0) * (l.peso_promedio || 0));
-              totalCabezasRango += (l.cabezas || 0);
-
-              if (l.ventas && l.ventas.length > 0) {
-                l.ventas.forEach(v => catMap[cat].montoTot += (v.monto_final || 0));
-              }
-            });
-          });
-
-          let filasCatHtml = '';
-          const descripcionesCat = {
-            'NOV': 'Novillos', 'NT': 'Novillitos', 'VQ': 'Vaquillonas', 'VC': 'Vacas',
-            'TR': 'Toros / Reproductores', 'TER': 'Terneros / Invernada', 'VQP': 'Vaquillonas Preñadas'
-          };
-
-          Object.keys(catMap).forEach(cat => {
-            const item = catMap[cat];
-            const porc = totalCabezasRango > 0 ? ((item.cabezas / totalCabezasRango) * 100).toFixed(1) : 0;
-            const promKg = item.kilosTot > 0 ? (item.kilosTot / item.cabezas).toFixed(0) : '-';
-
-            filasCatHtml += `
-              <tr>
-                <td><strong>${cat}</strong> — ${descripcionesCat[cat] || cat}</td>
-                <td style="text-align:center;">${item.corrales} lotes</td>
-                <td style="text-align:right; font-weight:bold;">${item.cabezas.toLocaleString('es-AR')} cab.</td>
-                <td style="text-align:center;"><strong>${porc}%</strong></td>
-                <td style="text-align:right;">${promKg} kg</td>
-                <td style="text-align:right; font-weight:bold; color:#166534;">$${item.montoTot.toLocaleString('es-AR')}</td>
-              </tr>
-            `;
-          });
-
-          container.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 style="color:#5b21b6;">🐂 Resumen de Cabezas Ofrecidas por Categoría en el Rango</h4>
-              <span style="font-size:11px; color:#6b7280;">Total Hacienda: <strong>${totalCabezasRango.toLocaleString('es-AR')} cabezas</strong></span>
-            </div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>CATEGORÍA DE HACIENDA</th><th>CORRALES OFRECIDOS</th><th>CABEZAS TOTALES</th><th>PARTICIPACIÓN (%)</th><th>PESO PROM. ESTIMADO</th><th>SUBTOTAL OPERADO ($)</th>
-                </tr>
-              </thead>
-              <tbody>${filasCatHtml || '<tr><td colspan="6" style="text-align:center; color:#888;">Sin hacienda en el período marcado.</td></tr>'}</tbody>
-              <tfoot>
-                <tr style="background:#f5f3ff; font-weight:bold;">
-                  <td>TOTAL OFERTA EN EL RANGO:</td><td>-</td>
-                  <td style="text-align:right;">${totalCabezasRango.toLocaleString('es-AR')} cab.</td>
-                  <td style="text-align:center;">100%</td><td>-</td><td>-</td>
-                </tr>
-              </tfoot>
-            </table>
-          `;
-          return;
-        }
-
-        if (tipoReporte === 'comisiones_intermediario') {
-          const interMap = {};
-
-          CONSIGNATARIAS_DEMO.forEach(cons => {
-            const interName = cons.intermediario || 'Directo (Sin Intermediario)';
-            if (interFiltro !== 'TODOS') {
-              if (interFiltro === 'DIRECTO' && cons.intermediario) return;
-              if (interFiltro !== 'DIRECTO' && cons.intermediario.toLowerCase() !== interFiltro.toLowerCase()) return;
-            }
-
-            if (!interMap[interName]) {
-              interMap[interName] = {
-                nombre: interName,
-                consignatarias: [],
-                eventos: [],
-                cabezasTotal: 0,
-                montoTotal: 0,
-                comisionPorc: cons.comision || 0
-              };
-            }
-            if (!interMap[interName].consignatarias.includes(cons.nombre)) {
-              interMap[interName].consignatarias.push(cons.nombre);
-            }
-
-            EVENTOS_DEMO.filter(e => e.consignataria_id === cons.id).forEach(ev => {
-              if (fDesde && ev.fecha < fDesde) return;
-              if (fHasta && ev.fecha > fHasta) return;
-
-              if (!interMap[interName].eventos.includes(ev.id)) {
-                interMap[interName].eventos.push(ev.id);
-              }
-
-              const lotes = CORRALES_DEMO[ev.id] || [];
-              lotes.forEach(l => {
-                interMap[interName].cabezasTotal += (l.cabezas || 0);
-                if (l.ventas && l.ventas.length > 0) {
-                  l.ventas.forEach(v => interMap[interName].montoTotal += (v.monto_final || 0));
-                }
-              });
-            });
-          });
-
-          let filasInterHtml = '';
-          let totEv = 0, totCab = 0, totMonto = 0, totComis = 0;
-
-          Object.values(interMap).forEach(row => {
-            const numEventos = row.eventos.length;
-            const comisPesos = (row.montoTotal * row.comisionPorc) / 100;
-            totEv += numEventos;
-            totCab += row.cabezasTotal;
-            totMonto += row.montoTotal;
-            totComis += comisPesos;
-
-            filasInterHtml += `
-              <tr>
-                <td><strong>${row.nombre}</strong></td>
-                <td>${row.consignatarias.join(', ')}</td>
-                <td style="text-align:center; font-weight:bold; color:#5b21b6;">${numEventos} remates</td>
-                <td style="text-align:right;">${row.cabezasTotal.toLocaleString('es-AR')} cab.</td>
-                <td style="text-align:right;">$${row.montoTotal.toLocaleString('es-AR')}</td>
-                <td style="text-align:center;">${row.comisionPorc}%</td>
-                <td style="text-align:right; color:#166534; font-weight:bold;">$${comisPesos.toLocaleString('es-AR')}</td>
-              </tr>
-            `;
-          });
-
-          container.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <h4 style="color:#5b21b6;">💰 Liquidación de Comisiones & Eventos por Intermediario</h4>
-              <span style="font-size:11px; color:#6b7280;">Filtro: <strong>${interFiltro}</strong> | Período: <strong>${fDesde || 'Inicio'} al ${fHasta || 'Hoy'}</strong></span>
-            </div>
-            <table class="report-table">
-              <thead>
-                <tr>
-                  <th>INTERMEDIARIO</th><th>CONSIGNATARIAS QUE SUMÓ</th><th>EVENTOS CON COMISIÓN</th><th>CABEZAS TOTALES</th><th>VOLUMEN OPERADO ($)</th><th>% COMISIÓN</th><th>TOTAL COMISIÓN A LIQUIDAR ($)</th>
-                </tr>
-              </thead>
-              <tbody>${filasInterHtml || '<tr><td colspan="7" style="text-align:center; color:#888;">No hay intermediarios activos con remates en este período.</td></tr>'}</tbody>
-              <tfoot>
-                <tr style="background:#f5f3ff; font-weight:bold;">
-                  <td colspan="2">TOTAL LIQUIDACIÓN ADMIN:</td>
-                  <td style="text-align:center;">${totEv} remates</td>
-                  <td style="text-align:right;">${totCab.toLocaleString('es-AR')} cab.</td>
-                  <td style="text-align:right;">$${totMonto.toLocaleString('es-AR')}</td>
-                  <td>-</td>
-                  <td style="text-align:right; color:#166534;">$${totComis.toLocaleString('es-AR')}</td>
-                </tr>
-              </tfoot>
-            </table>
-          `;
-          return;
-        }
-      }
-
-      // REPORTE ESTÁNDAR VENDEDOR
       const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
       const catSel = document.getElementById('f_categoria_reporte')?.value || '';
       const plazoSel = document.getElementById('f_plazo_reporte')?.value || '';
@@ -2030,32 +1782,29 @@
 
       actualizarGraficosVendedor(puntosDispersion, distribucionPrecios);
     }
-    
+
     function imprimirReporte() {
-       const style = document.createElement('style');
-       style.id = "estiloImpresionDinamico";
-       style.innerHTML = `
-          @media print {
-            body * { visibility: hidden; }
-            #secReportesGlobales, #secReportesGlobales * { visibility: visible; }
-            #secReportesGlobales { position: absolute; left: 0; top: 0; width: 100%; padding: 15px; }
-            .no-print, .btn-export, .btn-submit, .btn-print, .btn-nav-back, select, input { display: none !important; }
-            .card { box-shadow: none !important; border: 1px solid #ccc !important; }
-          }
-       `;
-       document.head.appendChild(style);
-       
-       window.print();
-       
-       setTimeout(() => {
-           const el = document.getElementById("estiloImpresionDinamico");
-           if (el) el.remove();
-       }, 500);
+      const style = document.createElement('style');
+      style.id = "estiloImpresionDinamico";
+      style.innerHTML = `
+        @media print {
+          body * { visibility: hidden; }
+          #secReportesGlobales, #secReportesGlobales * { visibility: visible; }
+          #secReportesGlobales { position: absolute; left: 0; top: 0; width: 100%; padding: 15px; }
+          .no-print, .btn-export, .btn-submit, .btn-print, .btn-nav-back, select, input { display: none !important; }
+          .card { box-shadow: none !important; border: 1px solid #ccc !important; }
+        }
+      `;
+      document.head.appendChild(style);
+      window.print();
+      setTimeout(() => {
+        const el = document.getElementById("estiloImpresionDinamico");
+        if (el) el.remove();
+      }, 500);
     }
 
     function actualizarGraficosVendedor(puntos, distribucion) {
       if (usuarioActual && usuarioActual.rol === 'admin') return;
-
       const ctxDisp = document.getElementById('chartDispersion')?.getContext('2d');
       const ctxBar = document.getElementById('chartBarrasPrecios')?.getContext('2d');
       if (!ctxDisp || !ctxBar) return;
@@ -2064,19 +1813,12 @@
       if (puntos.length >= 2) {
         const n = puntos.length;
         let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-        puntos.forEach(p => {
-          sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumX2 += p.x * p.x;
-        });
-
+        puntos.forEach(p => { sumX += p.x; sumY += p.y; sumXY += p.x * p.y; sumX2 += p.x * p.x; });
         const pendiente = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX || 1);
         const intercepto = (sumY - pendiente * sumX) / n;
         const xMin = Math.min(...puntos.map(p => p.x));
         const xMax = Math.max(...puntos.map(p => p.x));
-
-        rectaPuntos = [
-          { x: xMin, y: pendiente * xMin + intercepto },
-          { x: xMax, y: pendiente * xMax + intercepto }
-        ];
+        rectaPuntos = [{ x: xMin, y: pendiente * xMin + intercepto }, { x: xMax, y: pendiente * xMax + intercepto }];
       }
 
       if (chartDispersionInstance) chartDispersionInstance.destroy();
@@ -2085,16 +1827,10 @@
         data: {
           datasets: [
             { label: 'Ventas Reales ($/kg vs Cabezas)', data: puntos, backgroundColor: '#1e40af', pointRadius: 6 },
-            { label: 'Recta de Ajuste / Tendencia', data: rectaPuntos, type: 'line', borderColor: '#dc2626', borderWidth: 2, fill: false, pointRadius: 0 }
+            { label: 'Recta de Tendencia', data: rectaPuntos, type: 'line', borderColor: '#dc2626', borderWidth: 2, fill: false, pointRadius: 0 }
           ]
         },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          scales: {
-            x: { title: { display: true, text: 'Cabezas Adjudicadas (Eje X)' } },
-            y: { title: { display: true, text: 'Precio $/kg (Eje Y)' } }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
 
       if (chartBarrasInstance) chartBarrasInstance.destroy();
@@ -2104,13 +1840,7 @@
           labels: Object.keys(distribucion),
           datasets: [{ label: 'Cabezas Vendidas', data: Object.values(distribucion), backgroundColor: '#166534' }]
         },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          scales: {
-            y: { title: { display: true, text: 'Cantidad de Cabezas' } },
-            x: { title: { display: true, text: 'Nivel de Precio' } }
-          }
-        }
+        options: { responsive: true, maintainAspectRatio: false }
       });
     }
 
@@ -2120,25 +1850,77 @@
     function abrirSeccionRemates() {
       ocultarTodasLasSecciones();
       document.getElementById('secSeleccionEvento').classList.remove('hidden');
-      const esVendedorOAdmin = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
-      
-      document.getElementById('cardCrearEvento').classList.toggle('hidden', !esVendedorOAdmin);
-      document.getElementById('divFiltroVendedorEvento').classList.remove('hidden');
 
-      if (esVendedorOAdmin) {
+      const esAdmin = (modoOperatorioActivo === 'admin');
+      const esVendedor = (modoOperatorioActivo === 'vendedor');
+
+      document.getElementById('cardCrearEvento').classList.toggle('hidden', !(esAdmin || esVendedor));
+
+      const divFiltro = document.getElementById('divFiltroVendedorEvento');
+      if (divFiltro) {
+        divFiltro.classList.toggle('hidden', !esAdmin);
+        if (esAdmin) poblarSelectorConsignatariasEvento();
+      }
+
+      if (esAdmin || esVendedor) {
         evaluarFechaYNombreEvento();
         onTipoEventoChange();
       }
+
       cargarEventosDisponibles();
+    }
+
+    function poblarSelectorConsignatariasEvento() {
+      const select = document.getElementById('f_vendedor_evento');
+      const selectCli = document.getElementById('f_cliente_vendedor_id');
+      let opts = '<option value="ALL">Todas las Consignatarias</option>';
+      CONSIGNATARIAS_DEMO.forEach(c => {
+        opts += `<option value="${c.id}">${c.nombre}</option>`;
+      });
+      if (select) select.innerHTML = opts;
+      if (selectCli) selectCli.innerHTML = opts;
     }
 
     async function cargarEventosDisponibles() {
       const container = document.getElementById('listaEventosDisponibles');
       if (!container) return;
 
-      const fCons = document.getElementById('f_vendedor_evento')?.value || 'ALL';
-      let lista = EVENTOS_DEMO;
-      if (fCons !== 'ALL') lista = lista.filter(e => e.consignataria_id === fCons);
+      let lista = [...EVENTOS_DEMO];
+
+      if (sb) {
+        try {
+          let query = sb.from('eventos').select('*');
+          if (usuarioActual && modoOperatorioActivo === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
+            query = query.eq('consignataria_id', usuarioActual.consignataria_id);
+          }
+          const { data: evDb, error: errDb } = await query;
+          if (!errDb && evDb && evDb.length > 0) {
+            evDb.forEach(e => {
+              if (!lista.some(item => item.id == e.id)) lista.unshift(e);
+            });
+          }
+        } catch (err) {
+          console.warn('Consulta Supabase eventos:', err);
+        }
+      }
+
+      if (usuarioActual && modoOperatorioActivo === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
+        lista = lista.filter(e => e.consignataria_id === usuarioActual.consignataria_id);
+      } else {
+        const fCons = document.getElementById('f_vendedor_evento')?.value || 'ALL';
+        if (fCons !== 'ALL') lista = lista.filter(e => e.consignataria_id === fCons);
+      }
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:30px 15px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:8px;">
+            <span style="font-size:32px;">📭</span>
+            <h4 style="color:var(--primary); margin:8px 0 4px 0;">No tenés remates cargados todavía</h4>
+            <p style="font-size:12px; color:#64748b; margin:0;">Utilizá el formulario superior para dar de alta tu primer evento en la plataforma.</p>
+          </div>
+        `;
+        return;
+      }
 
       let html = '';
       lista.forEach(ev => {
@@ -2155,12 +1937,12 @@
               </div>
             </div>
             <div style="font-size:12px; color:#6b7280; margin-top:4px;">
-              🏢 Consignataria: <strong>${firma ? firma.nombre : 'Firma'}</strong> | 📅 Fecha: ${ev.fecha} | 📍 ${ev.lugar || 'Sin ubicación'} | Plazo: <strong>${ev.plazo_default || '30 Días (1 Cuota)'}</strong>
+              🏢 Consignataria: <strong>${firma ? firma.nombre : (usuarioActual ? usuarioActual.alias : 'Firma')}</strong> | 📅 Fecha: ${ev.fecha} | 📍 ${ev.lugar || 'Sin ubicación'} | Plazo: <strong>${ev.plazo_default || '30 Días (1 Cuota)'}</strong>
             </div>
           </div>
         `;
       });
-      container.innerHTML = html || '<p style="color:#888;">No hay remates cargados para el filtro actual.</p>';
+      container.innerHTML = html;
     }
 
     async function seleccionarEvento(id, nombre, tipo) {
@@ -2175,7 +1957,7 @@
       document.getElementById('vistaComprador').classList.toggle('hidden', esVistaConsignataria);
       document.getElementById('subnavComprador').classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
 
-      cancelarEdicionCorralBase();
+      cancelarEdicionCorralBase(false);
       await cargarCorrales();
     }
 
@@ -2189,7 +1971,28 @@
 
     async function cargarCorrales() {
       if (!eventoActivoObj) return;
+
+      // 1. Cargar desde memoria local de inmediato
       corralesGlobales = CORRALES_DEMO[eventoActivoObj.id] || [];
+
+      // 2. Traer desde Supabase si está disponible
+      if (sb) {
+        try {
+          const { data: dbLotes, error: errLotes } = await sb
+            .from('corrales')
+            .select('*')
+            .eq('evento_id', eventoActivoObj.id);
+
+          if (!errLotes && dbLotes && dbLotes.length > 0) {
+            CORRALES_DEMO[eventoActivoObj.id] = dbLotes;
+            corralesGlobales = dbLotes;
+            guardarMemoriaFisicaLocal();
+          }
+        } catch (e) {
+          console.warn("Consulta Supabase corrales:", e);
+        }
+      }
+
       actualizarPistaActivaState();
       renderVistaConsignataria();
       renderVistaComprador();
@@ -2206,14 +2009,17 @@
       const container = document.getElementById('contenedorInputsTorosIndividuales');
       const lblCount = document.getElementById('lblCountTorosInfo');
 
+      if (!box || !container) return;
+
       const esToro = (cat === 'TR');
       if (!esToro || cabezas <= 0 || cabezas > 25) {
         box.classList.add('hidden');
+        container.innerHTML = '';
         return;
       }
 
       box.classList.remove('hidden');
-      lblCount.textContent = `(${cabezas} toros a detallar)`;
+      if (lblCount) lblCount.textContent = `(${cabezas} toros a detallar)`;
 
       let inputsHtml = '';
       for (let i = 1; i <= cabezas; i++) {
@@ -2222,8 +2028,8 @@
             <strong style="color:#1e40af; font-size:12px;">Toro #${i}:</strong>
             <div class="grid-4" style="margin-top:4px;">
               <div>
-                <label>Número / RP *</label>
-                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}" required>
+                <label>Número / RP</label>
+                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}">
               </div>
               <div>
                 <label>HBA / Control</label>
@@ -2240,8 +2046,8 @@
             </div>
             <div class="grid-2" style="margin-top:6px;">
               <div>
-                <label>Aptitud para Vaquillonas *</label>
-                <select id="toro_apt_${i}" required>
+                <label>Aptitud para Vaquillonas</label>
+                <select id="toro_apt_${i}">
                   <option value="🟢 Apto Vaquillonas (Parto Muy Fácil)">🟢 Apto Vaquillonas 15m (Parto Muy Fácil)</option>
                   <option value="🟢 Apto Vaquillonas (Facilidad comprobada)">🟢 Apto Vaquillonas (Facilidad comprobada)</option>
                   <option value="🟡 Rodeo General / Vacas">🟡 Rodeo General / Vacas</option>
@@ -2339,9 +2145,7 @@
       }
       document.getElementById('mv_comprador_input').value = ultimaVentaConfirmada.comprador;
       document.getElementById('mv_precio_input').value = ultimaVentaConfirmada.precio;
-      
-      const inputPrecio = document.getElementById('mv_precio_input');
-      inputPrecio.focus();
+      document.getElementById('mv_precio_input').focus();
     }
 
     function buscarCompradorPredictivo(query) {
@@ -2401,6 +2205,7 @@
       };
 
       CLIENTES_DEMO.push(nuevoCliente);
+      guardarMemoriaFisicaLocal();
       seleccionarCompradorPredictivo(`${nuevoCliente.nombre} (${nuevoCliente.alias})`);
       renderListaCompradoresAutorizados();
     }
@@ -2459,10 +2264,15 @@
       if (!c.ventas) c.ventas = [];
       c.ventas.unshift(objVenta);
       
-      ultimaVentaConfirmada = {
-        comprador: comprador,
-        precio: precio
-      };
+      ultimaVentaConfirmada = { comprador, precio };
+
+      guardarMemoriaFisicaLocal();
+
+      if (sb) {
+        sb.from('corrales').upsert([c]).then(({ error }) => {
+          if (error) console.warn("Aviso guardado venta Supabase:", error.message);
+        });
+      }
 
       cerrarModalVenta();
       renderVistaConsignataria();
@@ -2477,6 +2287,15 @@
         c.estado = 'Disponible';
         c.ventas = [];
         if (c.toros) c.toros.forEach(t => t.vendido = false);
+        
+        guardarMemoriaFisicaLocal();
+
+        if (sb) {
+          sb.from('corrales').upsert([c]).then(({ error }) => {
+            if (error) console.warn("Aviso anulación venta Supabase:", error.message);
+          });
+        }
+
         alert('✔ Venta anulada exitosamente.');
         renderVistaConsignataria();
       }
@@ -2525,8 +2344,9 @@
       const c = CLIENTES_DEMO.find(item => item.id === id);
       if (!c) return;
 
-      if (confirm(`⚠️ ¿Está seguro de anular/eliminar al cliente "${c.nombre}" (${c.alias})?`)) {
+      if (confirm(`⚠️ ¿Está seguro de anular al cliente "${c.nombre}" (${c.alias})?`)) {
         CLIENTES_DEMO = CLIENTES_DEMO.filter(item => item.id !== id);
+        guardarMemoriaFisicaLocal();
         alert(`✔ Registro de "${c.nombre}" anulado.`);
         renderListaCompradoresAutorizados();
       }
@@ -2543,6 +2363,11 @@
       const clave = document.getElementById('u_comprador_clave').value.trim();
       const limite = parseFloat(document.getElementById('u_comprador_limite').value) || 0;
 
+      if (!nombre || !alias) {
+        alert('Por favor complete al menos la Razón Social y el Alias.');
+        return;
+      }
+
       const consignatariaOwner = usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR';
 
       if (editId) {
@@ -2551,6 +2376,7 @@
         if (comp) {
           comp.tipo_cliente = tipo_cliente; comp.nombre = nombre; comp.alias = alias;
           comp.cuit = cuit; comp.email = email; comp.clave = clave; comp.limite_credito = limite;
+          if (sb) sb.from('compradores').upsert([comp]);
         }
         alert(`✔ Cliente "${nombre}" actualizado.`);
       } else {
@@ -2558,9 +2384,11 @@
           id: Date.now(), consignataria_id: consignatariaOwner, tipo_cliente, nombre, alias, cuit, email, clave, limite_credito: limite
         };
         CLIENTES_DEMO.push(nuevoCliente);
+        if (sb) sb.from('compradores').insert([nuevoCliente]);
         alert(`✔ Cliente "${nombre}" registrado con éxito.`);
       }
 
+      guardarMemoriaFisicaLocal();
       cancelarEdicionComprador();
       renderListaCompradoresAutorizados();
     }
@@ -2599,38 +2427,104 @@
     }
 
     // ==========================================
-    // 🐂 CARGA Y GUARDADO DE CORRALES
+    // 🐂 CARGA Y EDICIÓN DE CORRALES
     // ==========================================
-    async function guardarCorralBase(e) {
-      if (e) e.preventDefault();
-      
-      // Fallback seguro de evento
-      if (!eventoActivoObj && EVENTOS_DEMO.length > 0) {
-        eventoActivoObj = EVENTOS_DEMO[0];
-      }
-      if (!eventoActivoObj) { 
-        alert('Seleccioná primero un evento antes de cargar corrales.'); 
-        return; 
+    function editarCorralBase(id) {
+      const c = corralesGlobales.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('c_edit_id').value = c.id;
+      document.getElementById('c_numero').value = c.numero_corral || '';
+      document.getElementById('c_remitente').value = c.remitente || '';
+      document.getElementById('c_cabezas').value = c.cabezas || '';
+      document.getElementById('c_categoria').value = c.categoria || 'NOV';
+      document.getElementById('c_raza_select').value = c.raza || 'Angus';
+      document.getElementById('c_peso_promedio').value = c.peso_promedio || '';
+      document.getElementById('c_pesada_obs').value = c.pesada_observaciones || '';
+
+      poblarSelectPlazos('c_cuotas_select', c.plazo_texto);
+
+      evaluarDetalleTorosIndividuales();
+      if (c.toros && c.toros.length > 0) {
+        c.toros.forEach((t, i) => {
+          const idx = i + 1;
+          if (document.getElementById(`toro_rp_${idx}`)) document.getElementById(`toro_rp_${idx}`).value = t.rp || '';
+          if (document.getElementById(`toro_hba_${idx}`)) document.getElementById(`toro_hba_${idx}`).value = t.hba || '';
+          if (document.getElementById(`toro_peso_${idx}`)) document.getElementById(`toro_peso_${idx}`).value = t.peso || '';
+          if (document.getElementById(`toro_ce_${idx}`)) document.getElementById(`toro_ce_${idx}`).value = t.ce || '';
+          if (document.getElementById(`toro_apt_${idx}`)) document.getElementById(`toro_apt_${idx}`).value = t.aptitud_vaquillona || '';
+          if (document.getElementById(`toro_obs_${idx}`)) document.getElementById(`toro_obs_${idx}`).value = t.obs || '';
+        });
       }
 
-      const editId = document.getElementById('c_edit_id').value;
-      const numero_corral = document.getElementById('c_numero').value.trim();
-      const remitente = document.getElementById('c_remitente').value.trim();
-      const cabezas = parseInt(document.getElementById('c_cabezas').value) || 0;
-      
-      const plazoIdSel = document.getElementById('c_cuotas_select').value;
+      document.getElementById('txtTituloFormCorral').textContent = `✏️ Editando Corral #${c.numero_corral}`;
+      document.getElementById('btnGuardarCorralBase').textContent = '💾 Guardar Cambios del Corral';
+      document.getElementById('btnCancelarEditCorral').classList.remove('hidden');
+
+      document.getElementById('formCargarCorral').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function eliminarCorralBase(id) {
+      const c = corralesGlobales.find(item => item.id === id);
+      if (!c) return;
+
+      if (confirm(`⚠️ ¿Seguro que deseás eliminar el Corral #${c.numero_corral}?`)) {
+        corralesGlobales = corralesGlobales.filter(item => item.id !== id);
+        if (eventoActivoObj && CORRALES_DEMO[eventoActivoObj.id]) {
+          CORRALES_DEMO[eventoActivoObj.id] = corralesGlobales;
+        }
+        guardarMemoriaFisicaLocal();
+        renderVistaConsignataria();
+        renderVistaComprador();
+      }
+    }
+
+    async function guardarCorralBase(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      if (!eventoActivoObj) {
+        if (typeof EVENTOS_DEMO !== 'undefined' && EVENTOS_DEMO.length > 0) {
+          eventoActivoObj = EVENTOS_DEMO[0];
+        } else {
+          alert('Por favor seleccioná o creá un remate primero.');
+          return;
+        }
+      }
+
+      const numero_corral = document.getElementById('c_numero')?.value.trim();
+      const remitente = document.getElementById('c_remitente')?.value.trim();
+      const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
+
+      if (!numero_corral) {
+        alert('Ingresá el Número de Corral.');
+        document.getElementById('c_numero')?.focus();
+        return;
+      }
+      if (!remitente) {
+        alert('Ingresá o seleccioná el Remitente.');
+        document.getElementById('c_remitente')?.focus();
+        return;
+      }
+      if (cabezas <= 0) {
+        alert('Ingresá una cantidad válida de cabezas (mínimo 1).');
+        document.getElementById('c_cabezas')?.focus();
+        return;
+      }
+
+      const editId = document.getElementById('c_edit_id')?.value;
+      const plazoIdSel = document.getElementById('c_cuotas_select')?.value;
       const plazoObj = PLAZOS_SISTEMA.find(p => p.id == plazoIdSel) || { texto: '30 Días (1 Cuota)', dias_calc: 30 };
       const plazo_dias = plazoObj.dias_calc;
       const plazo_texto = plazoObj.texto;
 
-      const categoria = document.getElementById('c_categoria').value;
-      const raza = document.getElementById('c_raza_select').value;
-      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio').value) || null;
-      const pesada_observaciones = document.getElementById('c_pesada_obs').value.trim();
+      const categoria = document.getElementById('c_categoria')?.value || 'NOV';
+      const raza = document.getElementById('c_raza_select')?.value || 'Angus';
+      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio')?.value) || null;
+      const pesada_observaciones = document.getElementById('c_pesada_obs')?.value.trim() || '';
 
       const torosArray = [];
       const boxToros = document.getElementById('boxDetalleTorosIndividuales');
-      if (!boxToros.classList.contains('hidden')) {
+      if (boxToros && !boxToros.classList.contains('hidden')) {
         for (let i = 1; i <= cabezas; i++) {
           const rp = document.getElementById(`toro_rp_${i}`)?.value.trim() || `T-${i}`;
           const hba = document.getElementById(`toro_hba_${i}`)?.value.trim() || '';
@@ -2642,38 +2536,73 @@
         }
       }
 
+      const idFinal = editId ? parseInt(editId) : Date.now();
       const nuevoCorral = {
-        id: editId ? parseInt(editId) : Date.now(),
+        id: idFinal,
         evento_id: eventoActivoObj.id,
-        numero_corral, remitente, cabezas, plazo_dias, plazo_texto, categoria, raza,
-        peso_promedio, pesada_observaciones, estado: 'Disponible',
+        numero_corral,
+        remitente,
+        cabezas,
+        plazo_dias,
+        plazo_texto,
+        categoria,
+        raza,
+        peso_promedio,
+        pesada_observaciones,
+        estado: 'Disponible',
         toros: torosArray
       };
 
       if (editId) {
-        const idx = corralesGlobales.findIndex(item => item.id === nuevoCorral.id);
-        if (idx !== -1) corralesGlobales[idx] = nuevoCorral;
-        alert(`✔ Corral #${numero_corral} actualizado.`);
+        const idx = corralesGlobales.findIndex(item => item.id === idFinal);
+        if (idx !== -1) {
+          if (corralesGlobales[idx].ventas) nuevoCorral.ventas = corralesGlobales[idx].ventas;
+          if (corralesGlobales[idx].estado === 'Vendido') nuevoCorral.estado = 'Vendido';
+          corralesGlobales[idx] = nuevoCorral;
+        }
+        alert(`✔ Corral #${numero_corral} modificado.`);
       } else {
+        if (!CORRALES_DEMO[eventoActivoObj.id]) {
+          CORRALES_DEMO[eventoActivoObj.id] = [];
+        }
+        corralesGlobales = CORRALES_DEMO[eventoActivoObj.id];
         corralesGlobales.push(nuevoCorral);
-        if (!CORRALES_DEMO[eventoActivoObj.id]) CORRALES_DEMO[eventoActivoObj.id] = [];
-        CORRALES_DEMO[eventoActivoObj.id].push(nuevoCorral);
+        ultimoNumeroCorralCargado = numero_corral;
         alert(`✔ Corral #${numero_corral} cargado exitosamente.`);
       }
 
-      cancelarEdicionCorralBase();
+      guardarMemoriaFisicaLocal();
+
+      if (sb) {
+        sb.from('corrales').upsert([nuevoCorral]).then(({ error }) => {
+          if (error) console.warn("Aviso Supabase corral:", error.message);
+        });
+      }
+
+      cancelarEdicionCorralBase(true);
       renderVistaConsignataria();
       renderVistaComprador();
     }
 
-    function cancelarEdicionCorralBase() {
+    function cancelarEdicionCorralBase(sugerirCorrelativo = false) {
+      const remitentePrevio = document.getElementById('c_remitente')?.value || '';
       document.getElementById('formCargarCorral').reset();
       document.getElementById('c_edit_id').value = '';
       document.getElementById('txtTituloFormCorral').textContent = '➕ Cargar Nuevo Corral / Lote en Remate';
       document.getElementById('btnGuardarCorralBase').textContent = '🐂 Guardar Datos del Corral';
       document.getElementById('btnCancelarEditCorral').classList.add('hidden');
+      
       evaluarDetalleTorosIndividuales();
       poblarSelectPlazos('c_cuotas_select');
+
+      if (sugerirCorrelativo && ultimoNumeroCorralCargado) {
+        const prox = calcularSiguienteCorral(ultimoNumeroCorralCargado);
+        if (prox) {
+          document.getElementById('c_numero').value = prox;
+          if (remitentePrevio) document.getElementById('c_remitente').value = remitentePrevio;
+          document.getElementById('c_cabezas').focus();
+        }
+      }
     }
 
     function renderVistaConsignataria() {
@@ -2724,9 +2653,12 @@
               ${!vendido ? `
                 <button type="button" class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 Poner En Pista</button>
                 <button type="button" class="btn-action btn-venta" onclick="abrirModalVenta(${c.id}, 'nueva')">💲 Registrar Venta</button>
+                <button type="button" class="btn-action" style="background:#0284c7; color:white;" onclick="editarCorralBase(${c.id})">✏️ Editar</button>
+                <button type="button" class="btn-action" style="background:#ef4444; color:white; min-width:40px; flex:0.3;" title="Eliminar Corral" onclick="eliminarCorralBase(${c.id})">🗑️</button>
               ` : `
                 <button type="button" class="btn-action" style="background:#0284c7; color:white;" onclick="abrirModalVenta(${c.id}, 'editar')">✏️ Editar Venta</button>
                 <button type="button" class="btn-action" style="background:#dc2626; color:white;" onclick="anularVenta(${c.id}, '${c.numero_corral}')">❌ Anular Venta</button>
+                <button type="button" class="btn-action" style="background:#64748b; color:white;" onclick="editarCorralBase(${c.id})">✏️ Modif. Datos</button>
               `}
             </div>
           </div>
@@ -3051,11 +2983,11 @@
     }
 
     function generarClaveSugerida() {
-      const cuit = document.getElementById('u_comprador_cuit').value.replace(/[^0-9]/g, '');
-      const alias = document.getElementById('u_comprador_alias').value.trim();
+      const cuit = document.getElementById('u_comprador_cuit')?.value.replace(/[^0-9]/g, '');
+      const alias = document.getElementById('u_comprador_alias')?.value.trim();
       const inputClave = document.getElementById('u_comprador_clave');
 
-      if (cuit && alias && !inputClave.getAttribute('data-manual')) {
+      if (cuit && alias && inputClave && !inputClave.getAttribute('data-manual')) {
         const inicial = alias.charAt(0).toUpperCase();
         inputClave.value = `${cuit}-${inicial}`;
       }
@@ -3075,13 +3007,32 @@
         localStorage.setItem('plazo_mag_anterior', plazoDefault);
       }
 
+      const consId = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
+        ? usuarioActual.consignataria_id
+        : 'CONS_SUR';
+
       const nuevo = {
-        consignataria_id: usuarioActual && usuarioActual.consignataria_id !== 'ALL' ? usuarioActual.consignataria_id : 'CONS_SUR',
-        nombre, tipo_evento: tipo, fecha, lugar, estado: 'Pendiente', plazo_default: plazoDefault
+        id: Date.now(),
+        consignataria_id: consId,
+        nombre: nombre,
+        tipo_evento: tipo,
+        fecha: fecha,
+        lugar: lugar,
+        estado: 'Pendiente',
+        plazo_default: plazoDefault
       };
 
-      nuevo.id = Date.now();
       EVENTOS_DEMO.unshift(nuevo);
+      guardarMemoriaFisicaLocal();
+
+      if (sb) {
+        try {
+          await sb.from('eventos').insert([nuevo]);
+        } catch (err) {
+          console.warn('Error al guardar evento en Supabase:', err);
+        }
+      }
+
       document.getElementById('formNuevoEvento').reset();
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
@@ -3186,8 +3137,6 @@
         const target = e.target;
         if (target.tagName === 'INPUT' && target.type !== 'submit') {
           const modalVenta = document.getElementById('modalVentaCorral');
-
-          // Solo interceptamos Enter si estamos dentro del modal de venta rápida
           if (modalVenta && !modalVenta.classList.contains('hidden')) {
             e.preventDefault();
             const formVenta = document.getElementById('formModalVenta');
@@ -3200,15 +3149,38 @@
         }
       }
     });
-          
-    document.addEventListener('DOMContentLoaded', () => {
+
+    // ==========================================
+    // 🚀 INICIALIZACIÓN Y SINCRONIZACIÓN
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', async () => {
       evaluarFechaYNombreEvento();
       onTipoEventoChange();
       renderListaCompradoresAutorizados();
       evaluarDetalleTorosIndividuales();
       actualizarSelectorIntermediariosFiltro();
       poblarSelectPlazos('c_cuotas_select');
+      poblarSelectorConsignatariasEvento();
       actualizarEtiquetaSugeridaPlazo();
+
+      // Sincronizar consignatarias activas de Supabase a la lista local
+      if (sb) {
+        try {
+          const { data: dbCons } = await sb.from('consignatarias').select('*');
+          if (dbCons && dbCons.length > 0) {
+            dbCons.forEach(c => {
+              if (!CONSIGNATARIAS_DEMO.some(item => item.id === c.id)) {
+                CONSIGNATARIAS_DEMO.push(c);
+              }
+            });
+            guardarMemoriaFisicaLocal();
+            poblarSelectorConsignatariasEvento();
+            actualizarSelectorIntermediariosFiltro();
+          }
+        } catch (e) {
+          console.warn("Sincronización inicial Supabase:", e);
+        }
+      }
     });
 
     // REGISTRO DEL SERVICE WORKER (OFFLINE)
