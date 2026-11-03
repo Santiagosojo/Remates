@@ -2289,7 +2289,73 @@ HTML
       renderVistaComprador();
       renderMisCompras();
     }
+let ultimoNumeroCorralCargado = "";
 
+    function calcularSiguienteCorral(numStr) {
+      if (!numStr) return "";
+      // Si termina en números (ej: "101", "C-01", "Corral 5")
+      const match = numStr.match(/^(.*?)(\d+)$/);
+      if (match) {
+        const prefijo = match[1];
+        const numero = parseInt(match[2], 10) + 1;
+        // Conserva ceros a la izquierda si los tenía (ej: "01" -> "02")
+        const formateado = numero.toString().padStart(match[2].length, '0');
+        return prefijo + formateado;
+      }
+      const soloNumero = parseInt(numStr, 10);
+      if (!isNaN(soloNumero)) return (soloNumero + 1).toString();
+      return "";
+    }
+
+    function editarCorralBase(id) {
+      const c = corralesGlobales.find(item => item.id === id);
+      if (!c) return;
+
+      document.getElementById('c_edit_id').value = c.id;
+      document.getElementById('c_numero').value = c.numero_corral || '';
+      document.getElementById('c_remitente').value = c.remitente || '';
+      document.getElementById('c_cabezas').value = c.cabezas || '';
+      document.getElementById('c_categoria').value = c.categoria || 'NOV';
+      document.getElementById('c_raza_select').value = c.raza || 'Angus';
+      document.getElementById('c_peso_promedio').value = c.peso_promedio || '';
+      document.getElementById('c_pesada_obs').value = c.pesada_observaciones || '';
+
+      poblarSelectPlazos('c_cuotas_select', c.plazo_texto);
+
+      // Cargar toros individuales si la categoría es TR
+      evaluarDetalleTorosIndividuales();
+      if (c.toros && c.toros.length > 0) {
+        c.toros.forEach((t, i) => {
+          const idx = i + 1;
+          if (document.getElementById(`toro_rp_${idx}`)) document.getElementById(`toro_rp_${idx}`).value = t.rp || '';
+          if (document.getElementById(`toro_hba_${idx}`)) document.getElementById(`toro_hba_${idx}`).value = t.hba || '';
+          if (document.getElementById(`toro_peso_${idx}`)) document.getElementById(`toro_peso_${idx}`).value = t.peso || '';
+          if (document.getElementById(`toro_ce_${idx}`)) document.getElementById(`toro_ce_${idx}`).value = t.ce || '';
+          if (document.getElementById(`toro_apt_${idx}`)) document.getElementById(`toro_apt_${idx}`).value = t.aptitud_vaquillona || '';
+          if (document.getElementById(`toro_obs_${idx}`)) document.getElementById(`toro_obs_${idx}`).value = t.obs || '';
+        });
+      }
+
+      document.getElementById('txtTituloFormCorral').textContent = `✏️ Editando Corral #${c.numero_corral}`;
+      document.getElementById('btnGuardarCorralBase').textContent = '💾 Guardar Cambios del Corral';
+      document.getElementById('btnCancelarEditCorral').classList.remove('hidden');
+
+      document.getElementById('formCargarCorral').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function eliminarCorralBase(id) {
+      const c = corralesGlobales.find(item => item.id === id);
+      if (!c) return;
+
+      if (confirm(`⚠️ ¿Seguro que deseás eliminar el Corral #${c.numero_corral}?`)) {
+        corralesGlobales = corralesGlobales.filter(item => item.id !== id);
+        if (eventoActivoObj && CORRALES_DEMO[eventoActivoObj.id]) {
+          CORRALES_DEMO[eventoActivoObj.id] = corralesGlobales;
+        }
+        renderVistaConsignataria();
+        renderVistaComprador();
+      }
+    }
     // ==========================================
     // 🐂 DINÁMICA DE TOROS & VENTA A LA ELECCIÓN
     // ==========================================
@@ -2701,12 +2767,11 @@ HTML
  async function guardarCorralBase(e) {
       if (e && e.preventDefault) e.preventDefault();
 
-      // Si por alguna razón no se eligió remate, toma el primer remate activo por defecto
       if (!eventoActivoObj) {
         if (typeof EVENTOS_DEMO !== 'undefined' && EVENTOS_DEMO.length > 0) {
           eventoActivoObj = EVENTOS_DEMO[0];
         } else {
-          alert('Por favor seleccione o cree un evento de remate primero.');
+          alert('Por favor seleccioná o creá un remate primero.');
           return;
         }
       }
@@ -2715,19 +2780,18 @@ HTML
       const remitente = document.getElementById('c_remitente')?.value.trim();
       const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
 
-      // Validación directa en JavaScript con mensajes claros
       if (!numero_corral) {
-        alert('Por favor ingrese el Número de Corral.');
+        alert('Ingresá el Número de Corral.');
         document.getElementById('c_numero')?.focus();
         return;
       }
       if (!remitente) {
-        alert('Por favor ingrese o seleccione el Remitente.');
+        alert('Ingresá o seleccioná el Remitente.');
         document.getElementById('c_remitente')?.focus();
         return;
       }
       if (cabezas <= 0) {
-        alert('Ingrese una cantidad válida de cabezas (mínimo 1).');
+        alert('Ingresá una cantidad de cabezas válida (mínimo 1).');
         document.getElementById('c_cabezas')?.focus();
         return;
       }
@@ -2757,8 +2821,9 @@ HTML
         }
       }
 
+      const idFinal = editId ? parseInt(editId) : Date.now();
       const nuevoCorral = {
-        id: editId ? parseInt(editId) : Date.now(),
+        id: idFinal,
         evento_id: eventoActivoObj.id,
         numero_corral,
         remitente,
@@ -2774,28 +2839,50 @@ HTML
       };
 
       if (editId) {
-        const idx = corralesGlobales.findIndex(item => item.id === nuevoCorral.id);
-        if (idx !== -1) corralesGlobales[idx] = nuevoCorral;
-        alert(`✔ Corral #${numero_corral} actualizado.`);
+        const idx = corralesGlobales.findIndex(item => item.id === idFinal);
+        if (idx !== -1) {
+          // Preservar ventas si ya existían
+          if (corralesGlobales[idx].ventas) nuevoCorral.ventas = corralesGlobales[idx].ventas;
+          if (corralesGlobales[idx].estado === 'Vendido') nuevoCorral.estado = 'Vendido';
+          corralesGlobales[idx] = nuevoCorral;
+        }
+        alert(`✔ Corral #${numero_corral} modificado.`);
       } else {
+        // Corrección de duplicado: se inserta una única vez
+        if (!CORRALES_DEMO[eventoActivoObj.id]) {
+          CORRALES_DEMO[eventoActivoObj.id] = [];
+          corralesGlobales = CORRALES_DEMO[eventoActivoObj.id];
+        }
         corralesGlobales.push(nuevoCorral);
-        if (!CORRALES_DEMO[eventoActivoObj.id]) CORRALES_DEMO[eventoActivoObj.id] = [];
-        CORRALES_DEMO[eventoActivoObj.id].push(nuevoCorral);
+        ultimoNumeroCorralCargado = numero_corral;
         alert(`✔ Corral #${numero_corral} cargado exitosamente.`);
       }
 
-      cancelarEdicionCorralBase();
+      cancelarEdicionCorralBase(true);
       renderVistaConsignataria();
       renderVistaComprador();
     }
-    function cancelarEdicionCorralBase() {
+
+    function cancelarEdicionCorralBase(sugerirCorrelativo = false) {
+      const remitentePrevio = document.getElementById('c_remitente')?.value || '';
       document.getElementById('formCargarCorral').reset();
       document.getElementById('c_edit_id').value = '';
       document.getElementById('txtTituloFormCorral').textContent = '➕ Cargar Nuevo Corral / Lote en Remate';
       document.getElementById('btnGuardarCorralBase').textContent = '🐂 Guardar Datos del Corral';
       document.getElementById('btnCancelarEditCorral').classList.add('hidden');
+      
       evaluarDetalleTorosIndividuales();
       poblarSelectPlazos('c_cuotas_select');
+
+      // Si recién cargó un corral, sugerir el siguiente número correlativo y mantener el remitente
+      if (sugerirCorrelativo && ultimoNumeroCorralCargado) {
+        const prox = calcularSiguienteCorral(ultimoNumeroCorralCargado);
+        if (prox) {
+          document.getElementById('c_numero').value = prox;
+          if (remitentePrevio) document.getElementById('c_remitente').value = remitentePrevio;
+          document.getElementById('c_cabezas').focus();
+        }
+      }
     }
 
     function renderVistaConsignataria() {
@@ -2846,12 +2933,14 @@ HTML
               ${!vendido ? `
                 <button type="button" class="btn-action btn-pista" onclick="ponerEnPista(${c.id})">🔨 Poner En Pista</button>
                 <button type="button" class="btn-action btn-venta" onclick="abrirModalVenta(${c.id}, 'nueva')">💲 Registrar Venta</button>
+                <button type="button" class="btn-action" style="background:#0284c7; color:white;" onclick="editarCorralBase(${c.id})">✏️ Editar</button>
+                <button type="button" class="btn-action" style="background:#ef4444; color:white; min-width:40px; flex:0.3;" title="Eliminar Corral" onclick="eliminarCorralBase(${c.id})">🗑️</button>
               ` : `
                 <button type="button" class="btn-action" style="background:#0284c7; color:white;" onclick="abrirModalVenta(${c.id}, 'editar')">✏️ Editar Venta</button>
                 <button type="button" class="btn-action" style="background:#dc2626; color:white;" onclick="anularVenta(${c.id}, '${c.numero_corral}')">❌ Anular Venta</button>
+                <button type="button" class="btn-action" style="background:#64748b; color:white;" onclick="editarCorralBase(${c.id})">✏️ Modif. Datos</button>
               `}
             </div>
-          </div>
         `;
       });
 
