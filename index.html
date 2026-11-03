@@ -2154,19 +2154,41 @@ HTML
     // ==========================================
     // 📋 EVENTOS & AUDITORÍA EN PISTA
     // ==========================================
-    function abrirSeccionRemates() {
+   function abrirSeccionRemates() {
       ocultarTodasLasSecciones();
       document.getElementById('secSeleccionEvento').classList.remove('hidden');
-      const esVendedorOAdmin = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
-      
-      document.getElementById('cardCrearEvento').classList.toggle('hidden', !esVendedorOAdmin);
-      document.getElementById('divFiltroVendedorEvento').classList.remove('hidden');
 
-      if (esVendedorOAdmin) {
+      const esAdmin = (modoOperatorioActivo === 'admin');
+      const esVendedor = (modoOperatorioActivo === 'vendedor');
+
+      // Solo vendedor y admin pueden crear remates
+      document.getElementById('cardCrearEvento').classList.toggle('hidden', !(esAdmin || esVendedor));
+
+      // El filtro desplegable de consignatarias SOLO lo ve el Administrador
+      const divFiltro = document.getElementById('divFiltroVendedorEvento');
+      if (divFiltro) {
+        divFiltro.classList.toggle('hidden', !esAdmin);
+        if (esAdmin) {
+          poblarSelectorConsignatariasEvento();
+        }
+      }
+
+      if (esAdmin || esVendedor) {
         evaluarFechaYNombreEvento();
         onTipoEventoChange();
       }
+
       cargarEventosDisponibles();
+    }
+
+    function poblarSelectorConsignatariasEvento() {
+      const select = document.getElementById('f_vendedor_evento');
+      if (!select) return;
+      let opts = '<option value="ALL">Todas las Consignatarias</option>';
+      CONSIGNATARIAS_DEMO.forEach(c => {
+        opts += `<option value="${c.id}">${c.nombre}</option>`;
+      });
+      select.innerHTML = opts;
     }
 
     async function cargarEventosDisponibles() {
@@ -3167,7 +3189,7 @@ HTML
       }
     }
 
-    async function crearNuevoEvento(e) {
+sync function crearNuevoEvento(e) {
       if (e) e.preventDefault();
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
@@ -3181,13 +3203,33 @@ HTML
         localStorage.setItem('plazo_mag_anterior', plazoDefault);
       }
 
+      // Asigna estrictamente la consignataria activa en la sesión
+      const consId = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
+        ? usuarioActual.consignataria_id
+        : 'CONS_SUR';
+
       const nuevo = {
-        consignataria_id: usuarioActual && usuarioActual.consignataria_id !== 'ALL' ? usuarioActual.consignataria_id : 'CONS_SUR',
-        nombre, tipo_evento: tipo, fecha, lugar, estado: 'Pendiente', plazo_default: plazoDefault
+        id: Date.now(),
+        consignataria_id: consId,
+        nombre: nombre,
+        tipo_evento: tipo,
+        fecha: fecha,
+        lugar: lugar,
+        estado: 'Pendiente',
+        plazo_default: plazoDefault
       };
 
-      nuevo.id = Date.now();
       EVENTOS_DEMO.unshift(nuevo);
+
+      // Si Supabase está conectado, guardar fila en tabla eventos
+      if (sb) {
+        try {
+          await sb.from('eventos').insert([nuevo]);
+        } catch (err) {
+          console.warn('Error al guardar evento en Supabase:', err);
+        }
+      }
+
       document.getElementById('formNuevoEvento').reset();
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
