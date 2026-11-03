@@ -1488,6 +1488,7 @@
 
     async function guardarNuevaConsignatariaAdmin(e) {
       if (e) e.preventDefault();
+      
       const nombre = document.getElementById('adm_empresa_nombre').value.trim();
       const cuit = document.getElementById('adm_empresa_cuit').value.trim();
       const email = document.getElementById('adm_vendedor_email').value.trim().toLowerCase();
@@ -1496,17 +1497,61 @@
       const intermediario = intermediarioInput || '';
       const comision = parseFloat(document.getElementById('adm_empresa_comision').value) || 0;
 
-      const idNuevaCons = `CONS_${Date.now()}`;
-      const nuevaCons = { 
-        id: idNuevaCons, 
-        nombre, 
-        cuit, 
-        email, 
-        intermediario: intermediario, 
-        comision 
-      };
+      if (!nombre || !email || !pass) {
+        alert("Por favor complete nombre, email y contraseña.");
+        return;
+      }
 
-      CONSIGNATARIAS_DEMO.push(nuevaCons);
+      const idNuevaCons = `CONS_${Date.now()}`;
+
+      // Si Supabase está conectado, guardamos en la base de datos
+      if (sb) {
+        // 1. Guardar la empresa en la tabla consignatarias
+        const { error: errCons } = await sb.from('consignatarias').insert([{
+          id: idNuevaCons,
+          nombre: nombre,
+          cuit: cuit,
+          email: email,
+          intermediario: intermediario,
+          comision: comision
+        }]);
+
+        if (errCons) {
+          console.error("Error al registrar consignataria:", errCons);
+          alert("⚠️ Error en Supabase (Consignataria): " + errCons.message);
+          return;
+        }
+
+        // 2. Guardar el usuario vendedor titular
+        const { error: errUser } = await sb.from('usuarios').insert([{
+          consignataria_id: idNuevaCons,
+          nombre: `${nombre} (Titular)`,
+          email: email,
+          clave: pass,
+          rol: 'vendedor_primario',
+          cuit: cuit,
+          intermediario: intermediario,
+          comision: comision
+        }]);
+
+        if (errUser) {
+          console.error("Error al registrar usuario:", errUser);
+          alert("⚠️ Error en Supabase (Usuario): " + errUser.message);
+          return;
+        }
+      } else {
+        alert("ℹ️ Supabase no está conectado. El usuario solo funcionará en memoria local.");
+      }
+
+      // Registro en memoria local para uso offline
+      CONSIGNATARIAS_DEMO.push({
+        id: idNuevaCons,
+        nombre,
+        cuit,
+        email,
+        intermediario,
+        comision
+      });
 
       CLIENTES_DEMO.push({
         id: Date.now(),
@@ -1520,15 +1565,7 @@
         limite_credito: 0
       });
 
-      if (sb) {
-        try {
-          await sb.from('usuarios').insert([{
-            nombre, email, clave: pass, rol: 'vendedor_primario', cuit, intermediario, comision
-          }]);
-        } catch (err) {}
-      }
-
-      alert(`✔ Consignataria "${nombre}" dada de alta exitosamente.\nUsuario Primario: ${email}\nIntermediario: ${intermediario ? intermediario + ' (' + comision + '%)' : 'Directo (Sin Intermediario)'}`);
+      alert(`✔ Consignataria "${nombre}" y usuario creados con éxito en la nube.\nUsuario: ${email}`);
       document.getElementById('formAltaConsignataria').reset();
       actualizarSelectorIntermediariosFiltro();
       volverAlMenuPrincipal();
