@@ -525,6 +525,7 @@ HTLM
         <div class="card-title">
           <span id="lblTituloReportes">📊 Reportes Contables & Estadísticas</span>
           <div>
+            <button type="button" class="btn-print" onclick="imprimirReporte()">🖨️ Imprimir Reporte</button>
             <button type="button" class="btn-export" style="background:#166534;" onclick="enviarMailsResumenCierreEvento()">📧 Enviar Resumen Mail</button>
             <button type="button" class="btn-export" onclick="exportarReporteConsignatariaCSV()">📥 Exportar Cierre (CSV)</button>
           </div>
@@ -570,45 +571,48 @@ HTLM
           </div>
         </div>
 
-        <!-- REPORTE POR FECHAS (VENDEDOR) -->
+        <!-- REPORTE POR FECHAS Y PERIODOS (VENDEDOR) -->
         <div id="seccionReportesFechas" style="background:white; padding:18px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
-          <h3 style="margin-top:0; color:#1b4332; font-size:16px;">📊 Análisis y Reporte por Rango de Fechas</h3>
+          <h3 style="margin-top:0; color:#1b4332; font-size:16px;">📊 Análisis y Comparativa por Períodos</h3>
           
-          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
-            <div>
-              <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Desde:</label><br>
-              <input type="date" id="rep_fecha_desde" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom: 12px;">
+            <div style="flex:1; min-width:200px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Base de Comparación:</label><br>
+                <input type="date" id="rep_fecha_base" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;">
+            </div>
+            <div style="flex:1; min-width:120px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Cantidad de Períodos:</label><br>
+                <select id="rep_cantidad_periodos" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;">
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div style="flex:1; min-width:150px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Tipo de Período Hacia Atrás:</label><br>
+                <select id="rep_tipo_periodo" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;">
+                    <option value="dias">Días Anteriores</option>
+                    <option value="semanas" selected>Semanas Anteriores</option>
+                    <option value="meses">Meses Anteriores</option>
+                    <option value="anos">Años Anteriores</option>
+                </select>
             </div>
             <div>
-              <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Hasta:</label><br>
-              <input type="date" id="rep_fecha_hasta" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1;">
-            </div>
-            <div>
-              <button type="button" onclick="filtrarReportesPorFecha()" style="background:#1b4332; color:white; padding:8px 16px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">
-                🔍 Filtrar Período
+              <button type="button" onclick="generarComparativaPeriodos()" style="background:#1b4332; color:white; padding:8px 16px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">
+                🔍 Comparar
               </button>
             </div>
           </div>
 
-          <!-- Tarjetas KPI comparativas -->
-          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:16px;">
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-              <span style="font-size:11px; color:#64748b; font-weight:bold;">TOTAL CABEZAS PERÍODO</span>
-              <div id="kpi_rep_cabezas" style="font-size:20px; font-weight:bold; color:#1b4332;">0</div>
-            </div>
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-              <span style="font-size:11px; color:#64748b; font-weight:bold;">PROMEDIO GENERAL ($/KG)</span>
-              <div id="kpi_rep_promedio" style="font-size:20px; font-weight:bold; color:#0284c7;">$0,00</div>
-            </div>
-            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
-              <span style="font-size:11px; color:#64748b; font-weight:bold;">VARIACIÓN VS. DÍA ANTERIOR</span>
-              <div id="kpi_rep_variacion" style="font-size:20px; font-weight:bold; color:#10b981;">0.0%</div>
-            </div>
+          <div id="contenedorComparativaPeriodos" style="overflow-x:auto;">
+              <p style="color:#888; font-size:12px;">Seleccione los parámetros para generar la comparativa.</p>
           </div>
         </div>
 
         <!-- FILTROS HABITUALES VENDEDOR -->
         <div id="filtrosVendedorReporte" class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; margin-bottom:12px;">
+          <h4 style="margin-top:0; color:#1b4332; font-size:14px; margin-bottom: 10px;">🔍 Filtros para Consolidado General</h4>
           <div class="grid-3">
             <div class="form-group">
               <label>Tipo de Evento</label>
@@ -1562,20 +1566,66 @@ HTLM
         if (!document.getElementById('rep_admin_hasta').value) document.getElementById('rep_admin_hasta').value = HOY_STR;
       }
 
-      actualizarSelectorIntermediariosFiltro();
-      ejecutarReporteGlobal();
-    }
-
-    function filtrarReportesPorFecha() {
-      const desde = document.getElementById('rep_fecha_desde').value;
-      const hasta = document.getElementById('rep_fecha_hasta').value;
-
-      if (!desde || !hasta) {
-        alert("Por favor seleccione fecha desde y hasta.");
-        return;
+      if (!document.getElementById('rep_fecha_base').value) {
+         document.getElementById('rep_fecha_base').value = HOY_STR;
       }
 
-      const ventasFiltradas = [];
+      actualizarSelectorIntermediariosFiltro();
+      ejecutarReporteGlobal();
+      generarComparativaPeriodos();
+    }
+
+    function generarComparativaPeriodos() {
+      const fechaBaseStr = document.getElementById('rep_fecha_base').value;
+      const numPeriodos = parseInt(document.getElementById('rep_cantidad_periodos').value);
+      const tipoPeriodo = document.getElementById('rep_tipo_periodo').value;
+
+      if (!fechaBaseStr) {
+          alert("Por favor seleccione una fecha base.");
+          return;
+      }
+
+      const fechaBase = new Date(fechaBaseStr);
+      // Ajustar zona horaria local
+      fechaBase.setMinutes(fechaBase.getMinutes() + fechaBase.getTimezoneOffset());
+      
+      const periodos = [];
+
+      for (let i = 0; i < numPeriodos; i++) {
+          let fechaFin = new Date(fechaBase);
+          let fechaInicio = new Date(fechaBase);
+          let etiqueta = "";
+
+          if (tipoPeriodo === 'dias') {
+              fechaFin.setDate(fechaFin.getDate() - i);
+              fechaInicio.setDate(fechaInicio.getDate() - i);
+              etiqueta = fechaInicio.toISOString().split('T')[0];
+          } else if (tipoPeriodo === 'semanas') {
+              fechaFin.setDate(fechaFin.getDate() - (i * 7));
+              fechaInicio.setDate(fechaInicio.getDate() - (i * 7) - 6);
+              etiqueta = `Semana del ${fechaInicio.toLocaleDateString()} al ${fechaFin.toLocaleDateString()}`;
+          } else if (tipoPeriodo === 'meses') {
+              fechaFin.setMonth(fechaFin.getMonth() - i);
+              // Ir al último día del mes
+              fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
+              fechaInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 1);
+              etiqueta = `${fechaInicio.toLocaleString('default', { month: 'long' })} ${fechaInicio.getFullYear()}`;
+          } else if (tipoPeriodo === 'anos') {
+              fechaFin.setFullYear(fechaFin.getFullYear() - i);
+              fechaFin = new Date(fechaFin.getFullYear(), 11, 31);
+              fechaInicio = new Date(fechaFin.getFullYear(), 0, 1);
+              etiqueta = `Año ${fechaInicio.getFullYear()}`;
+          }
+          
+          periodos.push({
+              inicio: fechaInicio.toISOString().split('T')[0],
+              fin: fechaFin.toISOString().split('T')[0],
+              etiqueta: etiqueta,
+              datos: { cabezas: 0, kilos: 0, monto: 0 }
+          });
+      }
+
+      // Recopilar datos para cada período
       Object.keys(CORRALES_DEMO).forEach(evId => {
         const ev = EVENTOS_DEMO.find(e => e.id == evId) || { fecha: HOY_STR };
         
@@ -1583,38 +1633,96 @@ HTLM
           if (c.ventas) {
             c.ventas.forEach(v => {
               const f = ev.fecha;
-              if (f && f >= desde && f <= hasta) {
-                ventasFiltradas.push({ ...v, peso: c.peso_promedio || 0, corral: c.numero_corral });
-              }
+              periodos.forEach(p => {
+                  if (f >= p.inicio && f <= p.fin) {
+                      const cab = v.cabezas_vendidas || 0;
+                      const kilos = cab * (c.peso_promedio || 0);
+                      p.datos.cabezas += cab;
+                      p.datos.kilos += kilos;
+                      p.datos.monto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
+                  }
+              });
             });
           }
         });
       });
 
-      let totalCabezas = 0;
-      let totalMonto = 0;
-      let totalKilos = 0;
-
-      ventasFiltradas.forEach(v => {
-        const cab = v.cabezas_vendidas || 0;
-        const kilos = cab * v.peso;
-        totalCabezas += cab;
-        totalKilos += kilos;
-        totalMonto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
+      // Renderizar tabla comparativa
+      let html = `
+          <table class="report-table" style="min-width:600px;">
+            <thead>
+                <tr>
+                    <th style="background:#e2e8f0;">MÉTRICA</th>
+      `;
+      periodos.forEach(p => {
+          html += `<th style="background:#e2e8f0; text-align:center;">${p.etiqueta.toUpperCase()}</th>`;
       });
+      html += `</tr></thead><tbody>`;
 
-      const promedioKg = totalKilos > 0 ? (totalMonto / totalKilos) : 0;
+      // Fila Cabezas
+      html += `<tr><td><strong>Cabezas Vendidas</strong></td>`;
+      periodos.forEach(p => html += `<td style="text-align:center;">${p.datos.cabezas.toLocaleString('es-AR')}</td>`);
+      html += `</tr>`;
 
-      document.getElementById('kpi_rep_cabezas').innerText = totalCabezas.toLocaleString('es-AR');
-      document.getElementById('kpi_rep_promedio').innerText = `$${promedioKg.toFixed(2)}`;
+      // Fila Promedio $/kg
+      html += `<tr><td><strong>Promedio ($/kg)</strong></td>`;
+      periodos.forEach(p => {
+          const prom = p.datos.kilos > 0 ? (p.datos.monto / p.datos.kilos) : 0;
+          html += `<td style="text-align:center; font-weight:bold; color:#0284c7;">$${prom.toFixed(2)}</td>`;
+      });
+      html += `</tr>`;
+
+      // Fila Monto Total
+      html += `<tr><td><strong>Monto Operado</strong></td>`;
+      periodos.forEach(p => html += `<td style="text-align:center; color:#166534;">$${p.datos.monto.toLocaleString('es-AR')}</td>`);
+      html += `</tr>`;
+
+      // Fila Variación Precio (vs periodo anterior)
+      html += `<tr style="background:#f8fafc;"><td><strong>Variación Precio vs Ant.</strong></td>`;
+      html += `<td style="text-align:center;">-</td>`; // El primer periodo (mas reciente) contra que se compara? Lo comparamos contra el de la derecha
+      for (let i = 0; i < periodos.length - 1; i++) {
+          const promActual = periodos[i].datos.kilos > 0 ? (periodos[i].datos.monto / periodos[i].datos.kilos) : 0;
+          const promAnt = periodos[i+1].datos.kilos > 0 ? (periodos[i+1].datos.monto / periodos[i+1].datos.kilos) : 0;
+          
+          let varTxt = "-";
+          let color = "#475569";
+          if (promAnt > 0) {
+              const variacion = ((promActual - promAnt) / promAnt) * 100;
+              varTxt = `${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%`;
+              color = variacion > 0 ? '#10b981' : (variacion < 0 ? '#ef4444' : '#475569');
+          }
+          // Insertamos la variacion en la columna del periodo actual (i)
+          html = html.replace(`<!--VAR_${i}-->`, `<td style="text-align:center; font-weight:bold; color:${color};">${varTxt}</td>`);
+      }
       
-      const promedioAnterior = promedioKg * 0.96;
-      const variacion = promedioAnterior > 0 ? (((promedioKg - promedioAnterior) / promedioAnterior) * 100).toFixed(1) : "0.0";
+      // Re-armar fila variacion correctamente
+      let filaVar = `<tr style="background:#f8fafc;"><td><strong>Variación Precio vs Anterior</strong></td>`;
+      for(let i=0; i < periodos.length; i++){
+          if(i === periodos.length -1){
+              filaVar += `<td style="text-align:center; color:#888;">Base</td>`;
+          } else {
+             const promActual = periodos[i].datos.kilos > 0 ? (periodos[i].datos.monto / periodos[i].datos.kilos) : 0;
+             const promAnt = periodos[i+1].datos.kilos > 0 ? (periodos[i+1].datos.monto / periodos[i+1].datos.kilos) : 0;
+             let varTxt = "-";
+             let color = "#475569";
+             if (promAnt > 0) {
+                  const variacion = ((promActual - promAnt) / promAnt) * 100;
+                  varTxt = `${variacion > 0 ? '+' : ''}${variacion.toFixed(1)}%`;
+                  color = variacion > 0 ? '#10b981' : (variacion < 0 ? '#ef4444' : '#475569');
+             }
+             filaVar += `<td style="text-align:center; font-weight:bold; color:${color};">${varTxt}</td>`;
+          }
+      }
+      filaVar += `</tr>`;
       
-      const varEl = document.getElementById('kpi_rep_variacion');
-      varEl.innerText = `${variacion >= 0 ? '+' : ''}${variacion}%`;
-      varEl.style.color = variacion >= 0 ? '#10b981' : '#ef4444';
+      // Quitamos la anterior mal armada y ponemos la nueva
+      html = html.substring(0, html.lastIndexOf('<tr style="background:#f8fafc;">')) + filaVar;
+
+      html += `</tbody></table>`;
+      
+      document.getElementById('contenedorComparativaPeriodos').innerHTML = html;
     }
+
 
     function ejecutarReporteGlobal() {
       const container = document.getElementById('reporteGlobalTablaContainer');
@@ -1671,7 +1779,7 @@ HTLM
                 <td style="text-align:center;">${lotes.length}</td>
                 <td style="text-align:right;">${cabEvento.toLocaleString('es-AR')} cab.</td>
                 <td style="text-align:right; font-weight:bold; color:#166534;">$${montoEvento.toLocaleString('es-AR')}</td>
-                <td style="text-align:center;">
+                <td style="text-align:center;" class="no-print">
                   <button type="button" class="btn-preset" style="background:#7e22ce; color:white; border:none;" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">🔍 Auditar Remate</button>
                 </td>
               </tr>
@@ -1686,7 +1794,7 @@ HTLM
             <table class="report-table">
               <thead>
                 <tr>
-                  <th>FECHA</th><th>REMATE / EVENTO</th><th>CONSIGNATARIA</th><th>INTERMEDIARIO</th><th>LUGAR</th><th>CORRALES</th><th>CABEZAS</th><th>MONTO TOTAL ($)</th><th>ACCIÓN</th>
+                  <th>FECHA</th><th>REMATE / EVENTO</th><th>CONSIGNATARIA</th><th>INTERMEDIARIO</th><th>LUGAR</th><th>CORRALES</th><th>CABEZAS</th><th>MONTO TOTAL ($)</th><th class="no-print">ACCIÓN</th>
                 </tr>
               </thead>
               <tbody>${filasHtml || '<tr><td colspan="9" style="text-align:center; color:#888;">No se encontraron remates en este rango con los filtros aplicados.</td></tr>'}</tbody>
@@ -1695,7 +1803,7 @@ HTLM
                   <td colspan="6">TOTALES ACUMULADOS EN EL PERÍODO:</td>
                   <td style="text-align:right;">${totCabGeneral.toLocaleString('es-AR')} cab.</td>
                   <td style="text-align:right; color:#166534;">$${totMontoGeneral.toLocaleString('es-AR')}</td>
-                  <td></td>
+                  <td class="no-print"></td>
                 </tr>
               </tfoot>
             </table>
@@ -1888,8 +1996,10 @@ HTLM
           const kilosLote = (cab * (c.peso_promedio || 0));
           const monto = v ? (v.monto_final || (kilosLote > 0 ? kilosLote * v.precio_kg : cab * v.precio_kg)) : 0;
 
+          // Solo sumar si está vendido para los promedios reales? No, el consolidado muestra la oferta total si no esta vendido.
+          // Pero para los graficos y promedios monetarios si necesitamos el vendido.
           totalCab += cab;
-          totalKilos += kilosLote;
+          totalKilos += (v ? kilosLote : 0); // Kilos vendidos
           totalMonto += monto;
 
           if (v && v.precio_kg) {
@@ -1928,7 +2038,7 @@ HTLM
               <td colspan="3">TOTALES:</td>
               <td>${totalCab} cab.</td>
               <td>-</td>
-              <td>${totalCab > 0 ? Math.round(totalKilos / totalCab) : 0} kg</td>
+              <td>${totalKilos > 0 && totalMonto > 0 ? Math.round(totalKilos / totalCab) : 0} kg</td>
               <td>-</td>
               <td style="color:#166534;">$${totalMonto.toLocaleString('es-AR')}</td>
               <td>-</td>
@@ -1938,6 +2048,32 @@ HTLM
       `;
 
       actualizarGraficosVendedor(puntosDispersion, distribucionPrecios);
+    }
+    
+    function imprimirReporte() {
+       // Oculta lo que no es reporte y llama print
+       const areaRep = document.getElementById('secReportesGlobales');
+       const originalHTML = document.body.innerHTML;
+       
+       // Agregar estilos para impresion a todo el body para que solo se vea el reporte
+       const style = document.createElement('style');
+       style.innerHTML = `
+          @media print {
+            body * { visibility: hidden; }
+            #secReportesGlobales, #secReportesGlobales * { visibility: visible; }
+            #secReportesGlobales { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+            .no-print, .btn-export, .btn-submit, .btn-print, .btn-nav-back, select, input[type="date"] { display: none !important; }
+            .card { box-shadow: none; border: 1px solid #ddd; }
+          }
+       `;
+       document.head.appendChild(style);
+       
+       window.print();
+       
+       // Remover el style agregado despues de imprimir
+       setTimeout(() => {
+           document.head.removeChild(style);
+       }, 500);
     }
 
     function actualizarGraficosVendedor(puntos, distribucion) {
@@ -3122,4 +3258,5 @@ HTLM
     }
   </script>
 </body>
-</html>
+</html> 
+
