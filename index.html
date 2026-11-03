@@ -1038,69 +1038,39 @@ HTML
       } catch (e) {}
     }
 
-    let CLIENTES_DEMO = [
+// ==========================================
+    // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE FIRST)
+    // ==========================================
+    let CLIENTES_DEMO = JSON.parse(localStorage.getItem('padron_clientes_v2')) || [
       { id: 1, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', email: 'compras@eltrebol.com', clave: '30711223348-T', limite_credito: 80000000 },
-      { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 },
-      { id: 3, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Estancia Las Lilas', alias: 'Las Lilas', cuit: '30-45667788-9', email: 'remites@laslilas.com', clave: '30456677889-L', limite_credito: 100000000 },
-      { id: 4, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Cabaña Don Luis', alias: 'Don Luis', cuit: '30-11223344-5', email: 'cabana@donluis.com', clave: '30112233445-D', limite_credito: 50000000 },
-      { id: 5, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Frigorífico Guaraní SA', alias: 'Guaraní', cuit: '30-99887766-1', email: 'compras@guarani.com', clave: '30998877661-G', limite_credito: 150000000 }
+      { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 }
     ];
 
-    let CONSIGNATARIAS_DEMO = [
+    let CONSIGNATARIAS_DEMO = JSON.parse(localStorage.getItem('padron_consignatarias_v2')) || [
       { id: 'CONS_SUR', nombre: 'Ventas del Sur SA', cuit: '30-88776655-4', email: 'ventas@ventasdelsur.com', intermediario: '', comision: 0 },
-      { id: 'CONS_OESTE', nombre: 'Ganadera del Oeste SA', cuit: '30-99881122-3', email: 'titular@ganaderadeloeste.com', intermediario: 'Gómez & Asociados', comision: 1.5 },
-      { id: 'CONS_NORTE', nombre: 'Haciendas del Litoral SA', cuit: '30-77664433-2', email: 'titular@litoral.com', intermediario: 'Martínez Rurales', comision: 2.0 }
+      { id: 'CONS_OESTE', nombre: 'Ganadera del Oeste SA', cuit: '30-99881122-3', email: 'titular@ganaderadeloeste.com', intermediario: 'Gómez & Asociados', comision: 1.5 }
     ];
 
-    const HOY_STR = new Date().toISOString().split('T')[0];
-    const AYER_STR = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    const HACE_UN_MES_STR = new Date(Date.now() - (30 * 86400000)).toISOString().split('T')[0];
-
-    let PLAZO_MAG_PREDETERMINADO = localStorage.getItem('plazo_mag_anterior') || '30 Días (1 Cuota)';
-
-    let EVENTOS_DEMO = [
-      { id: 101, consignataria_id: 'CONS_SUR', nombre: 'Remate Feria Especial Villegas', tipo_evento: 'Feria', fecha: HOY_STR, lugar: 'General Villegas', estado: 'Pendiente', plazo_default: '30 Días (1 Cuota)' },
-      { id: 102, consignataria_id: 'CONS_SUR', nombre: `MAG - ${HOY_STR.split('-')[2]}/${HOY_STR.split('-')[1]}`, tipo_evento: 'Mercado', fecha: HOY_STR, lugar: 'Cañuelas', estado: 'Pendiente', plazo_default: PLAZO_MAG_PREDETERMINADO },
-      { id: 103, consignataria_id: 'CONS_SUR', nombre: 'Gran Remate Cabaña Don Luis', tipo_evento: 'Cabaña', fecha: HOY_STR, lugar: 'Instalaciones Cabaña', estado: 'Pendiente', plazo_default: '90 Días (3 Cuotas)' },
-      { id: 201, consignataria_id: 'CONS_SUR', nombre: 'MAG - Jornada Anterior', tipo_evento: 'Mercado', fecha: AYER_STR, lugar: 'Cañuelas', estado: 'Realizado', plazo_default: '30 Días (1 Cuota)' },
-      { id: 202, consignataria_id: 'CONS_OESTE', nombre: 'Feria Invernada del Oeste', tipo_evento: 'Feria', fecha: HACE_UN_MES_STR, lugar: 'Pehuajó', estado: 'Realizado', plazo_default: '60 Días (2 Cuotas)' },
-      { id: 203, consignataria_id: 'CONS_NORTE', nombre: 'Remate Especial Reproductores Litoral', tipo_evento: 'Cabaña', fecha: HACE_UN_MES_STR, lugar: 'Corrientes', estado: 'Realizado', plazo_default: '1 Año (4 Cuotas Trimestrales)' }
+    let EVENTOS_DEMO = JSON.parse(localStorage.getItem('padron_eventos_v2')) || [
+      { id: 101, consignataria_id: 'CONS_SUR', nombre: 'Remate Feria Especial Villegas', tipo_evento: 'Feria', fecha: HOY_STR, lugar: 'General Villegas', estado: 'Pendiente', plazo_default: '30 Días (1 Cuota)' }
     ];
 
-    const CORRALES_DEMO = {
+    let CORRALES_DEMO = JSON.parse(localStorage.getItem('padron_corrales_v2')) || {
       101: [
-        { 
-          id: 1, evento_id: 101, numero_corral: 'F-101', remitente: 'Estancia Las Lilas', cabezas: 3, categoria: 'TR', raza: 'Angus', peso_promedio: 730, pesada_observaciones: 'Trío Toros PC 2 Años', plazo_texto: '60 Días (2 Cuotas)', plazo_dias: 60, estado: 'Disponible',
-          toros: [
-            { rp: 'T-101', hba: 'PC 401', peso: 740, ce: '41 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas (Parto Muy Fácil)', obs: 'Negro mocho', vendido: false },
-            { rp: 'T-102', hba: 'PC 402', peso: 720, ce: '40 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas (Facilidad comprobada)', obs: 'Colorado mocho', vendido: false },
-            { rp: 'T-103', hba: 'PC 403', peso: 730, ce: '42 cm', aptitud_vaquillona: '🟡 Rodeo General / Vacas', obs: 'Negro gran masa', vendido: false }
-          ]
-        },
         { id: 2, evento_id: 101, numero_corral: 'F-102', remitente: 'Campo Norte SRL', cabezas: 40, categoria: 'TER', raza: 'Angus', peso_promedio: 190, pesada_observaciones: 'Terneros destetados', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Disponible' }
-      ],
-      102: [
-        { id: 20, evento_id: 102, numero_corral: 'MAG-01', remitente: 'Agropecuaria El Trébol SA', cabezas: 45, categoria: 'NOV', raza: 'Angus', peso_promedio: 420, pesada_observaciones: 'Consumo especial', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Disponible' }
-      ],
-      103: [
-        { 
-          id: 40, evento_id: 103, numero_corral: 'CAB-01', remitente: 'Cabaña Don Luis', cabezas: 2, categoria: 'TR', raza: 'Angus', peso_promedio: 760, pesada_observaciones: 'Dúo PP', plazo_texto: '90 Días (3 Cuotas)', plazo_dias: 90, estado: 'Disponible',
-          toros: [
-            { rp: 'RP 501', hba: 'HBA 8912', peso: 770, ce: '42.5 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas', obs: 'Pedigree de punta', vendido: false },
-            { rp: 'RP 504', hba: 'HBA 8915', peso: 750, ce: '41.5 cm', aptitud_vaquillona: '🟢 Apto Vaquillonas', obs: 'Facilidad de parto', vendido: false }
-          ]
-        }
-      ],
-      201: [
-        { id: 80, evento_id: 201, numero_corral: 'HIST-1', remitente: 'La Julia Ganadera', cabezas: 40, categoria: 'NOV', raza: 'Angus', peso_promedio: 430, pesada_observaciones: 'Vendido MAG', plazo_texto: '30 Días (1 Cuota)', plazo_dias: 30, estado: 'Vendido', ventas: [{ comprador_nombre: 'Agropecuaria El Trébol SA', precio_kg: 4650, monto_final: 79980000, cabezas_vendidas: 40 }] }
-      ],
-      202: [
-        { id: 90, evento_id: 202, numero_corral: 'OEST-01', remitente: 'Don Esteban Agrícola', cabezas: 30, categoria: 'VQ', raza: 'Careta', peso_promedio: 320, pesada_observaciones: 'Vendido Feria', plazo_texto: '60 Días (2 Cuotas)', plazo_dias: 60, estado: 'Vendido', ventas: [{ comprador_nombre: 'Ganadera San Miguel SRL', precio_kg: 4300, monto_final: 41280000, cabezas_vendidas: 30 }] }
-      ],
-      203: [
-        { id: 95, evento_id: 203, numero_corral: 'LIT-01', remitente: 'Estancia Don Pedro', cabezas: 10, categoria: 'TR', raza: 'Braford', peso_promedio: 680, pesada_observaciones: 'Toros Braford', plazo_texto: '1 Año (4 Cuotas Trimestrales)', plazo_dias: 365, estado: 'Vendido', ventas: [{ comprador_nombre: 'Cabaña Don Luis', precio_kg: 4800, monto_final: 32640000, cabezas_vendidas: 10 }] }
       ]
     };
+
+    function guardarMemoriaFisicaLocal() {
+      try {
+        localStorage.setItem('padron_clientes_v2', JSON.stringify(CLIENTES_DEMO));
+        localStorage.setItem('padron_consignatarias_v2', JSON.stringify(CONSIGNATARIAS_DEMO));
+        localStorage.setItem('padron_eventos_v2', JSON.stringify(EVENTOS_DEMO));
+        localStorage.setItem('padron_corrales_v2', JSON.stringify(CORRALES_DEMO));
+      } catch (err) {
+        console.warn('Error al guardar en almacenamiento local:', err);
+      }
+    }
 
     let usuarioActual = null;
     let modoOperatorioActivo = 'vendedor';
@@ -2283,7 +2253,28 @@ HTML
 
     async function cargarCorrales() {
       if (!eventoActivoObj) return;
+
+      // 1. Carga inmediata desde almacenamiento local
       corralesGlobales = CORRALES_DEMO[eventoActivoObj.id] || [];
+
+      // 2. Consulta en la nube en Supabase
+      if (sb) {
+        try {
+          const { data: dbLotes, error: errLotes } = await sb
+            .from('corrales')
+            .select('*')
+            .eq('evento_id', eventoActivoObj.id);
+
+          if (!errLotes && dbLotes && dbLotes.length > 0) {
+            CORRALES_DEMO[eventoActivoObj.id] = dbLotes;
+            corralesGlobales = dbLotes;
+            guardarMemoriaFisicaLocal();
+          }
+        } catch (e) {
+          console.warn("Recuperación de corrales desde Supabase:", e);
+        }
+      }
+
       actualizarPistaActivaState();
       renderVistaConsignataria();
       renderVistaComprador();
@@ -2626,13 +2617,21 @@ let ultimoNumeroCorralCargado = "";
         comprador: comprador,
         precio: precio
       };
+// Guardar cambios en disco local
+      guardarMemoriaFisicaLocal();
 
+      // Sincronizar estado y ventas en Supabase
+      if (sb) {
+        sb.from('corrales').upsert([c]).then(({ error }) => {
+          if (error) console.error("Error al guardar venta en Supabase:", error);
+        });
+      }
       cerrarModalVenta();
       renderVistaConsignataria();
       renderMisCompras();
     }
 
-    function anularVenta(loteId, numeroCorral) {
+   function anularVenta(loteId, numeroCorral) {
       const c = corralesGlobales.find(item => item.id === loteId);
       if (!c) return;
 
@@ -2640,6 +2639,16 @@ let ultimoNumeroCorralCargado = "";
         c.estado = 'Disponible';
         c.ventas = [];
         if (c.toros) c.toros.forEach(t => t.vendido = false);
+
+        // 💾 PERSISTENCIA:
+        guardarMemoriaFisicaLocal();
+
+        if (sb) {
+          sb.from('corrales').upsert([c]).then(({ error }) => {
+            if (error) console.error("Error al anular venta en Supabase:", error);
+          });
+        }
+
         alert('✔ Venta anulada exitosamente.');
         renderVistaConsignataria();
       }
@@ -2706,28 +2715,63 @@ let ultimoNumeroCorralCargado = "";
       const clave = document.getElementById('u_comprador_clave').value.trim();
       const limite = parseFloat(document.getElementById('u_comprador_limite').value) || 0;
 
-      const consignatariaOwner = usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR';
+      if (!nombre || !alias) {
+        alert('Por favor complete al menos la Razón Social y el Alias del cliente.');
+        return;
+      }
+
+      const consignatariaOwner = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
+        ? usuarioActual.consignataria_id
+        : 'CONS_SUR';
 
       if (editId) {
         const idNum = parseInt(editId);
         const comp = CLIENTES_DEMO.find(c => c.id === idNum);
         if (comp) {
-          comp.tipo_cliente = tipo_cliente; comp.nombre = nombre; comp.alias = alias;
-          comp.cuit = cuit; comp.email = email; comp.clave = clave; comp.limite_credito = limite;
+          comp.tipo_cliente = tipo_cliente;
+          comp.nombre = nombre;
+          comp.alias = alias;
+          comp.cuit = cuit;
+          comp.email = email;
+          comp.clave = clave;
+          comp.limite_credito = limite;
+
+          if (sb) {
+            sb.from('compradores').upsert([comp]).then(({ error }) => {
+              if (error) console.error("Error al actualizar comprador en Supabase:", error);
+            });
+          }
         }
         alert(`✔ Cliente "${nombre}" actualizado.`);
       } else {
         const nuevoCliente = {
-          id: Date.now(), consignataria_id: consignatariaOwner, tipo_cliente, nombre, alias, cuit, email, clave, limite_credito: limite
+          id: Date.now(),
+          consignataria_id: consignatariaOwner,
+          tipo_cliente,
+          nombre,
+          alias,
+          cuit,
+          email,
+          clave,
+          limite_credito: limite
         };
+
         CLIENTES_DEMO.push(nuevoCliente);
+
+        if (sb) {
+          sb.from('compradores').insert([nuevoCliente]).then(({ error }) => {
+            if (error) console.error("Error al insertar comprador en Supabase:", error);
+          });
+        }
         alert(`✔ Cliente "${nombre}" registrado con éxito.`);
       }
+
+      // Guardar en disco local del navegador para que no se borre al salir
+      guardarMemoriaFisicaLocal();
 
       cancelarEdicionComprador();
       renderListaCompradoresAutorizados();
     }
-
     async function renderListaCompradoresAutorizados() {
       const container = document.getElementById('listaCompradoresAutorizados');
       const datalistRemitentes = document.getElementById('listRemitentesPadron');
@@ -2765,16 +2809,38 @@ let ultimoNumeroCorralCargado = "";
     // 🐂 CARGA Y GUARDADO DE CORRALES
     // ==========================================
  async function guardarCorralBase(e) {
-      if (e && e.preventDefault) e.preventDefault();
-
-      if (!eventoActivoObj) {
-        if (typeof EVENTOS_DEMO !== 'undefined' && EVENTOS_DEMO.length > 0) {
-          eventoActivoObj = EVENTOS_DEMO[0];
-        } else {
-          alert('Por favor seleccioná o creá un remate primero.');
-          return;
+     if (editId) {
+        const idx = corralesGlobales.findIndex(item => item.id === idFinal);
+        if (idx !== -1) {
+          if (corralesGlobales[idx].ventas) nuevoCorral.ventas = corralesGlobales[idx].ventas;
+          if (corralesGlobales[idx].estado === 'Vendido') nuevoCorral.estado = 'Vendido';
+          corralesGlobales[idx] = nuevoCorral;
         }
+        alert(`✔ Corral #${numero_corral} modificado.`);
+      } else {
+        if (!CORRALES_DEMO[eventoActivoObj.id]) {
+          CORRALES_DEMO[eventoActivoObj.id] = [];
+          corralesGlobales = CORRALES_DEMO[eventoActivoObj.id];
+        }
+        corralesGlobales.push(nuevoCorral);
+        ultimoNumeroCorralCargado = numero_corral;
+        alert(`✔ Corral #${numero_corral} cargado exitosamente.`);
       }
+
+      // 1. Guardar en memoria física del navegador
+      guardarMemoriaFisicaLocal();
+
+      // 2. Sincronizar en la nube en Supabase
+      if (sb) {
+        sb.from('corrales').upsert([nuevoCorral]).then(({ error }) => {
+          if (error) console.error("Error al sincronizar corral en Supabase:", error);
+        });
+      }
+
+      cancelarEdicionCorralBase(true);
+      renderVistaConsignataria();
+      renderVistaComprador();
+    }
 
       const numero_corral = document.getElementById('c_numero')?.value.trim();
       const remitente = document.getElementById('c_remitente')?.value.trim();
