@@ -709,33 +709,32 @@
           <span id="txtTituloFormCorral">➕ Cargar Nuevo Corral / Lote en Remate</span>
           <button type="button" id="btnCancelarEditCorral" class="btn-preset hidden" onclick="cancelarEdicionCorralBase()">Cancelar</button>
         </div>
-        <form id="formCargarCorral" onsubmit="guardarCorralBase(event)" autocomplete="off">
+      <form id="formCargarCorral" onsubmit="event.preventDefault();" autocomplete="off">
           <input type="hidden" id="c_edit_id">
           
           <div class="grid-4">
             <div class="form-group">
               <label>Nº Corral *</label>
-              <input type="text" id="c_numero" placeholder="Ej: 104 / C-T02" required>
+              <input type="text" id="c_numero" placeholder="Ej: 104 / C-T02">
             </div>
 
             <div class="form-group">
               <label>Remitente / Jaula *</label>
-              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia El Trébol" required>
+              <input type="text" id="c_remitente" list="listRemitentesPadron" placeholder="Ej: Estancia El Trébol">
               <datalist id="listRemitentesPadron"></datalist>
             </div>
 
             <div class="form-group">
               <label>Cabezas *</label>
-              <input type="number" id="c_cabezas" placeholder="Ej: 3" min="1" oninput="evaluarDetalleTorosIndividuales()" required>
+              <input type="number" id="c_cabezas" placeholder="Ej: 40" min="1" oninput="evaluarDetalleTorosIndividuales()">
             </div>
 
-            <!-- GESTIÓN DINÁMICA DE PLAZOS: SELECT + BOTÓN DE CONFIGURACIÓN DIRECTA -->
             <div class="form-group">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <label style="margin-bottom:0;">Plazo de Pago *</label>
                 <button type="button" onclick="abrirModalGestionPlazos()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">⚙️ Administrar Plazos</button>
               </div>
-              <select id="c_cuotas_select" required>
+              <select id="c_cuotas_select">
                 <!-- Se puebla dinámicamente -->
               </select>
             </div>
@@ -744,12 +743,12 @@
           <div class="grid-3">
             <div class="form-group">
               <label>Categoría *</label>
-              <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()" required>
-                <option value="NOV">Novillo (NOV)</option>
+              <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
+                <option value="NOV" selected>Novillo (NOV)</option>
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
                 <option value="VC">Vaca (VC)</option>
-                <option value="TR" selected>Toro (TR - Reproductores)</option>
+                <option value="TR">Toro (TR - Reproductores)</option>
                 <option value="TER">Ternero (TER)</option>
                 <option value="VQP">Vaquillona Preñada (VQP)</option>
               </select>
@@ -757,7 +756,7 @@
 
             <div class="form-group">
               <label>Raza *</label>
-              <select id="c_raza_select" required>
+              <select id="c_raza_select">
                 <option value="Angus" selected>Angus</option>
                 <option value="Hereford">Hereford</option>
                 <option value="Careta">Careta</option>
@@ -769,15 +768,15 @@
 
             <div class="form-group">
               <label>Peso Promedio Lote (kg)</label>
-              <input type="number" id="c_peso_promedio" placeholder="Ej: 720">
+              <input type="number" id="c_peso_promedio" placeholder="Ej: 420">
             </div>
           </div>
 
           <!-- CARGA INDIVIDUAL DE TOROS -->
-          <div id="boxDetalleTorosIndividuales" style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:6px; margin-bottom:12px;">
+          <div id="boxDetalleTorosIndividuales" class="hidden" style="background:#eff6ff; border:1px solid #bfdbfe; padding:12px; border-radius:6px; margin-bottom:12px;">
             <div style="font-size:12px; font-weight:bold; color:#1e40af; margin-bottom:8px; display:flex; justify-content:space-between;">
               <span>🐂 Registro Individual por Animal del Corral</span>
-              <span id="lblCountTorosInfo" style="font-size:11px;">(3 animales)</span>
+              <span id="lblCountTorosInfo" style="font-size:11px;">(0 animales)</span>
             </div>
             <div id="contenedorInputsTorosIndividuales"></div>
           </div>
@@ -787,7 +786,7 @@
             <input type="text" id="c_pesada_obs" placeholder="Ej: Lote parejo, revisación clínica aprobada">
           </div>
 
-          <button type="submit" id="btnGuardarCorralBase" class="btn-submit" style="background:var(--primary);">🐂 Guardar Datos del Corral</button>
+          <button type="button" id="btnGuardarCorralBase" class="btn-submit" style="background:var(--primary); cursor:pointer;" onclick="guardarCorralBase(event)">🐂 Guardar Datos del Corral</button>
         </form>
       </div>
 
@@ -2206,14 +2205,17 @@
       const container = document.getElementById('contenedorInputsTorosIndividuales');
       const lblCount = document.getElementById('lblCountTorosInfo');
 
+      if (!box || !container) return;
+
       const esToro = (cat === 'TR');
       if (!esToro || cabezas <= 0 || cabezas > 25) {
         box.classList.add('hidden');
+        container.innerHTML = ''; // Limpieza obligatoria para no dejar inputs fantasma
         return;
       }
 
       box.classList.remove('hidden');
-      lblCount.textContent = `(${cabezas} toros a detallar)`;
+      if (lblCount) lblCount.textContent = `(${cabezas} toros a detallar)`;
 
       let inputsHtml = '';
       for (let i = 1; i <= cabezas; i++) {
@@ -2222,8 +2224,8 @@
             <strong style="color:#1e40af; font-size:12px;">Toro #${i}:</strong>
             <div class="grid-4" style="margin-top:4px;">
               <div>
-                <label>Número / RP *</label>
-                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}" required>
+                <label>Número / RP</label>
+                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}">
               </div>
               <div>
                 <label>HBA / Control</label>
@@ -2240,8 +2242,8 @@
             </div>
             <div class="grid-2" style="margin-top:6px;">
               <div>
-                <label>Aptitud para Vaquillonas *</label>
-                <select id="toro_apt_${i}" required>
+                <label>Aptitud para Vaquillonas</label>
+                <select id="toro_apt_${i}">
                   <option value="🟢 Apto Vaquillonas (Parto Muy Fácil)">🟢 Apto Vaquillonas 15m (Parto Muy Fácil)</option>
                   <option value="🟢 Apto Vaquillonas (Facilidad comprobada)">🟢 Apto Vaquillonas (Facilidad comprobada)</option>
                   <option value="🟡 Rodeo General / Vacas">🟡 Rodeo General / Vacas</option>
@@ -2601,36 +2603,54 @@
     // ==========================================
     // 🐂 CARGA Y GUARDADO DE CORRALES
     // ==========================================
-    async function guardarCorralBase(e) {
-      if (e) e.preventDefault();
-      
-      // Fallback seguro de evento
-      if (!eventoActivoObj && EVENTOS_DEMO.length > 0) {
-        eventoActivoObj = EVENTOS_DEMO[0];
-      }
-      if (!eventoActivoObj) { 
-        alert('Seleccioná primero un evento antes de cargar corrales.'); 
-        return; 
+ async function guardarCorralBase(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      // Si por alguna razón no se eligió remate, toma el primer remate activo por defecto
+      if (!eventoActivoObj) {
+        if (typeof EVENTOS_DEMO !== 'undefined' && EVENTOS_DEMO.length > 0) {
+          eventoActivoObj = EVENTOS_DEMO[0];
+        } else {
+          alert('Por favor seleccione o cree un evento de remate primero.');
+          return;
+        }
       }
 
-      const editId = document.getElementById('c_edit_id').value;
-      const numero_corral = document.getElementById('c_numero').value.trim();
-      const remitente = document.getElementById('c_remitente').value.trim();
-      const cabezas = parseInt(document.getElementById('c_cabezas').value) || 0;
-      
-      const plazoIdSel = document.getElementById('c_cuotas_select').value;
+      const numero_corral = document.getElementById('c_numero')?.value.trim();
+      const remitente = document.getElementById('c_remitente')?.value.trim();
+      const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
+
+      // Validación directa en JavaScript con mensajes claros
+      if (!numero_corral) {
+        alert('Por favor ingrese el Número de Corral.');
+        document.getElementById('c_numero')?.focus();
+        return;
+      }
+      if (!remitente) {
+        alert('Por favor ingrese o seleccione el Remitente.');
+        document.getElementById('c_remitente')?.focus();
+        return;
+      }
+      if (cabezas <= 0) {
+        alert('Ingrese una cantidad válida de cabezas (mínimo 1).');
+        document.getElementById('c_cabezas')?.focus();
+        return;
+      }
+
+      const editId = document.getElementById('c_edit_id')?.value;
+      const plazoIdSel = document.getElementById('c_cuotas_select')?.value;
       const plazoObj = PLAZOS_SISTEMA.find(p => p.id == plazoIdSel) || { texto: '30 Días (1 Cuota)', dias_calc: 30 };
       const plazo_dias = plazoObj.dias_calc;
       const plazo_texto = plazoObj.texto;
 
-      const categoria = document.getElementById('c_categoria').value;
-      const raza = document.getElementById('c_raza_select').value;
-      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio').value) || null;
-      const pesada_observaciones = document.getElementById('c_pesada_obs').value.trim();
+      const categoria = document.getElementById('c_categoria')?.value || 'NOV';
+      const raza = document.getElementById('c_raza_select')?.value || 'Angus';
+      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio')?.value) || null;
+      const pesada_observaciones = document.getElementById('c_pesada_obs')?.value.trim() || '';
 
       const torosArray = [];
       const boxToros = document.getElementById('boxDetalleTorosIndividuales');
-      if (!boxToros.classList.contains('hidden')) {
+      if (boxToros && !boxToros.classList.contains('hidden')) {
         for (let i = 1; i <= cabezas; i++) {
           const rp = document.getElementById(`toro_rp_${i}`)?.value.trim() || `T-${i}`;
           const hba = document.getElementById(`toro_hba_${i}`)?.value.trim() || '';
@@ -2645,8 +2665,16 @@
       const nuevoCorral = {
         id: editId ? parseInt(editId) : Date.now(),
         evento_id: eventoActivoObj.id,
-        numero_corral, remitente, cabezas, plazo_dias, plazo_texto, categoria, raza,
-        peso_promedio, pesada_observaciones, estado: 'Disponible',
+        numero_corral,
+        remitente,
+        cabezas,
+        plazo_dias,
+        plazo_texto,
+        categoria,
+        raza,
+        peso_promedio,
+        pesada_observaciones,
+        estado: 'Disponible',
         toros: torosArray
       };
 
@@ -2665,7 +2693,6 @@
       renderVistaConsignataria();
       renderVistaComprador();
     }
-
     function cancelarEdicionCorralBase() {
       document.getElementById('formCargarCorral').reset();
       document.getElementById('c_edit_id').value = '';
