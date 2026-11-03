@@ -3160,7 +3160,7 @@ HTML
       }
     }
 
-    function autocompletarLogin(email, pass) {
+   function autocompletarLogin(email, pass) {
       document.getElementById('login_email').value = email;
       document.getElementById('login_pass').value = pass;
       procesarLogin(new Event('submit'));
@@ -3168,22 +3168,25 @@ HTML
 
     function recuperarContrasena() {
       const email = document.getElementById('login_email').value.trim();
-      if (!email) { alert('Ingresá tu email en la casilla superior.'); return; }
-      alert(`✔ Enlace de restablecimiento enviado a: ${email}`);
+      if (!email) { 
+        alert('Ingresá tu email en la casilla superior.'); 
+        return; 
+      }
+      alert('✔ Enlace de restablecimiento enviado a: ' + email);
     }
 
     function generarClaveSugerida() {
-      const cuit = document.getElementById('u_comprador_cuit').value.replace(/[^0-9]/g, '');
-      const alias = document.getElementById('u_comprador_alias').value.trim();
+      const cuit = document.getElementById('u_comprador_cuit')?.value.replace(/[^0-9]/g, '');
+      const alias = document.getElementById('u_comprador_alias')?.value.trim();
       const inputClave = document.getElementById('u_comprador_clave');
 
-      if (cuit && alias && !inputClave.getAttribute('data-manual')) {
+      if (cuit && alias && inputClave && !inputClave.getAttribute('data-manual')) {
         const inicial = alias.charAt(0).toUpperCase();
         inputClave.value = `${cuit}-${inicial}`;
       }
     }
 
-async function crearNuevoEvento(e) {
+    async function crearNuevoEvento(e) {
       if (e) e.preventDefault();
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
@@ -3197,7 +3200,6 @@ async function crearNuevoEvento(e) {
         localStorage.setItem('plazo_mag_anterior', plazoDefault);
       }
 
-      // Asigna estrictamente la consignataria activa en la sesión
       const consId = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
         ? usuarioActual.consignataria_id
         : 'CONS_SUR';
@@ -3215,7 +3217,6 @@ async function crearNuevoEvento(e) {
 
       EVENTOS_DEMO.unshift(nuevo);
 
-      // Si Supabase está conectado, guardar fila en tabla eventos
       if (sb) {
         try {
           await sb.from('eventos').insert([nuevo]);
