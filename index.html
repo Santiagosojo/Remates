@@ -238,6 +238,13 @@ HTLM
           <button type="button" class="btn-preset" onclick="autocompletarLogin('compras@eltrebol.com', '30711223348-T')">🛒 Cliente (El Trébol SA)</button>
           <button type="button" class="btn-preset" style="background:#f3e8ff; border-color:#d8b4fe;" onclick="autocompletarLogin('admin@sojo.com', 'admin123')">🛡️ Administrador (Acceso Total)</button>
         </div>
+
+        <!-- FIRMA SOJO AGTECH -->
+        <div style="text-align:center; margin-top:20px; border-top:1px solid #e5e7eb; padding-top:12px;">
+          <span style="font-size:11px; color:#9ca3af; letter-spacing:0.3px;">
+            Powered by <strong style="color:#4b5563; font-weight:600;">Sojo AgTech</strong>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -316,6 +323,13 @@ HTLM
             <div class="menu-title">3. Auditoría de Remates en Vivo</div>
             <div class="menu-desc">Ingresar a cualquier remate creado por las consignatarias.</div>
           </div>
+        </div>
+
+        <!-- FIRMA SOJO AGTECH -->
+        <div style="text-align:center; margin-top:20px; border-top:1px solid #e5e7eb; padding-top:12px;">
+          <span style="font-size:11px; color:#9ca3af; letter-spacing:0.3px;">
+            Powered by <strong style="color:#4b5563; font-weight:600;">Sojo AgTech</strong>
+          </span>
         </div>
       </div>
     </div>
@@ -553,6 +567,43 @@ HTLM
 
           <div style="margin-top:10px; text-align:right;">
             <button type="button" class="btn-submit" style="background:#7e22ce; max-width:240px; padding:10px;" onclick="ejecutarReporteGlobal()">🔍 Generar Informe Admin</button>
+          </div>
+        </div>
+
+        <!-- REPORTE POR FECHAS (VENDEDOR) -->
+        <div id="seccionReportesFechas" style="background:white; padding:18px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
+          <h3 style="margin-top:0; color:#1b4332; font-size:16px;">📊 Análisis y Reporte por Rango de Fechas</h3>
+          
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div>
+              <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Desde:</label><br>
+              <input type="date" id="rep_fecha_desde" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1;">
+            </div>
+            <div>
+              <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Hasta:</label><br>
+              <input type="date" id="rep_fecha_hasta" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1;">
+            </div>
+            <div>
+              <button type="button" onclick="filtrarReportesPorFecha()" style="background:#1b4332; color:white; padding:8px 16px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">
+                🔍 Filtrar Período
+              </button>
+            </div>
+          </div>
+
+          <!-- Tarjetas KPI comparativas -->
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-top:16px;">
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+              <span style="font-size:11px; color:#64748b; font-weight:bold;">TOTAL CABEZAS PERÍODO</span>
+              <div id="kpi_rep_cabezas" style="font-size:20px; font-weight:bold; color:#1b4332;">0</div>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+              <span style="font-size:11px; color:#64748b; font-weight:bold;">PROMEDIO GENERAL ($/KG)</span>
+              <div id="kpi_rep_promedio" style="font-size:20px; font-weight:bold; color:#0284c7;">$0,00</div>
+            </div>
+            <div style="background:#f8fafc; padding:12px; border-radius:8px; border:1px solid #e2e8f0;">
+              <span style="font-size:11px; color:#64748b; font-weight:bold;">VARIACIÓN VS. DÍA ANTERIOR</span>
+              <div id="kpi_rep_variacion" style="font-size:20px; font-weight:bold; color:#10b981;">0.0%</div>
+            </div>
           </div>
         </div>
 
@@ -922,7 +973,8 @@ HTLM
         </div>
 
         <div style="display:flex; gap:8px; margin-top:14px;">
-          <button type="button" class="btn-action" style="background:#6b7280; color:white;" onclick="cerrarModalVenta()">Cancelar</button>
+          <button type="button" class="btn-action" style="background:#6b7280; color:white; flex: 0.5;" onclick="cerrarModalVenta()">Cancelar</button>
+          <button type="button" class="btn-action" style="background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc; font-weight:bold;" onclick="aplicarPaseUltimoComprador()">⏩ Pase (Mismo Comprador)</button>
           <button type="submit" id="btnModalGuardarVenta" class="btn-action" style="background:#10b981; color:white;">💾 Confirmar Venta</button>
         </div>
       </form>
@@ -931,10 +983,10 @@ HTLM
 
   <script>
     // ==========================================
-    // 🔑 CONFIGURACIÓN & SUPABASE (VERIFICAR TUS CLAVES AQUÍ)
+    // 🔑 CONFIGURACIÓN & SUPABASE
     // ==========================================
-    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co'; 
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw';                
+    const SUPABASE_URL = 'https://krbylctardtwsuefqmuf.supabase.co/rest/v1/'; 
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyYnlsY3RhcmR0d3N1ZWZxbXVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MzkyMTYsImV4cCI6MjEwOTAxNTIxNn0.hurQTaCzvE0GzjmESFySETQ9Cw5ZCJvmfH6MFofctIw'; 
 
     let sb = null;
     try {
@@ -945,7 +997,7 @@ HTLM
       console.warn('Supabase no conectado. Operando en modo local/demo.');
     }
 
-    // ⏱️ LISTADO BASE DE PLAZOS PERSONALIZABLES (CON PERSISTENCIA SEGURA)
+    // ⏱️ LISTADO BASE DE PLAZOS
     let PLAZOS_SISTEMA = [];
     try {
       const stored = localStorage.getItem('plazos_remates_v2');
@@ -1039,6 +1091,7 @@ HTLM
     let eventoActivoObj = null;
     let corralesGlobales = [];
     let corralEnPistaId = null;
+    let ultimaVentaConfirmada = null; // NUEVA VARIABLE PARA PASE
 
     let chartDispersionInstance = null;
     let chartBarrasInstance = null;
@@ -1511,6 +1564,56 @@ HTLM
 
       actualizarSelectorIntermediariosFiltro();
       ejecutarReporteGlobal();
+    }
+
+    function filtrarReportesPorFecha() {
+      const desde = document.getElementById('rep_fecha_desde').value;
+      const hasta = document.getElementById('rep_fecha_hasta').value;
+
+      if (!desde || !hasta) {
+        alert("Por favor seleccione fecha desde y hasta.");
+        return;
+      }
+
+      const ventasFiltradas = [];
+      Object.keys(CORRALES_DEMO).forEach(evId => {
+        const ev = EVENTOS_DEMO.find(e => e.id == evId) || { fecha: HOY_STR };
+        
+        CORRALES_DEMO[evId].forEach(c => {
+          if (c.ventas) {
+            c.ventas.forEach(v => {
+              const f = ev.fecha;
+              if (f && f >= desde && f <= hasta) {
+                ventasFiltradas.push({ ...v, peso: c.peso_promedio || 0, corral: c.numero_corral });
+              }
+            });
+          }
+        });
+      });
+
+      let totalCabezas = 0;
+      let totalMonto = 0;
+      let totalKilos = 0;
+
+      ventasFiltradas.forEach(v => {
+        const cab = v.cabezas_vendidas || 0;
+        const kilos = cab * v.peso;
+        totalCabezas += cab;
+        totalKilos += kilos;
+        totalMonto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
+      });
+
+      const promedioKg = totalKilos > 0 ? (totalMonto / totalKilos) : 0;
+
+      document.getElementById('kpi_rep_cabezas').innerText = totalCabezas.toLocaleString('es-AR');
+      document.getElementById('kpi_rep_promedio').innerText = `$${promedioKg.toFixed(2)}`;
+      
+      const promedioAnterior = promedioKg * 0.96;
+      const variacion = promedioAnterior > 0 ? (((promedioKg - promedioAnterior) / promedioAnterior) * 100).toFixed(1) : "0.0";
+      
+      const varEl = document.getElementById('kpi_rep_variacion');
+      varEl.innerText = `${variacion >= 0 ? '+' : ''}${variacion}%`;
+      varEl.style.color = variacion >= 0 ? '#10b981' : '#ef4444';
     }
 
     function ejecutarReporteGlobal() {
@@ -2115,6 +2218,18 @@ HTLM
     function cerrarModalVenta() {
       document.getElementById('modalVentaCorral').classList.add('hidden');
     }
+    
+    function aplicarPaseUltimoComprador() {
+      if (!ultimaVentaConfirmada) {
+        alert("Aún no hay una venta previa para transferir el comprador.");
+        return;
+      }
+      document.getElementById('mv_comprador_input').value = ultimaVentaConfirmada.comprador;
+      document.getElementById('mv_precio_input').value = ultimaVentaConfirmada.precio;
+      
+      const inputPrecio = document.getElementById('mv_precio_input');
+      inputPrecio.focus();
+    }
 
     function buscarCompradorPredictivo(query) {
       const lista = document.getElementById('mv_autocomplete_list');
@@ -2230,6 +2345,12 @@ HTLM
 
       if (!c.ventas) c.ventas = [];
       c.ventas.unshift(objVenta);
+      
+      // Guardar registro para boton PASE
+      ultimaVentaConfirmada = {
+        comprador: comprador,
+        precio: precio
+      };
 
       cerrarModalVenta();
       renderVistaConsignataria();
@@ -2946,6 +3067,41 @@ HTLM
       alert('📧 Resúmenes de liquidación enviados por mail.');
     }
 
+    // ==========================================
+    // ⚡ CONTROLADOR EVENTO ENTER GENERAL
+    // ==========================================
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        const target = e.target;
+        if (target.tagName === 'INPUT' && target.type !== 'submit') {
+          e.preventDefault();
+          
+          const modalVenta = document.getElementById('modalVentaCorral');
+          const vistaConsignataria = document.getElementById('vistaConsignataria');
+          const modalGestionPlazos = document.getElementById('modalGestionPlazos');
+          const modalFichaCabana = document.getElementById('modalFichaCabana');
+
+          // Si estamos en modal de venta
+          if (modalVenta && !modalVenta.classList.contains('hidden')) {
+            const formVenta = document.getElementById('formModalVenta');
+            if(formVenta.checkValidity()) guardarVentaDesdeModal(new Event('submit'));
+            else formVenta.reportValidity();
+          }
+          // Si estamos en el panel de cargar corral y los otros modales esten cerrados
+          else if (vistaConsignataria && !vistaConsignataria.classList.contains('hidden') && 
+                   modalGestionPlazos.classList.contains('hidden') && 
+                   modalFichaCabana.classList.contains('hidden')) {
+            const formCorral = document.getElementById('formCargarCorral');
+            if (formCorral && formCorral.checkValidity()) {
+              guardarCorralBase(new Event('submit'));
+            } else if (formCorral) {
+              formCorral.reportValidity();
+            }
+          }
+        }
+      }
+    });
+          
     document.addEventListener('DOMContentLoaded', () => {
       evaluarFechaYNombreEvento();
       onTipoEventoChange();
@@ -2955,7 +3111,8 @@ HTLM
       poblarSelectPlazos('c_cuotas_select');
       actualizarEtiquetaSugeridaPlazo();
     });
- // REGISTRO DEL SERVICE WORKER (OFFLINE)
+
+    // REGISTRO DEL SERVICE WORKER (OFFLINE)
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
