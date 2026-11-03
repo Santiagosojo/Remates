@@ -1041,6 +1041,9 @@ HTML
 // ==========================================
     // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE FIRST)
     // ==========================================
+ // ==========================================
+    // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE FIRST)
+    // ==========================================
     let CLIENTES_DEMO = JSON.parse(localStorage.getItem('padron_clientes_v2')) || [
       { id: 1, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Agropecuaria El Trébol SA', alias: 'El Trébol', cuit: '30-71122334-8', email: 'compras@eltrebol.com', clave: '30711223348-T', limite_credito: 80000000 },
       { id: 2, consignataria_id: 'CONS_SUR', tipo_cliente: 'cliente', nombre: 'Ganadera San Miguel SRL', alias: 'San Miguel', cuit: '30-58998877-2', email: 'sanmiguel@ganadera.com', clave: '30589988772-S', limite_credito: 65000000 }
@@ -1071,16 +1074,6 @@ HTML
         console.warn('Error al guardar en almacenamiento local:', err);
       }
     }
-
-    let usuarioActual = null;
-    let modoOperatorioActivo = 'vendedor';
-    let eventoActivoObj = null;
-    let corralesGlobales = [];
-    let corralEnPistaId = null;
-    let ultimaVentaConfirmada = null;
-
-    let chartDispersionInstance = null;
-    let chartBarrasInstance = null;
 
     // ==========================================
     // ⏱️ GESTIÓN DE PLAZOS: SELECTOR Y MODAL
