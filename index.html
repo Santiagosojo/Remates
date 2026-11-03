@@ -2161,10 +2161,8 @@ HTML
       const esAdmin = (modoOperatorioActivo === 'admin');
       const esVendedor = (modoOperatorioActivo === 'vendedor');
 
-      // Solo vendedor y admin pueden crear remates
       document.getElementById('cardCrearEvento').classList.toggle('hidden', !(esAdmin || esVendedor));
 
-      // El filtro desplegable de consignatarias SOLO lo ve el Administrador
       const divFiltro = document.getElementById('divFiltroVendedorEvento');
       if (divFiltro) {
         divFiltro.classList.toggle('hidden', !esAdmin);
@@ -2197,7 +2195,6 @@ HTML
 
       let lista = [...EVENTOS_DEMO];
 
-      // Si Supabase está conectado, traer también los eventos persistidos
       if (sb) {
         try {
           let query = sb.from('eventos').select('*');
@@ -2213,10 +2210,128 @@ HTML
             });
           }
         } catch (err) {
-          console.warn('Consulta de eventos Supabase:', err);
+          console.warn('Consulta eventos Supabase:', err);
         }
       }
 
+      if (usuarioActual && modoOperatorioActivo === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
+        lista = lista.filter(e => e.consignataria_id === usuarioActual.consignataria_id);
+      } else {
+        const fCons = document.getElementById('f_vendedor_evento')?.value || 'ALL';
+        if (fCons !== 'ALL') {
+          lista = lista.filter(e => e.consignataria_id === fCons);
+        }
+      }
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div style="text-align:center; padding:30px 15px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:8px;">
+            <span style="font-size:32px;">📭</span>
+            <h4 style="color:var(--primary); margin:8px 0 4px 0;">No tenés remates cargados todavía</h4>
+            <p style="font-size:12px; color:#64748b; margin:0;">Utilizá el formulario superior para dar de alta tu primer evento.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      lista.forEach(ev => {
+        const esHoy = (ev.fecha === HOY_STR);
+        const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id);
+
+        html += `
+          <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <strong>${ev.nombre}</strong>
+              <div>
+                <span class="event-type-badge">${ev.tipo_evento}</span>
+                ${esHoy ? '<span class="badge-sugerido">⭐ HOY</span>' : ''}
+              </div>
+            </div>
+            <div style="font-size:12px; color:#6b7280; margin-top:4px;">
+              🏢 Consignataria: <strong>${firma ? firma.nombre : (usuarioActual ? usuarioActual.alias : 'Firma')}</strong> | 📅 Fecha: ${ev.fecha} | 📍 ${ev.lugar || 'Sin ubicación'} | Plazo: <strong>${ev.plazo_default || '30 Días (1 Cuota)'}</strong>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    async function seleccionarEvento(id, nombre, tipo) {
+      eventoActivoObj = EVENTOS_DEMO.find(ev => ev.id === id) || { id, nombre, tipo, fecha: HOY_STR };
+      document.getElementById('lblEventoActivo').textContent = `${nombre} (${tipo})`;
+      
+      ocultarTodasLasSecciones();
+      document.getElementById('headerEventBar').classList.remove('hidden');
+
+      const esVistaConsignataria = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
+      document.getElementById('vistaConsignataria').classList.toggle('hidden', !esVistaConsignataria);
+      document.getElementById('vistaComprador').classList.toggle('hidden', esVistaConsignataria);
+      document.getElementById('subnavComprador').classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
+
+      cancelarEdicionCorralBase();
+      await cargarCorrales();
+    }
+
+    function setTabComprador(tab) {
+      document.getElementById('btnTabRemate').classList.toggle('active', tab === 'remate');
+      document.getElementById('btnTabMisCompras').classList.toggle('active', tab === 'compras');
+      document.getElementById('secCompradorRemate').classList.toggle('hidden', tab !== 'remate');
+      document.getElementById('secCompradorCompras').classList.toggle('hidden', tab !== 'compras');
+      if (tab === 'compras') renderMisCompras();
+    }
+
+    async function cargarCorrales() {
+      if (!eventoActivoObj) return;
+      corralesGlobales = CORRALES_DEMO[eventoActivoObj.id] || [];
+      actualizarPistaActivaState();
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+    }
+
+    async function crearNuevoEvento(e) {
+      if (e) e.preventDefault();
+      const lugar = document.getElementById('ev_lugar').value.trim();
+      const fecha = document.getElementById('ev_fecha').value;
+      const nombre = document.getElementById('ev_nombre').value.trim();
+      const tipo = document.getElementById('ev_tipo').value;
+
+      let plazoDefault = '30 Días (1 Cuota)';
+      if (tipo === 'Mercado') {
+        plazoDefault = document.getElementById('ev_plazo_predeterminado')?.value.trim() || PLAZO_MAG_PREDETERMINADO;
+        PLAZO_MAG_PREDETERMINADO = plazoDefault;
+        localStorage.setItem('plazo_mag_anterior', plazoDefault);
+      }
+
+      const consId = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
+        ? usuarioActual.consignataria_id
+        : 'CONS_SUR';
+
+      const nuevo = {
+        id: Date.now(),
+        consignataria_id: consId,
+        nombre: nombre,
+        tipo_evento: tipo,
+        fecha: fecha,
+        lugar: lugar,
+        estado: 'Pendiente',
+        plazo_default: plazoDefault
+      };
+
+      EVENTOS_DEMO.unshift(nuevo);
+
+      if (sb) {
+        try {
+          await sb.from('eventos').insert([nuevo]);
+        } catch (err) {
+          console.warn('Error al guardar evento en Supabase:', err);
+        }
+      }
+
+      document.getElementById('formNuevoEvento').reset();
+      seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
+    }
       // REGLA DE AISLAMIENTO:
       // Si opera una consignataria (vendedor), SOLO ve sus propios remates
       if (usuarioActual && modoOperatorioActivo === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
