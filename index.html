@@ -2003,7 +2003,23 @@ HTML
         const fCons = document.getElementById('f_vendedor_evento')?.value || 'ALL';
         if (fCons !== 'ALL') lista = lista.filter(e => e.consignataria_id === fCons);
       }
+// 📅 ORDENAMIENTO CRONOLÓGICO INTELIGENTE
+      lista.sort((a, b) => {
+        const esHoyA = (a.fecha === HOY_STR);
+        const esHoyB = (b.fecha === HOY_STR);
+        if (esHoyA && !esHoyB) return -1;
+        if (!esHoyA && esHoyB) return 1;
 
+        const esFuturoA = a.fecha > HOY_STR;
+        const esFuturoB = b.fecha > HOY_STR;
+        if (esFuturoA && !esFuturoB) return -1;
+        if (!esFuturoA && esFuturoB) return 1;
+
+        if (esFuturoA && esFuturoB) {
+          return a.fecha.localeCompare(b.fecha); // Futuros: el más próximo primero
+        }
+        return b.fecha.localeCompare(a.fecha);   // Pasados: el más reciente primero
+      });
       if (lista.length === 0) {
         container.innerHTML = `
           <div style="text-align:center; padding:30px 15px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:8px;">
