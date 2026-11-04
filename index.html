@@ -353,9 +353,14 @@ HTML
       </div>
 
       <!-- ALTA EVENTO CON REGLA PLAZO MAG -->
+     <!-- ALTA EVENTO CON REGLA PLAZO MAG -->
       <div id="cardCrearEvento" class="card hidden">
-        <div class="card-title">➕ Crear Nuevo Evento de Remate</div>
+        <div class="card-title" style="display:flex; justify-content:space-between; align-items:center;">
+          <span id="txtTituloFormEvento">➕ Crear Nuevo Evento de Remate</span>
+          <button type="button" id="btnCancelarEditEvento" class="btn-preset hidden" onclick="cancelarEdicionEvento()">✕ Cancelar</button>
+        </div>
         <form id="formNuevoEvento" onsubmit="crearNuevoEvento(event)">
+          <input type="hidden" id="ev_edit_id">
           <div class="grid-2">
             <div class="form-group">
               <label>Tipo de Evento *</label>
@@ -390,7 +395,7 @@ HTML
             </div>
           </div>
 
-          <button type="submit" class="btn-submit">🚀 Crear e Ingresar al Remate</button>
+          <button type="submit" id="btnGuardarEvento" class="btn-submit">🚀 Crear e Ingresar al Remate</button>
         </form>
       </div>
     </div>
@@ -2016,12 +2021,16 @@ HTML
         const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id);
 
         html += `
+          const puedeEditar = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
+
+        html += `
           <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>${ev.nombre}</strong>
-              <div>
+              <div style="display:flex; gap:6px; align-items:center;">
                 <span class="event-type-badge">${ev.tipo_evento}</span>
                 ${esHoy ? '<span class="badge-sugerido">⭐ HOY</span>' : ''}
+                ${puedeEditar ? `<button type="button" class="btn-preset" style="padding:2px 8px; font-size:11px; background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc;" onclick="event.stopPropagation(); editarEvento(${ev.id})">✏️ Editar</button>` : ''}
               </div>
             </div>
             <div style="font-size:12px; color:#6b7280; margin-top:4px;">
@@ -3081,9 +3090,73 @@ HTML
       }
     }
 
-   async function crearNuevoEvento(e) {
+   function editarEvento(id) {
+      const ev = EVENTOS_DEMO.find(e => e.id == id);
+      if (!ev) return;
+
+      // Verificamos si ya hay hacienda vendida para resguardar la facturación
+      const corrales = (CORRALES_DEMO && CORRALES_DEMO[id]) ? CORRALES_DEMO[id] : [];
+      const tieneVentas = corrales.some(c => c.ventas && c.ventas.length > 0);
+
+      document.getElementById('ev_edit_id').value = ev.id;
+      document.getElementById('ev_tipo').value = ev.tipo_evento;
+      document.getElementById('ev_fecha').value = ev.fecha;
+      document.getElementById('ev_lugar').value = ev.lugar || '';
+      document.getElementById('ev_nombre').value = ev.nombre;
+      document.getElementById('ev_nombre').setAttribute('data-manual', 'true');
+      document.getElementById('ev_fecha').setAttribute('data-manual', 'true');
+
+      const inputPlazo = document.getElementById('ev_plazo_predeterminado');
+      if (inputPlazo) {
+        inputPlazo.value = ev.plazo_default || '30 Días (1 Cuota)';
+      }
+
+      onTipoEventoChange();
+
+      // Regla de auditoría: si ya tiene ventas, congelamos Tipo y Fecha
+      const selTipo = document.getElementById('ev_tipo');
+      const inputFecha = document.getElementById('ev_fecha');
+      if (tieneVentas) {
+        selTipo.disabled = true;
+        inputFecha.disabled = true;
+        selTipo.title = "Bloqueado: El remate ya cuenta con ventas cerradas.";
+        inputFecha.title = "Bloqueado: El remate ya cuenta con ventas cerradas.";
+      } else {
+        selTipo.disabled = false;
+        inputFecha.disabled = false;
+        selTipo.title = "";
+        inputFecha.title = "";
+      }
+
+      document.getElementById('txtTituloFormEvento').textContent = `✏️ Editando: ${ev.nombre}`;
+      document.getElementById('btnGuardarEvento').textContent = '💾 Actualizar Datos del Remate';
+      document.getElementById('btnCancelarEditEvento').classList.remove('hidden');
+
+      document.getElementById('cardCrearEvento')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function cancelarEdicionEvento() {
+      const form = document.getElementById('formNuevoEvento');
+      if (form) form.reset();
+      document.getElementById('ev_edit_id').value = '';
+
+      const selTipo = document.getElementById('ev_tipo');
+      const inputFecha = document.getElementById('ev_fecha');
+      if (selTipo) selTipo.disabled = false;
+      if (inputFecha) inputFecha.disabled = false;
+
+      document.getElementById('txtTituloFormEvento').textContent = '➕ Crear Nuevo Evento de Remate';
+      document.getElementById('btnGuardarEvento').textContent = '🚀 Crear e Ingresar al Remate';
+      document.getElementById('btnCancelarEditEvento').classList.add('hidden');
+
+      evaluarFechaYNombreEvento();
+      onTipoEventoChange();
+    }
+
+    async function crearNuevoEvento(e) {
       if (e) e.preventDefault();
 
+      const editId = document.getElementById('ev_edit_id')?.value;
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
       const nombre = document.getElementById('ev_nombre').value.trim();
@@ -3096,6 +3169,31 @@ HTML
         localStorage.setItem('plazo_mag_anterior', plazoDefault);
       }
 
+      // MODO EDICIÓN
+      if (editId) {
+        const evExistente = EVENTOS_DEMO.find(ev => ev.id == editId);
+        if (!evExistente) return;
+
+        evExistente.nombre = nombre;
+        evExistente.lugar = lugar;
+        evExistente.plazo_default = plazoDefault;
+
+        if (!document.getElementById('ev_tipo').disabled) {
+          evExistente.tipo_evento = tipo;
+        }
+        if (!document.getElementById('ev_fecha').disabled) {
+          evExistente.fecha = fecha;
+        }
+
+        guardarMemoriaFisicaLocal();
+        await encolarOperacion('eventos', evExistente);
+        cancelarEdicionEvento();
+        cargarEventosDisponibles();
+        alert(`✔ Remate "${nombre}" actualizado y sincronizado.`);
+        return;
+      }
+
+      // MODO CREACIÓN NORMAL
       const consId = (usuarioActual && usuarioActual.consignataria_id && usuarioActual.consignataria_id !== 'ALL')
         ? usuarioActual.consignataria_id
         : 'CONS_SUR';
@@ -3111,14 +3209,11 @@ HTML
         plazo_default: plazoDefault
       };
 
-      // 1. Lo muestra y guarda de inmediato en la laptop
       EVENTOS_DEMO.unshift(nuevo);
       guardarMemoriaFisicaLocal();
       document.getElementById('formNuevoEvento').reset();
 
-      // 2. Lo manda a la cola para subirlo a Supabase ahora o cuando recupere señal
       await encolarOperacion('eventos', nuevo);
-
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
     function imprimirBoletinPapel() {
