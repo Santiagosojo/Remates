@@ -2155,6 +2155,55 @@ function agregarCategoriaRapida() {
       evaluarDetalleTorosIndividuales();
     }
     
+    function agregarCategoriaRapida() {
+      const sel = document.getElementById('c_categoria');
+      if (!sel) return;
+      sel.value = 'NUEVA';
+      manejarSeleccionCategoria(sel);
+    }
+
+    function manejarSeleccionCategoria(sel) {
+      if (sel.value === 'NUEVA') {
+        const nombre = prompt("Ingresá el nombre de la nueva categoría (Ej: Vaca Conserva, Toro Manufactura):");
+        if (nombre && nombre.trim()) {
+          const nombreLimpio = nombre.trim();
+          
+          // Crea la opción real con el nombre que escribiste
+          const opt = document.createElement('option');
+          opt.value = nombreLimpio;
+          opt.textContent = nombreLimpio;
+          
+          // La inserta antes de la opción '➕ Crear nueva...'
+          const optNueva = sel.querySelector('option[value="NUEVA"]');
+          if (optNueva) {
+            sel.insertBefore(opt, optNueva);
+          } else {
+            sel.appendChild(opt);
+          }
+          
+          // Deja seleccionada la nueva categoría creada
+          sel.value = nombreLimpio;
+
+          // También la agrega a los filtros de reportes
+          ['rep_filtro_cat', 'f_categoria_reporte'].forEach(id => {
+            const s = document.getElementById(id);
+            if (s) {
+              const o = document.createElement('option');
+              o.value = nombreLimpio;
+              o.textContent = nombreLimpio;
+              s.appendChild(o);
+            }
+          });
+        } else {
+          // Si tocás cancelar o lo dejás vacío, vuelve a Novillo
+          sel.selectedIndex = 0;
+        }
+      }
+
+      // Ejecuta la verificación de toros reproductores
+      evaluarDetalleTorosIndividuales();
+    }
+    
     function evaluarDetalleTorosIndividuales() {
       const cat = document.getElementById('c_categoria')?.value;
       const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
