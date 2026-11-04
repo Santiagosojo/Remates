@@ -1005,7 +1005,95 @@ HTML
     } catch (e) {
       console.warn('Supabase no conectado. Operando en modo local.');
     }
+// ==========================================
+    // 🔄 MOTOR DE COLA DE SINCRONIZACIÓN (OUTBOX)
+    // ==========================================
+    let COLA_SYNC = JSON.parse(localStorage.getItem('cola_sync_remates')) || [];
 
+    function guardarColaEnStorage() {
+      try {
+        localStorage.setItem('cola_sync_remates', JSON.stringify(COLA_SYNC));
+        actualizarIndicadorConexion();
+      } catch (e) {
+        console.warn('Error al guardar cola:', e);
+      }
+    }
+
+    // Agrega una operación a la cola e intenta procesarla si hay red
+    async function encolarOperacion(tabla, data) {
+      const operacion = {
+        id: Date.now() + Math.random(),
+        tabla: tabla,
+        payload: data,
+        creado: new Date().toISOString()
+      };
+      
+      COLA_SYNC.push(operacion);
+      guardarColaEnStorage();
+
+      // Intento inmediato de sincronización
+      if (navigator.onLine && sb) {
+        await procesarColaSincronizacion();
+      }
+    }
+
+    // Vacía la cola subiendo todo a Supabase en orden
+    async function procesarColaSincronizacion() {
+      if (!navigator.onLine || !sb || COLA_SYNC.length === 0) {
+        actualizarIndicadorConexion();
+        return;
+      }
+
+      console.log(`🔄 Procesando ${COLA_SYNC.length} operaciones pendientes...`);
+
+      // Copia de trabajo para procesar en orden
+      const pendientes = [...COLA_SYNC];
+
+      for (const op of pendientes) {
+        try {
+          const { error } = await sb.from(op.tabla).upsert([op.payload]);
+          if (!error) {
+            // Remueve la operación confirmada por la base de datos
+            COLA_SYNC = COLA_SYNC.filter(item => item.id !== op.id);
+            guardarColaEnStorage();
+          } else {
+            console.warn(`Rechazo temporal de Supabase en tabla ${op.tabla}:`, error.message);
+            break; // Si falla por permisos o esquema, no sigue forzando para no saturar
+          }
+        } catch (err) {
+          console.warn("Fallo de conexión al sincronizar lote:", err.message);
+          break; // Si se cortó la red en pleno envío, frena hasta el próximo intento
+        }
+      }
+      actualizarIndicadorConexion();
+    }
+
+    // Escuchas automáticas de reconexión
+    window.addEventListener('online', () => {
+      console.log('📶 Conexión restablecida. Sincronizando datos...');
+      procesarColaSincronizacion();
+    });
+
+    window.addEventListener('offline', () => {
+      actualizarIndicadorConexion();
+    });
+
+    // Indicador visual en el header
+    function actualizarIndicadorConexion() {
+      let badge = document.getElementById('badgeEstadoRed');
+      if (!badge) return;
+
+      if (!navigator.onLine) {
+        badge.style.background = '#dc2626';
+        badge.textContent = `🔴 Sin Red (${COLA_SYNC.length} pendientes)`;
+      } else if (COLA_SYNC.length > 0) {
+        badge.style.background = '#d97706';
+        badge.textContent = `🟡 Subiendo (${COLA_SYNC.length} pendientes)`;
+      } else {
+        badge.style.background = '#10b981';
+        badge.textContent = `🟢 En Línea (Sincronizado)`;
+      }
+    }
     // ⏱️ LISTADO BASE DE PLAZOS
     let PLAZOS_SISTEMA = [];
     try {
