@@ -753,7 +753,7 @@ HTML
                 <label style="margin-bottom:0;">Categoría *</label>
                 <button type="button" onclick="agregarCategoriaRapida()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">➕ Nueva</button>
               </div>
-              <select id="c_categoria" onchange="manejarSeleccionCategoria(this)">
+             <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
                 <option value="NOV" selected>Novillo (NOV)</option>
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
@@ -2084,19 +2084,29 @@ function poblarSelectorEventosReporte() {
     }
 
     async function seleccionarEvento(id, nombre, tipo) {
-      eventoActivoObj = EVENTOS_DEMO.find(ev => ev.id === id) || { id, nombre, tipo, fecha: HOY_STR };
-      document.getElementById('lblEventoActivo').textContent = `${nombre} (${tipo})`;
+      eventoActivoObj = EVENTOS_DEMO.find(ev => ev.id == id) || { id, nombre, tipo, fecha: HOY_STR };
+      const lblEv = document.getElementById('lblEventoActivo');
+      if (lblEv) lblEv.textContent = `${nombre} (${tipo})`;
       
       ocultarTodasLasSecciones();
-      document.getElementById('headerEventBar').classList.remove('hidden');
+      document.getElementById('headerEventBar')?.classList.remove('hidden');
 
       const esVistaConsignataria = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
-      document.getElementById('vistaConsignataria').classList.toggle('hidden', !esVistaConsignataria);
-      document.getElementById('vistaComprador').classList.toggle('hidden', esVistaConsignataria);
-      document.getElementById('subnavComprador').classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
+      document.getElementById('vistaConsignataria')?.classList.toggle('hidden', !esVistaConsignataria);
+      document.getElementById('vistaComprador')?.classList.toggle('hidden', esVistaConsignataria);
+      document.getElementById('subnavComprador')?.classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
 
-      cancelarEdicionCorralBase(false);
-      await cargarCorrales();
+      try {
+        cancelarEdicionCorralBase(false);
+      } catch (err) {
+        console.warn("Aviso en reseteo de corral:", err);
+      }
+
+      try {
+        await cargarCorrales();
+      } catch (err) {
+        console.error("Error al cargar corrales:", err);
+      }
     }
 
     function setTabComprador(tab) {
@@ -2141,7 +2151,7 @@ function poblarSelectorEventosReporte() {
     // 🐂 DINÁMICA DE TOROS & VENTA A LA ELECCIÓN
     // ==========================================
 function agregarCategoriaRapida() {
-      const nombre = prompt("Nombre de la nueva categoría (Ej: Manufactura, Vaca Invernada):");
+      const nombre = prompt("Ingresá el nombre de la nueva categoría (Ej: Vaca Conserva, Toro Rechazo):");
       if (!nombre || !nombre.trim()) return;
       const nombreLimpio = nombre.trim();
       const sel = document.getElementById('c_categoria');
@@ -2153,13 +2163,6 @@ function agregarCategoriaRapida() {
         sel.appendChild(opt);
       }
       evaluarDetalleTorosIndividuales();
-    }
-    
-    function agregarCategoriaRapida() {
-      const sel = document.getElementById('c_categoria');
-      if (!sel) return;
-      sel.value = 'NUEVA';
-      manejarSeleccionCategoria(sel);
     }
 
     function manejarSeleccionCategoria(sel) {
