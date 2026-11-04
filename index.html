@@ -739,15 +739,19 @@ HTML
             </div>
           </div>
 
-          <div class="grid-3">
-            <div class="form-group">
-              <label>Categoría *</label>
-             <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
+         <div class="form-group">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <label style="margin-bottom:0;">Categoría *</label>
+                <button type="button" onclick="agregarCategoriaRapida()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">➕ Nueva</button>
+              </div>
+              <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
                 <option value="NOV" selected>Novillo (NOV)</option>
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
                 <option value="VC">Vaca (VC)</option>
-                <option value="TR">Toro (TR - Reproductores)</option>
+                <option value="VCO">Vaca Conserva</option>
+                <option value="TR">Toro Reproductor (TR - Cabaña)</option>
+                <option value="TREC">Toro Rechazo (Consumo / Faena)</option>
                 <option value="TER">Ternero (TER)</option>
                 <option value="VQP">Vaquillona Preñada (VQP)</option>
               </select>
