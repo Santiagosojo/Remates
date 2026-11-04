@@ -1652,6 +1652,7 @@ HTML
     function abrirSeccionReportes() {
       ocultarTodasLasSecciones();
       document.getElementById('secReportesGlobales').classList.remove('hidden');
+      poblarSelectorEventosReporte();
       
       const esAdmin = (usuarioActual && usuarioActual.rol === 'admin');
       document.getElementById('panelFiltroPrimarioFechasAdmin').classList.toggle('hidden', !esAdmin);
