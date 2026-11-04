@@ -627,7 +627,13 @@ HTML
         <!-- FILTROS HABITUALES VENDEDOR -->
         <div id="filtrosVendedorReporte" class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; margin-bottom:12px;">
           <h4 style="margin-top:0; color:#1b4332; font-size:14px; margin-bottom: 10px;">🔍 Filtros para Consolidado General</h4>
-          <div class="grid-3">
+         <div class="grid-4">
+            <div class="form-group">
+              <label>Evento Específico</label>
+              <select id="f_evento_especifico_reporte" onchange="ejecutarReporteGlobal()">
+                <option value="TODOS" selected>Todos los Eventos</option>
+              </select>
+            </div>
             <div class="form-group">
               <label>Tipo de Evento</label>
               <select id="f_tipo_remate_reporte">
@@ -645,7 +651,9 @@ HTML
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
                 <option value="VC">Vaca (VC)</option>
-                <option value="TR">Toro (TR)</option>
+                <option value="VCO">Vaca Conserva</option>
+                <option value="TR">Toro Reproductor</option>
+                <option value="TREC">Toro Rechazo</option>
                 <option value="TER">Ternero (TER)</option>
                 <option value="VQP">Vaquillona Preñada (VQP)</option>
               </select>
@@ -660,11 +668,10 @@ HTML
               </select>
             </div>
           </div>
-          <div style="text-align:right;">
+          <div style="text-align:right; display:flex; justify-content:flex-end; gap:8px;">
+            <button type="button" class="btn-print" onclick="imprimirConsolidadoGlobal()">🖨️ Imprimir Consolidado</button>
             <button type="button" class="btn-submit" style="max-width:200px; background:#0284c7; padding:9px;" onclick="ejecutarReporteGlobal()">🔍 Filtrar Hacienda</button>
           </div>
-        </div>
-
         <!-- GRÁFICOS VENDEDOR -->
         <div id="seccionGraficosVendedor" class="hidden">
           <h4 style="color:var(--primary); margin:12px 0 6px 0;">📈 Curva de Ventas & Concentración de Precios</h4>
