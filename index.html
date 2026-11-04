@@ -1793,20 +1793,26 @@ HTML
       const container = document.getElementById('reporteGlobalTablaContainer');
       if (!container) return;
 
+  // REPORTE ESTÁNDAR VENDEDOR (3 FILTROS: TIPO, CATEGORÍA, REMATE)
       const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
       const catSel = document.getElementById('f_categoria_reporte')?.value || '';
-      const plazoSel = document.getElementById('f_plazo_reporte')?.value || '';
+      const evEspecifico = document.getElementById('f_evento_especifico_reporte')?.value || 'TODOS';
 
       let totalCab = 0, totalKilos = 0, totalMonto = 0;
       let filas = '', puntosDispersion = [], distribucionPrecios = {};
 
       Object.keys(CORRALES_DEMO).forEach(evId => {
+        // 1. Filtro por Remate Específico
+        if (evEspecifico !== 'TODOS' && evId != evEspecifico) return;
+
         const ev = EVENTOS_DEMO.find(e => e.id == evId) || { tipo_evento: 'Feria', fecha: HOY_STR };
+        
+        // 2. Filtro por Tipo de Evento
         if (tipoSel !== 'TODOS' && ev.tipo_evento !== tipoSel) return;
 
         CORRALES_DEMO[evId].forEach(c => {
+          // 3. Filtro por Categoría
           if (catSel && c.categoria !== catSel) return;
-          if (plazoSel && c.plazo_dias != plazoSel) return;
 
           const v = c.ventas && c.ventas.length > 0 ? c.ventas[0] : null;
           const cab = v ? (v.cabezas_vendidas || c.cabezas) : c.cabezas;
@@ -1837,7 +1843,7 @@ HTML
             </tr>
           `;
         });
-      });
+      }); 
 
       container.innerHTML = `
         <h4 style="margin-bottom:8px; color:var(--primary);">📊 Consolidado General de Hacienda</h4>
