@@ -572,9 +572,9 @@ HTML
         <div id="seccionReportesFechas" style="background:white; padding:18px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
           <h3 style="margin-top:0; color:#1b4332; font-size:16px;">📊 Análisis y Comparativa por Períodos</h3>
           
-          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom: 12px;">
-            <div style="flex:1; min-width:180px;">
-                <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Base de Comparación:</label><br>
+         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom: 12px;">
+            <div style="flex:1; min-width:160px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Base de Análisis:</label><br>
                 <input type="date" id="rep_fecha_base" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;">
             </div>
             <div style="flex:1; min-width:110px;">
@@ -589,8 +589,8 @@ HTML
             <div style="flex:1; min-width:140px;">
                 <label style="font-size:12px; font-weight:bold; color:#475569;">Tipo de Período:</label><br>
                 <select id="rep_tipo_periodo" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;" onchange="generarComparativaPeriodos()">
-                    <option value="dias">Días Anteriores</option>
-                    <option value="semanas" selected>Semanas Anteriores</option>
+                    <option value="eventos" selected>Eventos Anteriores</option>
+                    <option value="semanas">Semanas Anteriores</option>
                     <option value="meses">Meses Anteriores</option>
                     <option value="anos">Años Anteriores</option>
                 </select>
@@ -603,23 +603,27 @@ HTML
                     <option value="NT">Novillito (NT)</option>
                     <option value="VQ">Vaquillona (VQ)</option>
                     <option value="VC">Vaca (VC)</option>
-                    <option value="TR">Toro (TR)</option>
+                    <option value="VCO">Vaca Conserva</option>
+                    <option value="TR">Toro Reproductor</option>
+                    <option value="TREC">Toro Rechazo</option>
                     <option value="TER">Ternero (TER)</option>
                     <option value="VQP">Vaquillona Preñada (VQP)</option>
                 </select>
+            </div>
+            <div style="flex:1; min-width:90px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Peso Mín (kg):</label><br>
+                <input type="number" id="rep_peso_min" placeholder="Ej: 0" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;" oninput="generarComparativaPeriodos()">
+            </div>
+            <div style="flex:1; min-width:90px;">
+                <label style="font-size:12px; font-weight:bold; color:#475569;">Peso Máx (kg):</label><br>
+                <input type="number" id="rep_peso_max" placeholder="Ej: 600" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;" oninput="generarComparativaPeriodos()">
             </div>
             <div>
               <button type="button" onclick="generarComparativaPeriodos()" style="background:#1b4332; color:white; padding:8px 16px; border-radius:6px; border:none; font-weight:bold; cursor:pointer;">
                 🔍 Comparar
               </button>
             </div>
-          </div>
-
-          <div id="contenedorComparativaPeriodos" style="overflow-x:auto;">
-              <p style="color:#888; font-size:12px;">Seleccione los parámetros para generar la comparativa.</p>
-          </div>
-        </div>
-
+          </div> 
         <!-- FILTROS HABITUALES VENDEDOR -->
         <div id="filtrosVendedorReporte" class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; margin-bottom:12px;">
           <h4 style="margin-top:0; color:#1b4332; font-size:14px; margin-bottom: 10px;">🔍 Filtros para Consolidado General</h4>
