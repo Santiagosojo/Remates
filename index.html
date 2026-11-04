@@ -2062,6 +2062,21 @@ HTML
     // ==========================================
     // 🐂 DINÁMICA DE TOROS & VENTA A LA ELECCIÓN
     // ==========================================
+function agregarCategoriaRapida() {
+      const nombre = prompt("Nombre de la nueva categoría (Ej: Manufactura, Vaca Invernada):");
+      if (!nombre || !nombre.trim()) return;
+      const nombreLimpio = nombre.trim();
+      const sel = document.getElementById('c_categoria');
+      if (sel) {
+        const opt = document.createElement('option');
+        opt.value = nombreLimpio;
+        opt.textContent = nombreLimpio;
+        opt.selected = true;
+        sel.appendChild(opt);
+      }
+      evaluarDetalleTorosIndividuales();
+    }
+    
     function evaluarDetalleTorosIndividuales() {
       const cat = document.getElementById('c_categoria')?.value;
       const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
