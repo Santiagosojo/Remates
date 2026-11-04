@@ -3213,11 +3213,9 @@ HTML
       evaluarFechaYNombreEvento();
       onTipoEventoChange();
       renderListaCompradoresAutorizados();
+      poblarSelectCategorias(); // <--- ESTA ES LA LÍNEA QUE AGREGÁS
       evaluarDetalleTorosIndividuales();
       actualizarSelectorIntermediariosFiltro();
-      poblarSelectPlazos('c_cuotas_select');
-      poblarSelectorConsignatariasEvento();
-      actualizarEtiquetaSugeridaPlazo();
 
       // Sincronizar consignatarias activas de Supabase a la lista local
       if (sb) {
