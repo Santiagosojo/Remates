@@ -3081,8 +3081,9 @@ HTML
       }
     }
 
-    async function crearNuevoEvento(e) {
+   async function crearNuevoEvento(e) {
       if (e) e.preventDefault();
+
       const lugar = document.getElementById('ev_lugar').value.trim();
       const fecha = document.getElementById('ev_fecha').value;
       const nombre = document.getElementById('ev_nombre').value.trim();
@@ -3110,21 +3111,16 @@ HTML
         plazo_default: plazoDefault
       };
 
+      // 1. Lo muestra y guarda de inmediato en la laptop
       EVENTOS_DEMO.unshift(nuevo);
       guardarMemoriaFisicaLocal();
-
-      if (sb) {
-        try {
-          await sb.from('eventos').insert([nuevo]);
-        } catch (err) {
-          console.warn('Error al guardar evento en Supabase:', err);
-        }
-      }
-
       document.getElementById('formNuevoEvento').reset();
+
+      // 2. Lo manda a la cola para subirlo a Supabase ahora o cuando recupere señal
+      await encolarOperacion('eventos', nuevo);
+
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
-
     function imprimirBoletinPapel() {
       const area = document.getElementById('printArea');
       if (!area || !eventoActivoObj) return;
