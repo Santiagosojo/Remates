@@ -572,7 +572,7 @@ HTML
         <div id="seccionReportesFechas" style="background:white; padding:18px; border-radius:10px; border:1px solid #e2e8f0; margin-bottom:20px;">
           <h3 style="margin-top:0; color:#1b4332; font-size:16px;">📊 Análisis y Comparativa por Períodos</h3>
           
-         <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom: 12px;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; margin-bottom: 12px;">
             <div style="flex:1; min-width:160px;">
                 <label style="font-size:12px; font-weight:bold; color:#475569;">Fecha Base de Análisis:</label><br>
                 <input type="date" id="rep_fecha_base" class="input-control" style="padding:6px 10px; border-radius:6px; border:1px solid #cbd5e1; width:100%;">
@@ -623,9 +623,14 @@ HTML
                 🔍 Comparar
               </button>
             </div>
-          </div> 
+          </div>
+
+          <div id="contenedorComparativaPeriodos" style="overflow-x:auto;">
+              <p style="color:#888; font-size:12px;">Seleccione los parámetros para generar la comparativa.</p>
+          </div>
+        </div>
+
         <!-- FILTROS HABITUALES VENDEDOR -->
-      <!-- FILTROS HABITUALES VENDEDOR -->
         <div id="filtrosVendedorReporte" class="filter-box" style="background:#f8fafc; border:1px solid #e2e8f0; padding:12px; border-radius:6px; margin-bottom:12px;">
           <h4 style="margin-top:0; color:#1b4332; font-size:14px; margin-bottom: 10px;">🔍 Filtros para Consolidado General</h4>
           <div class="grid-3">
@@ -665,6 +670,7 @@ HTML
             <button type="button" class="btn-submit" style="max-width:200px; background:#0284c7; padding:9px;" onclick="ejecutarReporteGlobal()">🔍 Filtrar Hacienda</button>
           </div>
         </div>
+
         <!-- GRÁFICOS VENDEDOR -->
         <div id="seccionGraficosVendedor" class="hidden">
           <h4 style="color:var(--primary); margin:12px 0 6px 0;">📈 Curva de Ventas & Concentración de Precios</h4>
@@ -743,17 +749,13 @@ HTML
             </div>
           </div>
 
-         <div class="form-group">
+          <div class="grid-3">
+            <div class="form-group">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                 <label style="margin-bottom:0;">Categoría *</label>
                 <button type="button" onclick="agregarCategoriaRapida()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">➕ Nueva</button>
               </div>
-             <div class="form-group">
-              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                <label style="margin-bottom:0;">Categoría *</label>
-                <button type="button" onclick="agregarCategoriaRapida()" style="background:none; border:none; color:#0284c7; font-size:11px; font-weight:bold; cursor:pointer; text-decoration:underline;">➕ Nueva</button>
-              </div>
-             <select id="c_categoria" onchange="evaluarDetalleTorosIndividuales()">
+              <select id="c_categoria" onchange="manejarSeleccionCategoria(this)">
                 <option value="NOV" selected>Novillo (NOV)</option>
                 <option value="NT">Novillito (NT)</option>
                 <option value="VQ">Vaquillona (VQ)</option>
@@ -1044,63 +1046,7 @@ HTML
         localStorage.setItem('plazos_remates_v2', JSON.stringify(PLAZOS_SISTEMA));
       } catch (e) {}
     }
-// ==========================================
-    // 🏷️ GESTIÓN DE CATEGORÍAS DINÁMICAS
-    // ==========================================
-    let CATEGORIAS_SISTEMA = JSON.parse(localStorage.getItem('categorias_remates_v2')) || [
-      { id: 'NOV', texto: 'Novillo (NOV)' },
-      { id: 'NT', texto: 'Novillito (NT)' },
-      { id: 'VQ', texto: 'Vaquillona (VQ)' },
-      { id: 'VC', texto: 'Vaca (VC)' },
-      { id: 'TR', texto: 'Toro (TR - Reproductores)' },
-      { id: 'TER', texto: 'Ternero (TER)' },
-      { id: 'VQP', texto: 'Vaquillona Preñada (VQP)' }
-    ];
 
-    function guardarCategoriasEnStorage() {
-      localStorage.setItem('categorias_remates_v2', JSON.stringify(CATEGORIAS_SISTEMA));
-    }
-
-    function poblarSelectCategorias() {
-      const selects = [
-        { id: 'c_categoria', todas: false },
-        { id: 'rep_filtro_cat', todas: true },
-        { id: 'f_categoria_reporte', todas: true },
-        { id: 'f_categoria', todas: true }
-      ];
-
-      selects.forEach(s => {
-        const el = document.getElementById(s.id);
-        if (!el) return;
-        const valActual = el.value;
-        let html = s.todas ? '<option value="">Todas las Categorías</option>' : '';
-        CATEGORIAS_SISTEMA.forEach(cat => {
-          html += `<option value="${cat.id}">${cat.texto}</option>`;
-        });
-        if (!s.todas) {
-          html += `<option value="NUEVA" style="color:#0284c7; font-weight:bold;">➕ Crear nueva categoría...</option>`;
-        }
-        el.innerHTML = html;
-        if (valActual && valActual !== 'NUEVA') el.value = valActual;
-      });
-    }
-
-    function manejarCambioCategoria(el) {
-      if (el.value === 'NUEVA') {
-        const nueva = prompt('Ingrese el nombre de la nueva categoría (Ej: Vaca Conserva):');
-        if (nueva && nueva.trim() !== '') {
-          const nombreStr = nueva.trim();
-          const idStr = nombreStr.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 4) + Date.now().toString().slice(-4);
-          CATEGORIAS_SISTEMA.push({ id: idStr, texto: nombreStr });
-          guardarCategoriasEnStorage();
-          poblarSelectCategorias(); 
-          el.value = idStr;
-        } else {
-          el.selectedIndex = 0;
-        }
-      }
-      evaluarDetalleTorosIndividuales();
-    }
     // ==========================================
     // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE-FIRST)
     // ==========================================
@@ -1177,6 +1123,219 @@ HTML
       return "";
     }
 
+    // ==========================================
+    // 📋 SELECCIÓN DE EVENTOS & CARGA DE CORRALES
+    // ==========================================
+    async function seleccionarEvento(id, nombre, tipo) {
+      eventoActivoObj = EVENTOS_DEMO.find(ev => ev.id == id) || { id, nombre, tipo, fecha: HOY_STR };
+      const lblEv = document.getElementById('lblEventoActivo');
+      if (lblEv) lblEv.textContent = `${nombre} (${tipo})`;
+      
+      ocultarTodasLasSecciones();
+      const headBar = document.getElementById('headerEventBar');
+      if (headBar) headBar.classList.remove('hidden');
+
+      const esVistaConsignataria = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
+      const vistaCons = document.getElementById('vistaConsignataria');
+      const vistaComp = document.getElementById('vistaComprador');
+      const subnavComp = document.getElementById('subnavComprador');
+
+      if (vistaCons) vistaCons.classList.toggle('hidden', !esVistaConsignataria);
+      if (vistaComp) vistaComp.classList.toggle('hidden', esVistaConsignataria);
+      if (subnavComp) subnavComp.classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
+
+      try {
+        cancelarEdicionCorralBase(false);
+      } catch (err) {
+        console.warn("Aviso en reseteo de corral:", err);
+      }
+
+      try {
+        await cargarCorrales();
+      } catch (err) {
+        console.error("Error al cargar corrales:", err);
+      }
+    }
+
+    function setTabComprador(tab) {
+      document.getElementById('btnTabRemate')?.classList.toggle('active', tab === 'remate');
+      document.getElementById('btnTabMisCompras')?.classList.toggle('active', tab === 'compras');
+      document.getElementById('secCompradorRemate')?.classList.toggle('hidden', tab !== 'remate');
+      document.getElementById('secCompradorCompras')?.classList.toggle('hidden', tab !== 'compras');
+      if (tab === 'compras') renderMisCompras();
+    }
+
+    async function cargarCorrales() {
+      if (!eventoActivoObj) return;
+
+      corralesGlobales = (CORRALES_DEMO && CORRALES_DEMO[eventoActivoObj.id]) ? CORRALES_DEMO[eventoActivoObj.id] : [];
+
+      if (sb) {
+        try {
+          const { data: dbLotes, error: errLotes } = await sb
+            .from('corrales')
+            .select('*')
+            .eq('evento_id', eventoActivoObj.id);
+
+          if (!errLotes && dbLotes && dbLotes.length > 0) {
+            if (!CORRALES_DEMO) CORRALES_DEMO = {};
+            CORRALES_DEMO[eventoActivoObj.id] = dbLotes;
+            corralesGlobales = dbLotes;
+            guardarMemoriaFisicaLocal();
+          }
+        } catch (e) {
+          console.warn("Consulta Supabase corrales:", e);
+        }
+      }
+
+      actualizarPistaActivaState();
+      renderVistaConsignataria();
+      renderVistaComprador();
+      renderMisCompras();
+    }
+
+    // ==========================================
+    // 🏷️ GESTIÓN DE CATEGORÍAS & TOROS REPRODUCTORES
+    // ==========================================
+    function agregarCategoriaRapida() {
+      const sel = document.getElementById('c_categoria');
+      if (!sel) return;
+      sel.value = 'NUEVA';
+      manejarSeleccionCategoria(sel);
+    }
+
+    function manejarSeleccionCategoria(sel) {
+      if (!sel) return;
+      if (sel.value === 'NUEVA') {
+        const nombre = prompt("Ingresá el nombre de la nueva categoría (Ej: Vaca Conserva, Toro Manufactura):");
+        if (nombre && nombre.trim()) {
+          const nombreLimpio = nombre.trim();
+          const opt = document.createElement('option');
+          opt.value = nombreLimpio;
+          opt.textContent = nombreLimpio;
+
+          const optNueva = sel.querySelector('option[value="NUEVA"]');
+          if (optNueva) sel.insertBefore(opt, optNueva);
+          else sel.appendChild(opt);
+
+          sel.value = nombreLimpio;
+
+          ['rep_filtro_cat', 'f_categoria_reporte'].forEach(id => {
+            const s = document.getElementById(id);
+            if (s) {
+              const o = document.createElement('option');
+              o.value = nombreLimpio;
+              o.textContent = nombreLimpio;
+              s.appendChild(o);
+            }
+          });
+        } else {
+          sel.selectedIndex = 0;
+        }
+      }
+      evaluarDetalleTorosIndividuales();
+    }
+
+    function evaluarDetalleTorosIndividuales() {
+      const catSelect = document.getElementById('c_categoria');
+      const inputCabezas = document.getElementById('c_cabezas');
+      const box = document.getElementById('boxDetalleTorosIndividuales');
+      const container = document.getElementById('contenedorInputsTorosIndividuales');
+      const lblCount = document.getElementById('lblCountTorosInfo');
+
+      if (!box || !container || !catSelect) return;
+
+      const cat = catSelect.value || '';
+      const cabezas = parseInt(inputCabezas?.value) || 0;
+
+      // ÚNICAMENTE 'TR' abre las fichas individuales de toros
+      const esToro = (cat === 'TR');
+      if (!esToro || cabezas <= 0 || cabezas > 25) {
+        box.classList.add('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      box.classList.remove('hidden');
+      if (lblCount) lblCount.textContent = `(${cabezas} toros a detallar)`;
+
+      let inputsHtml = '';
+      for (let i = 1; i <= cabezas; i++) {
+        inputsHtml += `
+          <div class="toro-input-card">
+            <strong style="color:#1e40af; font-size:12px;">Toro #${i}:</strong>
+            <div class="grid-4" style="margin-top:4px;">
+              <div>
+                <label>Número / RP</label>
+                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}">
+              </div>
+              <div>
+                <label>HBA / Control</label>
+                <input type="text" id="toro_hba_${i}" placeholder="Ej: PC / HBA">
+              </div>
+              <div>
+                <label>Peso Indiv. (kg)</label>
+                <input type="number" id="toro_peso_${i}" placeholder="Ej: 720">
+              </div>
+              <div>
+                <label>Circ. Escrotal (CE)</label>
+                <input type="text" id="toro_ce_${i}" placeholder="Ej: 41 cm">
+              </div>
+            </div>
+            <div class="grid-2" style="margin-top:6px;">
+              <div>
+                <label>Aptitud para Vaquillonas</label>
+                <select id="toro_apt_${i}">
+                  <option value="🟢 Apto Vaquillonas (Parto Muy Fácil)">🟢 Apto Vaquillonas 15m (Parto Muy Fácil)</option>
+                  <option value="🟢 Apto Vaquillonas (Facilidad comprobada)">🟢 Apto Vaquillonas (Facilidad comprobada)</option>
+                  <option value="🟡 Rodeo General / Vacas">🟡 Rodeo General / Vacas</option>
+                  <option value="⚪ No Especificado">⚪ No Especificado</option>
+                </select>
+              </div>
+              <div>
+                <label>Notas Individuales</label>
+                <input type="text" id="toro_obs_${i}" placeholder="Ej: Mocho, frame moderado">
+              </div>
+            </div>
+          </div>
+        `;
+      }
+      container.innerHTML = inputsHtml;
+    }
+
+    function cancelarEdicionCorralBase(sugerirCorrelativo = false) {
+      const remitentePrevio = document.getElementById('c_remitente')?.value || '';
+      const form = document.getElementById('formCargarCorral');
+      if (form) form.reset();
+      
+      const editId = document.getElementById('c_edit_id');
+      if (editId) editId.value = '';
+
+      const tit = document.getElementById('txtTituloFormCorral');
+      if (tit) tit.textContent = '➕ Cargar Nuevo Corral / Lote en Remate';
+
+      const btnG = document.getElementById('btnGuardarCorralBase');
+      if (btnG) btnG.textContent = '🐂 Guardar Datos del Corral';
+
+      const btnC = document.getElementById('btnCancelarEditCorral');
+      if (btnC) btnC.classList.add('hidden');
+
+      evaluarDetalleTorosIndividuales();
+      poblarSelectPlazos('c_cuotas_select');
+
+      if (sugerirCorrelativo && typeof ultimoNumeroCorralCargado !== 'undefined' && ultimoNumeroCorralCargado) {
+        const prox = calcularSiguienteCorral(ultimoNumeroCorralCargado);
+        if (prox) {
+          const numInput = document.getElementById('c_numero');
+          if (numInput) numInput.value = prox;
+          if (remitentePrevio) {
+            const remInput = document.getElementById('c_remitente');
+            if (remInput) remInput.value = remitentePrevio;
+          }
+          document.getElementById('c_cabezas')?.focus();
+        }
+      }
+    }
     // ==========================================
     // ⏱️ GESTIÓN DE PLAZOS: SELECTOR Y MODAL
     // ==========================================
@@ -1489,7 +1648,8 @@ HTML
         };
         confirmarIngresoModo(rolFinal);
       } else {
-        alert('⚠️ Credenciales incorrectas.\nVerifique email y contraseña.');
+        alert('⚠️ Credenciales incorrectas.
+Verifique email y contraseña.');
       }
     }
 
@@ -1629,7 +1789,8 @@ HTML
 
       guardarMemoriaFisicaLocal();
 
-      alert(`✔ Consignataria "${nombre}" y usuario creados con éxito.\nUsuario: ${email}`);
+      alert(`✔ Consignataria "${nombre}" y usuario creados con éxito.
+Usuario: ${email}`);
       document.getElementById('formAltaConsignataria').reset();
       actualizarSelectorIntermediariosFiltro();
       poblarSelectorConsignatariasEvento();
@@ -1658,7 +1819,6 @@ HTML
     function abrirSeccionReportes() {
       ocultarTodasLasSecciones();
       document.getElementById('secReportesGlobales').classList.remove('hidden');
-      poblarSelectorEventosReporte();
       
       const esAdmin = (usuarioActual && usuarioActual.rol === 'admin');
       document.getElementById('panelFiltroPrimarioFechasAdmin').classList.toggle('hidden', !esAdmin);
@@ -1678,9 +1838,10 @@ HTML
       actualizarSelectorIntermediariosFiltro();
       ejecutarReporteGlobal();
       generarComparativaPeriodos();
+      poblarSelectorEventosReporte();
     }
 
- function generarComparativaPeriodos() {
+    function generarComparativaPeriodos() {
       const fechaBaseStr = document.getElementById('rep_fecha_base')?.value;
       const numPeriodos = parseInt(document.getElementById('rep_cantidad_periodos')?.value) || 3;
       const tipoPeriodo = document.getElementById('rep_tipo_periodo')?.value || 'eventos';
@@ -1795,12 +1956,255 @@ HTML
       html += `</tr></tbody></table>`;
       document.getElementById('contenedorComparativaPeriodos').innerHTML = html;
     }
-
+    
     function ejecutarReporteGlobal() {
       const container = document.getElementById('reporteGlobalTablaContainer');
       if (!container) return;
 
-  // REPORTE ESTÁNDAR VENDEDOR (3 FILTROS: TIPO, CATEGORÍA, REMATE)
+      if (usuarioActual && usuarioActual.rol === 'admin') {
+        const fDesde = document.getElementById('rep_admin_desde')?.value || '';
+        const fHasta = document.getElementById('rep_admin_hasta')?.value || '';
+        const interFiltro = document.getElementById('rep_admin_intermediario')?.value || 'TODOS';
+        const tipoReporte = document.getElementById('sel_admin_reporte_tipo')?.value || 'listado_eventos';
+
+        const eventosFiltrados = EVENTOS_DEMO.filter(ev => {
+          if (fDesde && ev.fecha < fDesde) return false;
+          if (fHasta && ev.fecha > fHasta) return false;
+
+          const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id);
+          const firmaInter = firma ? (firma.intermediario || '').trim() : '';
+
+          if (interFiltro === 'DIRECTO') {
+            return !firmaInter;
+          } else if (interFiltro !== 'TODOS') {
+            return firmaInter.toLowerCase() === interFiltro.toLowerCase();
+          }
+          return true;
+        });
+
+        if (tipoReporte === 'listado_eventos') {
+          let filasHtml = '';
+          let totCabGeneral = 0, totMontoGeneral = 0;
+
+          eventosFiltrados.forEach(ev => {
+            const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id) || { nombre: 'Consignataria', intermediario: '' };
+            const lotes = CORRALES_DEMO[ev.id] || [];
+            let cabEvento = 0, montoEvento = 0;
+
+            lotes.forEach(l => {
+              cabEvento += (l.cabezas || 0);
+              if (l.ventas && l.ventas.length > 0) {
+                l.ventas.forEach(v => montoEvento += (v.monto_final || 0));
+              }
+            });
+
+            totCabGeneral += cabEvento;
+            totMontoGeneral += montoEvento;
+
+            filasHtml += `
+              <tr>
+                <td><strong>${ev.fecha}</strong></td>
+                <td><strong>${ev.nombre}</strong> <span class="event-type-badge">${ev.tipo_evento}</span></td>
+                <td>${firma.nombre}</td>
+                <td><span style="color:#0369a1; font-weight:bold;">${firma.intermediario || 'Directo (Sin Intermediario)'}</span></td>
+                <td>${ev.lugar || '-'}</td>
+                <td style="text-align:center;">${lotes.length}</td>
+                <td style="text-align:right;">${cabEvento.toLocaleString('es-AR')} cab.</td>
+                <td style="text-align:right; font-weight:bold; color:#166534;">$${montoEvento.toLocaleString('es-AR')}</td>
+                <td style="text-align:center;" class="no-print">
+                  <button type="button" class="btn-preset" style="background:#7e22ce; color:white; border:none;" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\'")}', '${ev.tipo_evento}')">🔍 Auditar Remate</button>
+                </td>
+              </tr>
+            `;
+          });
+
+          container.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h4 style="color:#5b21b6;">📋 Listado Completo de Eventos de Remate en el Rango</h4>
+              <span style="font-size:11px; color:#6b7280;">Intermediario: <strong>${interFiltro}</strong> | Fechas: <strong>${fDesde || 'Inicio'} al ${fHasta || 'Hoy'}</strong></span>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>FECHA</th><th>REMATE / EVENTO</th><th>CONSIGNATARIA</th><th>INTERMEDIARIO</th><th>LUGAR</th><th>CORRALES</th><th>CABEZAS</th><th>MONTO TOTAL ($)</th><th class="no-print">ACCIÓN</th>
+                </tr>
+              </thead>
+              <tbody>${filasHtml || '<tr><td colspan="9" style="text-align:center; color:#888;">No se encontraron remates en este rango con los filtros aplicados.</td></tr>'}</tbody>
+              <tfoot>
+                <tr style="background:#f5f3ff; font-weight:bold;">
+                  <td colspan="6">TOTALES ACUMULADOS EN EL PERÍODO:</td>
+                  <td style="text-align:right;">${totCabGeneral.toLocaleString('es-AR')} cab.</td>
+                  <td style="text-align:right; color:#166534;">$${totMontoGeneral.toLocaleString('es-AR')}</td>
+                  <td class="no-print"></td>
+                </tr>
+              </tfoot>
+            </table>
+          `;
+          return;
+        }
+
+        if (tipoReporte === 'cabezas_categoria') {
+          const catMap = {};
+          let totalCabezasRango = 0;
+
+          eventosFiltrados.forEach(ev => {
+            const lotes = CORRALES_DEMO[ev.id] || [];
+            lotes.forEach(l => {
+              const cat = l.categoria || 'OTRO';
+              if (!catMap[cat]) catMap[cat] = { cabezas: 0, corrales: 0, kilosTot: 0, montoTot: 0 };
+              
+              catMap[cat].cabezas += (l.cabezas || 0);
+              catMap[cat].corrales += 1;
+              catMap[cat].kilosTot += ((l.cabezas || 0) * (l.peso_promedio || 0));
+              totalCabezasRango += (l.cabezas || 0);
+
+              if (l.ventas && l.ventas.length > 0) {
+                l.ventas.forEach(v => catMap[cat].montoTot += (v.monto_final || 0));
+              }
+            });
+          });
+
+          let filasCatHtml = '';
+          const descripcionesCat = {
+            'NOV': 'Novillos', 'NT': 'Novillitos', 'VQ': 'Vaquillonas', 'VC': 'Vacas',
+            'TR': 'Toros / Reproductores', 'TER': 'Terneros / Invernada', 'VQP': 'Vaquillonas Preñadas'
+          };
+
+          Object.keys(catMap).forEach(cat => {
+            const item = catMap[cat];
+            const porc = totalCabezasRango > 0 ? ((item.cabezas / totalCabezasRango) * 100).toFixed(1) : 0;
+            const promKg = item.kilosTot > 0 ? (item.kilosTot / item.cabezas).toFixed(0) : '-';
+
+            filasCatHtml += `
+              <tr>
+                <td><strong>${cat}</strong> — ${descripcionesCat[cat] || cat}</td>
+                <td style="text-align:center;">${item.corrales} lotes</td>
+                <td style="text-align:right; font-weight:bold;">${item.cabezas.toLocaleString('es-AR')} cab.</td>
+                <td style="text-align:center;"><strong>${porc}%</strong></td>
+                <td style="text-align:right;">${promKg} kg</td>
+                <td style="text-align:right; font-weight:bold; color:#166534;">$${item.montoTot.toLocaleString('es-AR')}</td>
+              </tr>
+            `;
+          });
+
+          container.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h4 style="color:#5b21b6;">🐂 Resumen de Cabezas Ofrecidas por Categoría en el Rango</h4>
+              <span style="font-size:11px; color:#6b7280;">Total Hacienda: <strong>${totalCabezasRango.toLocaleString('es-AR')} cabezas</strong></span>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>CATEGORÍA DE HACIENDA</th><th>CORRALES OFRECIDOS</th><th>CABEZAS TOTALES</th><th>PARTICIPACIÓN (%)</th><th>PESO PROM. ESTIMADO</th><th>SUBTOTAL OPERADO ($)</th>
+                </tr>
+              </thead>
+              <tbody>${filasCatHtml || '<tr><td colspan="6" style="text-align:center; color:#888;">Sin hacienda en el período marcado.</td></tr>'}</tbody>
+              <tfoot>
+                <tr style="background:#f5f3ff; font-weight:bold;">
+                  <td>TOTAL OFERTA EN EL RANGO:</td><td>-</td>
+                  <td style="text-align:right;">${totalCabezasRango.toLocaleString('es-AR')} cab.</td>
+                  <td style="text-align:center;">100%</td><td>-</td><td>-</td>
+                </tr>
+              </tfoot>
+            </table>
+          `;
+          return;
+        }
+
+        if (tipoReporte === 'comisiones_intermediario') {
+          const interMap = {};
+
+          CONSIGNATARIAS_DEMO.forEach(cons => {
+            const interName = cons.intermediario || 'Directo (Sin Intermediario)';
+            if (interFiltro !== 'TODOS') {
+              if (interFiltro === 'DIRECTO' && cons.intermediario) return;
+              if (interFiltro !== 'DIRECTO' && cons.intermediario.toLowerCase() !== interFiltro.toLowerCase()) return;
+            }
+
+            if (!interMap[interName]) {
+              interMap[interName] = {
+                nombre: interName,
+                consignatarias: [],
+                eventos: [],
+                cabezasTotal: 0,
+                montoTotal: 0,
+                comisionPorc: cons.comision || 0
+              };
+            }
+            if (!interMap[interName].consignatarias.includes(cons.nombre)) {
+              interMap[interName].consignatarias.push(cons.nombre);
+            }
+
+            EVENTOS_DEMO.filter(e => e.consignataria_id === cons.id).forEach(ev => {
+              if (fDesde && ev.fecha < fDesde) return;
+              if (fHasta && ev.fecha > fHasta) return;
+
+              if (!interMap[interName].eventos.includes(ev.id)) {
+                interMap[interName].eventos.push(ev.id);
+              }
+
+              const lotes = CORRALES_DEMO[ev.id] || [];
+              lotes.forEach(l => {
+                interMap[interName].cabezasTotal += (l.cabezas || 0);
+                if (l.ventas && l.ventas.length > 0) {
+                  l.ventas.forEach(v => interMap[interName].montoTotal += (v.monto_final || 0));
+                }
+              });
+            });
+          });
+
+          let filasInterHtml = '';
+          let totEv = 0, totCab = 0, totMonto = 0, totComis = 0;
+
+          Object.values(interMap).forEach(row => {
+            const numEventos = row.eventos.length;
+            const comisPesos = (row.montoTotal * row.comisionPorc) / 100;
+            totEv += numEventos;
+            totCab += row.cabezasTotal;
+            totMonto += row.montoTotal;
+            totComis += comisPesos;
+
+            filasInterHtml += `
+              <tr>
+                <td><strong>${row.nombre}</strong></td>
+                <td>${row.consignatarias.join(', ')}</td>
+                <td style="text-align:center; font-weight:bold; color:#5b21b6;">${numEventos} remates</td>
+                <td style="text-align:right;">${row.cabezasTotal.toLocaleString('es-AR')} cab.</td>
+                <td style="text-align:right;">$${row.montoTotal.toLocaleString('es-AR')}</td>
+                <td style="text-align:center;">${row.comisionPorc}%</td>
+                <td style="text-align:right; color:#166534; font-weight:bold;">$${comisPesos.toLocaleString('es-AR')}</td>
+              </tr>
+            `;
+          });
+
+          container.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <h4 style="color:#5b21b6;">💰 Liquidación de Comisiones & Eventos por Intermediario</h4>
+              <span style="font-size:11px; color:#6b7280;">Filtro: <strong>${interFiltro}</strong> | Período: <strong>${fDesde || 'Inicio'} al ${fHasta || 'Hoy'}</strong></span>
+            </div>
+            <table class="report-table">
+              <thead>
+                <tr>
+                  <th>INTERMEDIARIO</th><th>CONSIGNATARIAS QUE SUMÓ</th><th>EVENTOS CON COMISIÓN</th><th>CABEZAS TOTALES</th><th>VOLUMEN OPERADO ($)</th><th>% COMISIÓN</th><th>TOTAL COMISIÓN A LIQUIDAR ($)</th>
+                </tr>
+              </thead>
+              <tbody>${filasInterHtml || '<tr><td colspan="7" style="text-align:center; color:#888;">No hay intermediarios activos con remates en este período.</td></tr>'}</tbody>
+              <tfoot>
+                <tr style="background:#f5f3ff; font-weight:bold;">
+                  <td colspan="2">TOTAL LIQUIDACIÓN ADMIN:</td>
+                  <td style="text-align:center;">${totEv} remates</td>
+                  <td style="text-align:right;">${totCab.toLocaleString('es-AR')} cab.</td>
+                  <td style="text-align:right;">$${totMonto.toLocaleString('es-AR')}</td>
+                  <td>-</td>
+                  <td style="text-align:right; color:#166534;">$${totComis.toLocaleString('es-AR')}</td>
+                </tr>
+              </tfoot>
+            </table>
+          `;
+          return;
+        }
+      }
+
       const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
       const catSel = document.getElementById('f_categoria_reporte')?.value || '';
       const evEspecifico = document.getElementById('f_evento_especifico_reporte')?.value || 'TODOS';
@@ -1850,7 +2254,7 @@ HTML
             </tr>
           `;
         });
-      }); 
+      });
 
       container.innerHTML = `
         <h4 style="margin-bottom:8px; color:var(--primary);">📊 Consolidado General de Hacienda</h4>
@@ -1897,7 +2301,8 @@ HTML
         if (el) el.remove();
       }, 500);
     }
-function poblarSelectorEventosReporte() {
+
+    function poblarSelectorEventosReporte() {
       const sel = document.getElementById('f_evento_especifico_reporte');
       if (!sel) return;
 
@@ -1941,6 +2346,7 @@ function poblarSelectorEventosReporte() {
       ventana.print();
       ventana.close();
     }
+
     function actualizarGraficosVendedor(puntos, distribucion) {
       if (usuarioActual && usuarioActual.rol === 'admin') return;
       const ctxDisp = document.getElementById('chartDispersion')?.getContext('2d');
@@ -2066,7 +2472,7 @@ function poblarSelectorEventosReporte() {
         const firma = CONSIGNATARIAS_DEMO.find(c => c.id === ev.consignataria_id);
 
         html += `
-          <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
+          <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\'")}', '${ev.tipo_evento}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>${ev.nombre}</strong>
               <div>
@@ -2081,733 +2487,6 @@ function poblarSelectorEventosReporte() {
         `;
       });
       container.innerHTML = html;
-    }
-
-    async function seleccionarEvento(id, nombre, tipo) {
-      eventoActivoObj = EVENTOS_DEMO.find(ev => ev.id == id) || { id, nombre, tipo, fecha: HOY_STR };
-      const lblEv = document.getElementById('lblEventoActivo');
-      if (lblEv) lblEv.textContent = `${nombre} (${tipo})`;
-      
-      ocultarTodasLasSecciones();
-      document.getElementById('headerEventBar')?.classList.remove('hidden');
-
-      const esVistaConsignataria = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
-      document.getElementById('vistaConsignataria')?.classList.toggle('hidden', !esVistaConsignataria);
-      document.getElementById('vistaComprador')?.classList.toggle('hidden', esVistaConsignataria);
-      document.getElementById('subnavComprador')?.classList.toggle('hidden', modoOperatorioActivo !== 'comprador');
-
-      try {
-        cancelarEdicionCorralBase(false);
-      } catch (err) {
-        console.warn("Aviso en reseteo de corral:", err);
-      }
-
-      try {
-        await cargarCorrales();
-      } catch (err) {
-        console.error("Error al cargar corrales:", err);
-      }
-    }
-
-    function setTabComprador(tab) {
-      document.getElementById('btnTabRemate').classList.toggle('active', tab === 'remate');
-      document.getElementById('btnTabMisCompras').classList.toggle('active', tab === 'compras');
-      document.getElementById('secCompradorRemate').classList.toggle('hidden', tab !== 'remate');
-      document.getElementById('secCompradorCompras').classList.toggle('hidden', tab !== 'compras');
-      if (tab === 'compras') renderMisCompras();
-    }
-
-    async function cargarCorrales() {
-      if (!eventoActivoObj) return;
-
-      // 1. Cargar desde memoria local de inmediato
-      corralesGlobales = CORRALES_DEMO[eventoActivoObj.id] || [];
-
-      // 2. Traer desde Supabase si está disponible
-      if (sb) {
-        try {
-          const { data: dbLotes, error: errLotes } = await sb
-            .from('corrales')
-            .select('*')
-            .eq('evento_id', eventoActivoObj.id);
-
-          if (!errLotes && dbLotes && dbLotes.length > 0) {
-            CORRALES_DEMO[eventoActivoObj.id] = dbLotes;
-            corralesGlobales = dbLotes;
-            guardarMemoriaFisicaLocal();
-          }
-        } catch (e) {
-          console.warn("Consulta Supabase corrales:", e);
-        }
-      }
-
-      actualizarPistaActivaState();
-      renderVistaConsignataria();
-      renderVistaComprador();
-      renderMisCompras();
-    }
-
-    // ==========================================
-    // 🐂 DINÁMICA DE TOROS & VENTA A LA ELECCIÓN
-    // ==========================================
-function agregarCategoriaRapida() {
-      const nombre = prompt("Ingresá el nombre de la nueva categoría (Ej: Vaca Conserva, Toro Rechazo):");
-      if (!nombre || !nombre.trim()) return;
-      const nombreLimpio = nombre.trim();
-      const sel = document.getElementById('c_categoria');
-      if (sel) {
-        const opt = document.createElement('option');
-        opt.value = nombreLimpio;
-        opt.textContent = nombreLimpio;
-        opt.selected = true;
-        sel.appendChild(opt);
-      }
-      evaluarDetalleTorosIndividuales();
-    }
-
-    function manejarSeleccionCategoria(sel) {
-      if (sel.value === 'NUEVA') {
-        const nombre = prompt("Ingresá el nombre de la nueva categoría (Ej: Vaca Conserva, Toro Manufactura):");
-        if (nombre && nombre.trim()) {
-          const nombreLimpio = nombre.trim();
-          
-          // Crea la opción real con el nombre que escribiste
-          const opt = document.createElement('option');
-          opt.value = nombreLimpio;
-          opt.textContent = nombreLimpio;
-          
-          // La inserta antes de la opción '➕ Crear nueva...'
-          const optNueva = sel.querySelector('option[value="NUEVA"]');
-          if (optNueva) {
-            sel.insertBefore(opt, optNueva);
-          } else {
-            sel.appendChild(opt);
-          }
-          
-          // Deja seleccionada la nueva categoría creada
-          sel.value = nombreLimpio;
-
-          // También la agrega a los filtros de reportes
-          ['rep_filtro_cat', 'f_categoria_reporte'].forEach(id => {
-            const s = document.getElementById(id);
-            if (s) {
-              const o = document.createElement('option');
-              o.value = nombreLimpio;
-              o.textContent = nombreLimpio;
-              s.appendChild(o);
-            }
-          });
-        } else {
-          // Si tocás cancelar o lo dejás vacío, vuelve a Novillo
-          sel.selectedIndex = 0;
-        }
-      }
-
-      // Ejecuta la verificación de toros reproductores
-      evaluarDetalleTorosIndividuales();
-    }
-    
-    function evaluarDetalleTorosIndividuales() {
-      const cat = document.getElementById('c_categoria')?.value;
-      const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
-      const box = document.getElementById('boxDetalleTorosIndividuales');
-      const container = document.getElementById('contenedorInputsTorosIndividuales');
-      const lblCount = document.getElementById('lblCountTorosInfo');
-
-      if (!box || !container) return;
-
-      const esToro = (cat === 'TR');
-      if (!esToro || cabezas <= 0 || cabezas > 25) {
-        box.classList.add('hidden');
-        container.innerHTML = '';
-        return;
-      }
-
-      box.classList.remove('hidden');
-      if (lblCount) lblCount.textContent = `(${cabezas} toros a detallar)`;
-
-      let inputsHtml = '';
-      for (let i = 1; i <= cabezas; i++) {
-        inputsHtml += `
-          <div class="toro-input-card">
-            <strong style="color:#1e40af; font-size:12px;">Toro #${i}:</strong>
-            <div class="grid-4" style="margin-top:4px;">
-              <div>
-                <label>Número / RP</label>
-                <input type="text" id="toro_rp_${i}" placeholder="Ej: RP ${100 + i}">
-              </div>
-              <div>
-                <label>HBA / Control</label>
-                <input type="text" id="toro_hba_${i}" placeholder="Ej: PC / HBA">
-              </div>
-              <div>
-                <label>Peso Indiv. (kg)</label>
-                <input type="number" id="toro_peso_${i}" placeholder="Ej: 720">
-              </div>
-              <div>
-                <label>Circ. Escrotal (CE)</label>
-                <input type="text" id="toro_ce_${i}" placeholder="Ej: 41 cm">
-              </div>
-            </div>
-            <div class="grid-2" style="margin-top:6px;">
-              <div>
-                <label>Aptitud para Vaquillonas</label>
-                <select id="toro_apt_${i}">
-                  <option value="🟢 Apto Vaquillonas (Parto Muy Fácil)">🟢 Apto Vaquillonas 15m (Parto Muy Fácil)</option>
-                  <option value="🟢 Apto Vaquillonas (Facilidad comprobada)">🟢 Apto Vaquillonas (Facilidad comprobada)</option>
-                  <option value="🟡 Rodeo General / Vacas">🟡 Rodeo General / Vacas</option>
-                  <option value="⚪ No Especificado">⚪ No Especificado</option>
-                </select>
-              </div>
-              <div>
-                <label>Notas Individuales</label>
-                <input type="text" id="toro_obs_${i}" placeholder="Ej: Mocho, frame moderado">
-              </div>
-            </div>
-          </div>
-        `;
-      }
-      container.innerHTML = inputsHtml;
-    }
-
-    function abrirModalVenta(corralId, modo) {
-      const c = corralesGlobales.find(item => item.id === corralId);
-      if (!c) return;
-
-      document.getElementById('mv_corral_id').value = c.id;
-      document.getElementById('mv_modo').value = modo;
-      document.getElementById('mv_corral_info').innerHTML = `
-        <strong>Corral #${c.numero_corral}</strong> — Remitente: <strong>${c.remitente}</strong><br>
-        Hacienda: ${c.cabezas} Cabezas | ${c.categoria} ${c.raza} (${c.peso_promedio || '-'} kg)
-      `;
-
-      const boxEleccion = document.getElementById('boxEleccionTorosVenta');
-      const contenedorCheckboxes = document.getElementById('contenedorEleccionTorosCheckboxes');
-      const inputComp = document.getElementById('mv_comprador_input');
-      const inputPrec = document.getElementById('mv_precio_input');
-      const listaAuto = document.getElementById('mv_autocomplete_list');
-
-      listaAuto.classList.add('hidden');
-
-      if (c.toros && c.toros.length > 0) {
-        boxEleccion.classList.remove('hidden');
-        let checkHtml = '';
-        c.toros.forEach((t) => {
-          const yaVendido = t.vendido;
-          checkHtml += `
-            <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer; background:${yaVendido ? '#f3f4f6' : '#fff'}; padding:6px; border-radius:4px; border:1px solid #e5e7eb;">
-              <input type="checkbox" class="chk-toro-eleccion" value="${t.rp}" ${yaVendido ? 'disabled' : 'checked'} onchange="recalcularCabezasPorEleccion()">
-              <span><strong>${t.rp}</strong> — ${t.peso ? t.peso + 'kg' : ''} (${t.aptitud_vaquillona || 'Toro'}) ${yaVendido ? '<strong style="color:#dc2626;">[ADJUDICADO]</strong>' : ''}</span>
-            </label>
-          `;
-        });
-        contenedorCheckboxes.innerHTML = checkHtml;
-      } else {
-        boxEleccion.classList.add('hidden');
-        contenedorCheckboxes.innerHTML = '';
-      }
-
-      if (modo === 'editar' && c.ventas && c.ventas.length > 0) {
-        const v = c.ventas[0];
-        document.getElementById('modalVentaTitulo').textContent = `✏️ Editar Venta — Corral #${c.numero_corral}`;
-        document.getElementById('btnModalGuardarVenta').textContent = '💾 Actualizar Venta';
-        inputComp.value = v.comprador_nombre || '';
-        inputPrec.value = v.precio_kg || '';
-        document.getElementById('mv_cabezas_input').value = v.cabezas_vendidas || c.cabezas;
-      } else {
-        document.getElementById('modalVentaTitulo').textContent = `💲 Registrar Venta — Corral #${c.numero_corral}`;
-        document.getElementById('btnModalGuardarVenta').textContent = '💾 Confirmar Venta';
-        inputComp.value = '';
-        inputPrec.value = '';
-        recalcularCabezasPorEleccion();
-      }
-
-      document.getElementById('modalVentaCorral').classList.remove('hidden');
-      inputComp.focus();
-    }
-
-    function recalcularCabezasPorEleccion() {
-      const chks = document.querySelectorAll('.chk-toro-eleccion:checked:not(:disabled)');
-      const inputCab = document.getElementById('mv_cabezas_input');
-      const cId = parseInt(document.getElementById('mv_corral_id').value);
-      const c = corralesGlobales.find(item => item.id === cId);
-
-      if (c && c.toros && c.toros.length > 0) {
-        inputCab.value = chks.length;
-      } else if (c) {
-        inputCab.value = c.cabezas;
-      }
-    }
-
-    function cerrarModalVenta() {
-      document.getElementById('modalVentaCorral').classList.add('hidden');
-    }
-    
-    function aplicarPaseUltimoComprador() {
-      if (!ultimaVentaConfirmada) {
-        alert("Aún no hay una venta previa para transferir el comprador.");
-        return;
-      }
-      document.getElementById('mv_comprador_input').value = ultimaVentaConfirmada.comprador;
-      document.getElementById('mv_precio_input').value = ultimaVentaConfirmada.precio;
-      document.getElementById('mv_precio_input').focus();
-    }
-
-    function buscarCompradorPredictivo(query) {
-      const lista = document.getElementById('mv_autocomplete_list');
-      const q = query.trim().toLowerCase();
-
-      if (!q) {
-        lista.innerHTML = '';
-        lista.classList.add('hidden');
-        return;
-      }
-
-      const coincidencias = CLIENTES_DEMO.filter(c => 
-        c.nombre.toLowerCase().includes(q) || 
-        c.alias.toLowerCase().includes(q) || 
-        (c.cuit && c.cuit.includes(q))
-      );
-
-      let html = '';
-      coincidencias.forEach(c => {
-        html += `
-          <div class="autocomplete-item" onclick="seleccionarCompradorPredictivo('${c.nombre.replace(/'/g, "\\'")} (${c.alias})')">
-            <strong>${c.nombre}</strong> <small style="color:#0369a1;">[Alias: ${c.alias}]</small><br>
-            <small style="color:#6b7280;">CUIT: ${c.cuit || '-'}</small>
-          </div>
-        `;
-      });
-
-      html += `
-        <div class="autocomplete-item crear-rapido" onclick="crearCompradorRapidoAlias('${query.replace(/'/g, "\\'")}')">
-          ➕ Crear cliente rápido con Alias: "<strong>${query}</strong>"
-        </div>
-      `;
-
-      lista.innerHTML = html;
-      lista.classList.remove('hidden');
-    }
-
-    function seleccionarCompradorPredictivo(valor) {
-      document.getElementById('mv_comprador_input').value = valor;
-      document.getElementById('mv_autocomplete_list').classList.add('hidden');
-      document.getElementById('mv_precio_input').focus();
-    }
-
-    function crearCompradorRapidoAlias(aliasNuevo) {
-      const aliasLimpio = aliasNuevo.trim();
-      const nuevoCliente = {
-        id: Date.now(),
-        consignataria_id: usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR',
-        tipo_cliente: 'cliente',
-        nombre: `Cliente ${aliasLimpio}`,
-        alias: aliasLimpio,
-        cuit: 'Pendiente',
-        email: `${aliasLimpio.toLowerCase().replace(/\s+/g, '')}@temporal.com`,
-        clave: 'demo123',
-        limite_credito: 50000000
-      };
-
-      CLIENTES_DEMO.push(nuevoCliente);
-      guardarMemoriaFisicaLocal();
-      seleccionarCompradorPredictivo(`${nuevoCliente.nombre} (${nuevoCliente.alias})`);
-      renderListaCompradoresAutorizados();
-    }
-
-    async function guardarVentaDesdeModal(e) {
-      if (e) e.preventDefault();
-      const corralId = parseInt(document.getElementById('mv_corral_id').value);
-      const comprador = document.getElementById('mv_comprador_input').value.trim();
-      const precio = parseFloat(document.getElementById('mv_precio_input').value);
-      const cabezasVendidas = parseInt(document.getElementById('mv_cabezas_input').value);
-
-      if (!comprador || isNaN(precio) || isNaN(cabezasVendidas) || cabezasVendidas <= 0) {
-        alert('Complete comprador, precio y al menos 1 cabeza vendida.');
-        return;
-      }
-
-      const c = corralesGlobales.find(item => item.id === corralId);
-      if (!c) return;
-
-      const torosElegidosRP = [];
-      document.querySelectorAll('.chk-toro-eleccion:checked:not(:disabled)').forEach(cb => {
-        torosElegidosRP.push(cb.value);
-      });
-
-      if (c.toros && c.toros.length > 0 && torosElegidosRP.length === 0) {
-        alert('Seleccione al menos un toro para registrar la venta.');
-        return;
-      }
-
-      if (c.toros && c.toros.length > 0) {
-        c.toros.forEach(t => {
-          if (torosElegidosRP.includes(t.rp)) t.vendido = true;
-        });
-      }
-
-      const kilosLote = (cabezasVendidas * (c.peso_promedio || 0));
-      const montoTotal = kilosLote > 0 ? kilosLote * precio : cabezasVendidas * precio;
-
-      const torosRestantes = c.toros ? c.toros.filter(t => !t.vendido) : [];
-      if (torosRestantes.length === 0) {
-        c.estado = 'Vendido';
-      } else {
-        c.estado = 'Disponible';
-        alert(`✔ Venta asignada a ${torosElegidosRP.join(', ')}. Quedan ${torosRestantes.length} toros disponibles.`);
-      }
-
-      const objVenta = {
-        lote_id: c.id,
-        comprador_nombre: comprador,
-        precio_kg: precio,
-        cabezas_vendidas: cabezasVendidas,
-        monto_final: montoTotal,
-        toros_adjudicados: torosElegidosRP
-      };
-
-      if (!c.ventas) c.ventas = [];
-      c.ventas.unshift(objVenta);
-      
-      ultimaVentaConfirmada = { comprador, precio };
-
-      guardarMemoriaFisicaLocal();
-
-      if (sb) {
-        sb.from('corrales').upsert([c]).then(({ error }) => {
-          if (error) console.warn("Aviso guardado venta Supabase:", error.message);
-        });
-      }
-
-      cerrarModalVenta();
-      renderVistaConsignataria();
-      renderMisCompras();
-    }
-
-    function anularVenta(loteId, numeroCorral) {
-      const c = corralesGlobales.find(item => item.id === loteId);
-      if (!c) return;
-
-      if (confirm(`⚠️ ¿Anular la venta del Corral #${numeroCorral}? Los animales volverán a estar disponibles en pista.`)) {
-        c.estado = 'Disponible';
-        c.ventas = [];
-        if (c.toros) c.toros.forEach(t => t.vendido = false);
-        
-        guardarMemoriaFisicaLocal();
-
-        if (sb) {
-          sb.from('corrales').upsert([c]).then(({ error }) => {
-            if (error) console.warn("Aviso anulación venta Supabase:", error.message);
-          });
-        }
-
-        alert('✔ Venta anulada exitosamente.');
-        renderVistaConsignataria();
-      }
-    }
-
-    // ==========================================
-    // 🐂 PADRÓN DE CLIENTES: ALTA & EDICIÓN
-    // ==========================================
-    function abrirSeccionCompradores() {
-      ocultarTodasLasSecciones();
-      document.getElementById('secGestionCompradores').classList.remove('hidden');
-      cancelarEdicionComprador();
-      renderListaCompradoresAutorizados();
-    }
-
-    function editarComprador(id) {
-      const c = CLIENTES_DEMO.find(item => item.id === id);
-      if (!c) return;
-
-      document.getElementById('u_comprador_edit_id').value = c.id;
-      document.getElementById('u_cliente_tipo').value = c.tipo_cliente || 'cliente';
-      document.getElementById('u_comprador_nombre').value = c.nombre;
-      document.getElementById('u_comprador_alias').value = c.alias;
-      document.getElementById('u_comprador_cuit').value = c.cuit;
-      document.getElementById('u_comprador_email').value = c.email;
-      document.getElementById('u_comprador_clave').value = c.clave || `${c.cuit.replace(/[^0-9]/g, '')}-X`;
-      document.getElementById('u_comprador_limite').value = c.limite_credito || '';
-
-      document.getElementById('txtTituloFormComprador').textContent = `✏️ Editando Cliente: ${c.nombre}`;
-      document.getElementById('btnGuardarComprador').textContent = '💾 Guardar Cambios del Cliente';
-      document.getElementById('btnCancelarEditComprador').classList.remove('hidden');
-
-      const card = document.getElementById('cardFormComprador');
-      card.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function cancelarEdicionComprador() {
-      document.getElementById('formCrearComprador').reset();
-      document.getElementById('u_comprador_edit_id').value = '';
-      document.getElementById('txtTituloFormComprador').textContent = '👥 Alta & Edición de Clientes de la Empresa';
-      document.getElementById('btnGuardarComprador').textContent = '👤 Dar de Alta en la Empresa';
-      document.getElementById('btnCancelarEditComprador').classList.add('hidden');
-    }
-
-    async function eliminarComprador(id) {
-      const c = CLIENTES_DEMO.find(item => item.id === id);
-      if (!c) return;
-
-      if (confirm(`⚠️ ¿Está seguro de anular al cliente "${c.nombre}" (${c.alias})?`)) {
-        CLIENTES_DEMO = CLIENTES_DEMO.filter(item => item.id !== id);
-        guardarMemoriaFisicaLocal();
-        alert(`✔ Registro de "${c.nombre}" anulado.`);
-        renderListaCompradoresAutorizados();
-      }
-    }
-
-    async function guardarComprador(e) {
-      if (e) e.preventDefault();
-      const editId = document.getElementById('u_comprador_edit_id').value;
-      const tipo_cliente = document.getElementById('u_cliente_tipo').value;
-      const nombre = document.getElementById('u_comprador_nombre').value.trim();
-      const alias = document.getElementById('u_comprador_alias').value.trim();
-      const cuit = document.getElementById('u_comprador_cuit').value.trim();
-      const email = document.getElementById('u_comprador_email').value.trim().toLowerCase();
-      const clave = document.getElementById('u_comprador_clave').value.trim();
-      const limite = parseFloat(document.getElementById('u_comprador_limite').value) || 0;
-
-      if (!nombre || !alias) {
-        alert('Por favor complete al menos la Razón Social y el Alias.');
-        return;
-      }
-
-      const consignatariaOwner = usuarioActual ? usuarioActual.consignataria_id : 'CONS_SUR';
-
-      if (editId) {
-        const idNum = parseInt(editId);
-        const comp = CLIENTES_DEMO.find(c => c.id === idNum);
-        if (comp) {
-          comp.tipo_cliente = tipo_cliente; comp.nombre = nombre; comp.alias = alias;
-          comp.cuit = cuit; comp.email = email; comp.clave = clave; comp.limite_credito = limite;
-          if (sb) sb.from('compradores').upsert([comp]);
-        }
-        alert(`✔ Cliente "${nombre}" actualizado.`);
-      } else {
-        const nuevoCliente = {
-          id: Date.now(), consignataria_id: consignatariaOwner, tipo_cliente, nombre, alias, cuit, email, clave, limite_credito: limite
-        };
-        CLIENTES_DEMO.push(nuevoCliente);
-        if (sb) sb.from('compradores').insert([nuevoCliente]);
-        alert(`✔ Cliente "${nombre}" registrado con éxito.`);
-      }
-
-      guardarMemoriaFisicaLocal();
-      cancelarEdicionComprador();
-      renderListaCompradoresAutorizados();
-    }
-
-    async function renderListaCompradoresAutorizados() {
-      const container = document.getElementById('listaCompradoresAutorizados');
-      const datalistRemitentes = document.getElementById('listRemitentesPadron');
-      if (!container) return;
-
-      let lista = CLIENTES_DEMO;
-      if (usuarioActual && modoOperatorioActivo === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
-        lista = lista.filter(c => c.consignataria_id === usuarioActual.consignataria_id);
-      }
-
-      let html = '', htmlDatalist = '';
-      lista.forEach(c => {
-        const rolTexto = c.tipo_cliente === 'vendedor' ? 'VENDEDOR FIRMA' : 'CLIENTE';
-        htmlDatalist += `<option value="${c.nombre} (${c.alias})">`;
-
-        html += `
-          <div class="buyer-item">
-            <div>
-              <strong>${c.nombre}</strong> <small style="color:#0369a1;">[Alias: ${c.alias}]</small> <span class="event-type-badge">${rolTexto}</span><br>
-              <small style="color:#6b7280;">CUIT: ${c.cuit} | Crédito: <strong>$${(c.limite_credito || 0).toLocaleString('es-AR')}</strong> | Clave: <code>${c.clave || 'Definida'}</code></small>
-            </div>
-            <div style="display:flex; gap:6px;">
-              <button type="button" class="btn-preset" style="background:#0284c7; color:white; border:none; padding:6px 10px;" onclick="editarComprador(${c.id})">✏️ Editar</button>
-              <button type="button" class="btn-preset" style="background:#dc2626; color:white; border:none; padding:6px 10px;" onclick="eliminarComprador(${c.id})">🗑️ Anular</button>
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html || '<p style="color:#888;">No hay clientes cargados en el padrón.</p>';
-      if (datalistRemitentes) datalistRemitentes.innerHTML = htmlDatalist;
-    }
-
-    // ==========================================
-    // 🐂 CARGA Y EDICIÓN DE CORRALES
-    // ==========================================
-    function editarCorralBase(id) {
-      const c = corralesGlobales.find(item => item.id === id);
-      if (!c) return;
-
-      document.getElementById('c_edit_id').value = c.id;
-      document.getElementById('c_numero').value = c.numero_corral || '';
-      document.getElementById('c_remitente').value = c.remitente || '';
-      document.getElementById('c_cabezas').value = c.cabezas || '';
-      document.getElementById('c_categoria').value = c.categoria || 'NOV';
-      document.getElementById('c_raza_select').value = c.raza || 'Angus';
-      document.getElementById('c_peso_promedio').value = c.peso_promedio || '';
-      document.getElementById('c_pesada_obs').value = c.pesada_observaciones || '';
-
-      poblarSelectPlazos('c_cuotas_select', c.plazo_texto);
-
-      evaluarDetalleTorosIndividuales();
-      if (c.toros && c.toros.length > 0) {
-        c.toros.forEach((t, i) => {
-          const idx = i + 1;
-          if (document.getElementById(`toro_rp_${idx}`)) document.getElementById(`toro_rp_${idx}`).value = t.rp || '';
-          if (document.getElementById(`toro_hba_${idx}`)) document.getElementById(`toro_hba_${idx}`).value = t.hba || '';
-          if (document.getElementById(`toro_peso_${idx}`)) document.getElementById(`toro_peso_${idx}`).value = t.peso || '';
-          if (document.getElementById(`toro_ce_${idx}`)) document.getElementById(`toro_ce_${idx}`).value = t.ce || '';
-          if (document.getElementById(`toro_apt_${idx}`)) document.getElementById(`toro_apt_${idx}`).value = t.aptitud_vaquillona || '';
-          if (document.getElementById(`toro_obs_${idx}`)) document.getElementById(`toro_obs_${idx}`).value = t.obs || '';
-        });
-      }
-
-      document.getElementById('txtTituloFormCorral').textContent = `✏️ Editando Corral #${c.numero_corral}`;
-      document.getElementById('btnGuardarCorralBase').textContent = '💾 Guardar Cambios del Corral';
-      document.getElementById('btnCancelarEditCorral').classList.remove('hidden');
-
-      document.getElementById('formCargarCorral').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-
-    function eliminarCorralBase(id) {
-      const c = corralesGlobales.find(item => item.id === id);
-      if (!c) return;
-
-      if (confirm(`⚠️ ¿Seguro que deseás eliminar el Corral #${c.numero_corral}?`)) {
-        corralesGlobales = corralesGlobales.filter(item => item.id !== id);
-        if (eventoActivoObj && CORRALES_DEMO[eventoActivoObj.id]) {
-          CORRALES_DEMO[eventoActivoObj.id] = corralesGlobales;
-        }
-        guardarMemoriaFisicaLocal();
-        renderVistaConsignataria();
-        renderVistaComprador();
-      }
-    }
-
-    async function guardarCorralBase(e) {
-      if (e && e.preventDefault) e.preventDefault();
-
-      if (!eventoActivoObj) {
-        if (typeof EVENTOS_DEMO !== 'undefined' && EVENTOS_DEMO.length > 0) {
-          eventoActivoObj = EVENTOS_DEMO[0];
-        } else {
-          alert('Por favor seleccioná o creá un remate primero.');
-          return;
-        }
-      }
-
-      const numero_corral = document.getElementById('c_numero')?.value.trim();
-      const remitente = document.getElementById('c_remitente')?.value.trim();
-      const cabezas = parseInt(document.getElementById('c_cabezas')?.value) || 0;
-
-      if (!numero_corral) {
-        alert('Ingresá el Número de Corral.');
-        document.getElementById('c_numero')?.focus();
-        return;
-      }
-      if (!remitente) {
-        alert('Ingresá o seleccioná el Remitente.');
-        document.getElementById('c_remitente')?.focus();
-        return;
-      }
-      if (cabezas <= 0) {
-        alert('Ingresá una cantidad válida de cabezas (mínimo 1).');
-        document.getElementById('c_cabezas')?.focus();
-        return;
-      }
-
-      const editId = document.getElementById('c_edit_id')?.value;
-      const plazoIdSel = document.getElementById('c_cuotas_select')?.value;
-      const plazoObj = PLAZOS_SISTEMA.find(p => p.id == plazoIdSel) || { texto: '30 Días (1 Cuota)', dias_calc: 30 };
-      const plazo_dias = plazoObj.dias_calc;
-      const plazo_texto = plazoObj.texto;
-
-      const categoria = document.getElementById('c_categoria')?.value || 'NOV';
-      const raza = document.getElementById('c_raza_select')?.value || 'Angus';
-      const peso_promedio = parseFloat(document.getElementById('c_peso_promedio')?.value) || null;
-      const pesada_observaciones = document.getElementById('c_pesada_obs')?.value.trim() || '';
-
-      const torosArray = [];
-      const boxToros = document.getElementById('boxDetalleTorosIndividuales');
-      if (boxToros && !boxToros.classList.contains('hidden')) {
-        for (let i = 1; i <= cabezas; i++) {
-          const rp = document.getElementById(`toro_rp_${i}`)?.value.trim() || `T-${i}`;
-          const hba = document.getElementById(`toro_hba_${i}`)?.value.trim() || '';
-          const peso = parseFloat(document.getElementById(`toro_peso_${i}`)?.value) || peso_promedio;
-          const ce = document.getElementById(`toro_ce_${i}`)?.value.trim() || '';
-          const aptitud = document.getElementById(`toro_apt_${i}`)?.value || 'Apto';
-          const obs = document.getElementById(`toro_obs_${i}`)?.value.trim() || '';
-          torosArray.push({ rp, hba, peso, ce, aptitud_vaquillona: aptitud, obs, vendido: false });
-        }
-      }
-
-      const idFinal = editId ? parseInt(editId) : Date.now();
-      const nuevoCorral = {
-        id: idFinal,
-        evento_id: eventoActivoObj.id,
-        numero_corral,
-        remitente,
-        cabezas,
-        plazo_dias,
-        plazo_texto,
-        categoria,
-        raza,
-        peso_promedio,
-        pesada_observaciones,
-        estado: 'Disponible',
-        toros: torosArray
-      };
-
-      if (editId) {
-        const idx = corralesGlobales.findIndex(item => item.id === idFinal);
-        if (idx !== -1) {
-          if (corralesGlobales[idx].ventas) nuevoCorral.ventas = corralesGlobales[idx].ventas;
-          if (corralesGlobales[idx].estado === 'Vendido') nuevoCorral.estado = 'Vendido';
-          corralesGlobales[idx] = nuevoCorral;
-        }
-        alert(`✔ Corral #${numero_corral} modificado.`);
-      } else {
-        if (!CORRALES_DEMO[eventoActivoObj.id]) {
-          CORRALES_DEMO[eventoActivoObj.id] = [];
-        }
-        corralesGlobales = CORRALES_DEMO[eventoActivoObj.id];
-        corralesGlobales.push(nuevoCorral);
-        ultimoNumeroCorralCargado = numero_corral;
-        alert(`✔ Corral #${numero_corral} cargado exitosamente.`);
-      }
-
-      guardarMemoriaFisicaLocal();
-
-      if (sb) {
-        sb.from('corrales').upsert([nuevoCorral]).then(({ error }) => {
-          if (error) console.warn("Aviso Supabase corral:", error.message);
-        });
-      }
-
-      cancelarEdicionCorralBase(true);
-      renderVistaConsignataria();
-      renderVistaComprador();
-    }
-
-    function cancelarEdicionCorralBase(sugerirCorrelativo = false) {
-      const remitentePrevio = document.getElementById('c_remitente')?.value || '';
-      document.getElementById('formCargarCorral').reset();
-      document.getElementById('c_edit_id').value = '';
-      document.getElementById('txtTituloFormCorral').textContent = '➕ Cargar Nuevo Corral / Lote en Remate';
-      document.getElementById('btnGuardarCorralBase').textContent = '🐂 Guardar Datos del Corral';
-      document.getElementById('btnCancelarEditCorral').classList.add('hidden');
-      
-      evaluarDetalleTorosIndividuales();
-      poblarSelectPlazos('c_cuotas_select');
-
-      if (sugerirCorrelativo && ultimoNumeroCorralCargado) {
-        const prox = calcularSiguienteCorral(ultimoNumeroCorralCargado);
-        if (prox) {
-          document.getElementById('c_numero').value = prox;
-          if (remitentePrevio) document.getElementById('c_remitente').value = remitentePrevio;
-          document.getElementById('c_cabezas').focus();
-        }
-      }
     }
 
     function renderVistaConsignataria() {
@@ -3242,98 +2921,6 @@ function agregarCategoriaRapida() {
       seleccionarEvento(nuevo.id, nuevo.nombre, nuevo.tipo_evento);
     }
 
-    function imprimirBoletinPapel() {
-      const area = document.getElementById('printArea');
-      if (!area || !eventoActivoObj) return;
-
-      let filas = '';
-      corralesGlobales.forEach(c => {
-        filas += `
-          <tr>
-            <td>${c.numero_corral}</td>
-            <td>${c.remitente}</td>
-            <td>${c.cabezas}</td>
-            <td>${c.categoria}</td>
-            <td>${c.raza}</td>
-            <td>${c.peso_promedio || ''} kg</td>
-            <td>${c.plazo_texto || (c.plazo_dias ? c.plazo_dias + 'd' : '30d')}</td>
-            <td>${c.pesada_observaciones || ''}</td>
-            <td style="width:120px;"></td>
-            <td style="width:100px;"></td>
-          </tr>
-        `;
-      });
-
-      area.innerHTML = `
-        <h2 style="text-align:center;">PLANILLA DE PISTA — ${eventoActivoObj.nombre}</h2>
-        <p style="text-align:center; font-size:12px;">Fecha: ${eventoActivoObj.fecha} | Lugar: ${eventoActivoObj.lugar}</p>
-        <table class="print-table">
-          <thead>
-            <tr>
-              <th>CORRAL</th><th>REMITENTE</th><th>CAB.</th><th>CAT.</th><th>RAZA</th><th>PESO</th><th>PLAZO</th><th>OBSERVACIONES</th><th>COMPRADOR</th><th>PRECIO ($)</th>
-            </tr>
-          </thead>
-          <tbody>${filas}</tbody>
-        </table>
-      `;
-      window.print();
-    }
-
-    function exportarReporteConsignatariaCSV() {
-      if (!eventoActivoObj) {
-        alert("Seleccione un evento para exportar su liquidación.");
-        return;
-      }
-
-      let csvContent = "data:text/csv;charset=utf-8,FECHA,CORRAL,REMITENTE,CUIT_COMPRADOR,RAZON_SOCIAL_COMPRADOR,CATEGORIA,CABEZAS,KILOS_TOTALES,PRECIO_KG,MONTO_TOTAL,PLAZO_DIAS_CALCULADO\n";
-      let hayVentas = false;
-
-      corralesGlobales.forEach(c => {
-        if (c.ventas && c.ventas.length > 0) {
-          c.ventas.forEach(v => {
-            hayVentas = true;
-
-            const compradorBuscado = v.comprador_nombre.toLowerCase();
-            const compradorObj = CLIENTES_DEMO.find(cliente => 
-              compradorBuscado.includes(cliente.alias.toLowerCase()) || 
-              compradorBuscado.includes(cliente.nombre.toLowerCase())
-            );
-            const cuitComprador = compradorObj ? compradorObj.cuit : "A Confirmar";
-            
-            const cabezas = v.cabezas_vendidas || c.cabezas;
-            const kilosTotales = cabezas * (c.peso_promedio || 0);
-            const montoTotal = v.monto_final || (kilosTotales > 0 ? kilosTotales * v.precio_kg : cabezas * v.precio_kg);
-            const plazoDias = c.plazo_dias || 30;
-
-            const remitenteLimpio = (c.remitente || '').replace(/,/g, ' ');
-            const compLimpio = (v.comprador_nombre || '').replace(/,/g, ' ');
-
-            csvContent += `${eventoActivoObj.fecha},${c.numero_corral},"${remitenteLimpio}","${cuitComprador}","${compLimpio}",${c.categoria},${cabezas},${kilosTotales},${v.precio_kg},${montoTotal},${plazoDias}\n`;
-          });
-        }
-      });
-
-      if (!hayVentas) {
-        alert("No hay ventas registradas en este evento para exportar al sistema contable.");
-        return;
-      }
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      
-      const nombreArchivo = `Liquidacion_ERP_${eventoActivoObj.nombre.replace(/\s+/g, '_')}.csv`;
-      link.setAttribute("download", nombreArchivo);
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-
-    function enviarMailsResumenCierreEvento() {
-      alert('📧 Resúmenes de liquidación enviados por mail.');
-    }
-
     // ==========================================
     // ⚡ CONTROLADOR EVENTO ENTER GENERAL
     // ==========================================
@@ -3362,9 +2949,11 @@ function agregarCategoriaRapida() {
       evaluarFechaYNombreEvento();
       onTipoEventoChange();
       renderListaCompradoresAutorizados();
-      poblarSelectCategorias(); // <--- ESTA ES LA LÍNEA QUE AGREGÁS
       evaluarDetalleTorosIndividuales();
       actualizarSelectorIntermediariosFiltro();
+      poblarSelectPlazos('c_cuotas_select');
+      poblarSelectorConsignatariasEvento();
+      actualizarEtiquetaSugeridaPlazo();
 
       // Sincronizar consignatarias activas de Supabase a la lista local
       if (sb) {
