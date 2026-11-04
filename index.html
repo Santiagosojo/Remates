@@ -1680,62 +1680,80 @@ HTML
       generarComparativaPeriodos();
     }
 
-    function generarComparativaPeriodos() {
-      const fechaBaseStr = document.getElementById('rep_fecha_base').value;
-      const numPeriodos = parseInt(document.getElementById('rep_cantidad_periodos').value);
-      const tipoPeriodo = document.getElementById('rep_tipo_periodo').value;
+ function generarComparativaPeriodos() {
+      const fechaBaseStr = document.getElementById('rep_fecha_base')?.value;
+      const numPeriodos = parseInt(document.getElementById('rep_cantidad_periodos')?.value) || 3;
+      const tipoPeriodo = document.getElementById('rep_tipo_periodo')?.value || 'eventos';
       const fCat = document.getElementById('rep_filtro_cat')?.value || 'ALL';
+      const pesoMin = parseFloat(document.getElementById('rep_peso_min')?.value) || 0;
+      const pesoMax = parseFloat(document.getElementById('rep_peso_max')?.value) || 99999;
 
       if (!fechaBaseStr) return;
 
-      const fechaBase = new Date(fechaBaseStr);
-      fechaBase.setMinutes(fechaBase.getMinutes() + fechaBase.getTimezoneOffset());
       const periodos = [];
 
-      for (let i = 0; i < numPeriodos; i++) {
-        let fechaFin = new Date(fechaBase);
-        let fechaInicio = new Date(fechaBase);
-        let etiqueta = "";
-
-        if (tipoPeriodo === 'dias') {
-          fechaFin.setDate(fechaFin.getDate() - i);
-          fechaInicio.setDate(fechaInicio.getDate() - i);
-          etiqueta = fechaInicio.toISOString().split('T')[0];
-        } else if (tipoPeriodo === 'semanas') {
-          fechaFin.setDate(fechaFin.getDate() - (i * 7));
-          fechaInicio.setDate(fechaInicio.getDate() - (i * 7) - 6);
-          etiqueta = `Semana del ${fechaInicio.toLocaleDateString()} al ${fechaFin.toLocaleDateString()}`;
-        } else if (tipoPeriodo === 'meses') {
-          fechaFin.setMonth(fechaFin.getMonth() - i);
-          fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
-          fechaInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 1);
-          etiqueta = `${fechaInicio.toLocaleString('default', { month: 'long' })} ${fechaInicio.getFullYear()}`;
-        } else if (tipoPeriodo === 'anos') {
-          fechaFin.setFullYear(fechaFin.getFullYear() - i);
-          fechaFin = new Date(fechaFin.getFullYear(), 11, 31);
-          fechaInicio = new Date(fechaFin.getFullYear(), 0, 1);
-          etiqueta = `Año ${fechaInicio.getFullYear()}`;
+      // Nueva lógica por "Eventos" sin importar días muertos
+      if (tipoPeriodo === 'eventos') {
+        let evs = [...EVENTOS_DEMO].filter(e => e.fecha <= fechaBaseStr).sort((a,b) => b.fecha.localeCompare(a.fecha));
+        for (let i = 0; i < numPeriodos; i++) {
+          if (evs[i]) {
+            periodos.push({
+              evento_id: evs[i].id,
+              inicio: evs[i].fecha, fin: evs[i].fecha,
+              etiqueta: `${evs[i].nombre.slice(0, 16)} (${evs[i].fecha.slice(5)})`,
+              datos: { cabezas: 0, kilos: 0, monto: 0 }
+            });
+          }
         }
-        
-        periodos.push({
-          inicio: fechaInicio.toISOString().split('T')[0],
-          fin: fechaFin.toISOString().split('T')[0],
-          etiqueta: etiqueta,
-          datos: { cabezas: 0, kilos: 0, monto: 0 }
-        });
+      } else {
+        const fechaBase = new Date(fechaBaseStr);
+        fechaBase.setMinutes(fechaBase.getMinutes() + fechaBase.getTimezoneOffset());
+
+        for (let i = 0; i < numPeriodos; i++) {
+          let fechaFin = new Date(fechaBase);
+          let fechaInicio = new Date(fechaBase);
+          let etiqueta = "";
+
+          if (tipoPeriodo === 'semanas') {
+            fechaFin.setDate(fechaFin.getDate() - (i * 7));
+            fechaInicio.setDate(fechaInicio.getDate() - (i * 7) - 6);
+            etiqueta = `Sem. ${fechaInicio.toLocaleDateString().slice(0,5)} al ${fechaFin.toLocaleDateString().slice(0,5)}`;
+          } else if (tipoPeriodo === 'meses') {
+            fechaFin.setMonth(fechaFin.getMonth() - i);
+            fechaFin = new Date(fechaFin.getFullYear(), fechaFin.getMonth() + 1, 0); 
+            fechaInicio = new Date(fechaFin.getFullYear(), fechaFin.getMonth(), 1);
+            etiqueta = `${fechaInicio.toLocaleString('default', { month: 'short' })} ${fechaInicio.getFullYear()}`;
+          } else if (tipoPeriodo === 'anos') {
+            fechaFin.setFullYear(fechaFin.getFullYear() - i);
+            fechaFin = new Date(fechaFin.getFullYear(), 11, 31);
+            fechaInicio = new Date(fechaFin.getFullYear(), 0, 1);
+            etiqueta = `Año ${fechaInicio.getFullYear()}`;
+          }
+          periodos.push({
+            inicio: fechaInicio.toISOString().split('T')[0],
+            fin: fechaFin.toISOString().split('T')[0],
+            etiqueta: etiqueta,
+            datos: { cabezas: 0, kilos: 0, monto: 0 }
+          });
+        }
       }
 
+      // Procesamiento de datos aplicando pesos
       Object.keys(CORRALES_DEMO).forEach(evId => {
         const ev = EVENTOS_DEMO.find(e => e.id == evId) || { fecha: HOY_STR };
         CORRALES_DEMO[evId].forEach(c => {
           if (fCat !== 'ALL' && c.categoria !== fCat) return;
+          const peso = c.peso_promedio || 0;
+          if (peso < pesoMin || peso > pesoMax) return;
+
           if (c.ventas) {
             c.ventas.forEach(v => {
               const f = ev.fecha;
               periodos.forEach(p => {
-                if (f >= p.inicio && f <= p.fin) {
+                const match = p.evento_id ? (p.evento_id == evId) : (f >= p.inicio && f <= p.fin);
+                if (match) {
                   const cab = v.cabezas_vendidas || 0;
-                  const kilos = cab * (c.peso_promedio || 0);
+                  const kilos = cab * peso;
                   p.datos.cabezas += cab;
                   p.datos.kilos += kilos;
                   p.datos.monto += kilos > 0 ? kilos * v.precio_kg : cab * v.precio_kg;
@@ -1757,7 +1775,7 @@ HTML
       });
       html += `</tr><tr><td><strong>Monto Operado</strong></td>`;
       periodos.forEach(p => html += `<td style="text-align:center; color:#166534;">$${p.datos.monto.toLocaleString('es-AR')}</td>`);
-      html += `</tr><tr style="background:#f8fafc;"><td><strong>Variación Precio vs Ant.</strong></td>`;
+      html += `</tr><tr style="background:#f8fafc;"><td><strong>Variación vs Ant.</strong></td>`;
       for(let i=0; i < periodos.length; i++){
         if(i === periodos.length - 1){
           html += `<td style="text-align:center; color:#888;">Base</td>`;
