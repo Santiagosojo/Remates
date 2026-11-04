@@ -341,12 +341,20 @@ HTML
       </div>
 
       <div class="card">
-        <div class="card-title">
-          <span>📅 Eventos del Día & Remates Disponibles</span>
-          <div id="divFiltroVendedorEvento">
-            <select id="f_vendedor_evento" style="padding:4px 8px; font-size:12px;" onchange="cargarEventosDisponibles()">
-              <option value="ALL">Todas las Consignatarias</option>
-            </select>
+        <div class="card-title" style="flex-wrap: wrap; gap: 8px;">
+          <span>📅 Eventos & Remates Disponibles</span>
+          <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:4px; background:#f1f5f9; padding:2px 6px; border-radius:6px; border:1px solid #e2e8f0;">
+              <span style="font-size:10px; font-weight:bold; color:#64748b;">DESDE</span>
+              <input type="date" id="f_ev_desde" style="padding:2px 4px; font-size:11px; border:none; background:transparent;" onchange="cargarEventosDisponibles()">
+              <span style="font-size:10px; font-weight:bold; color:#64748b;">HASTA</span>
+              <input type="date" id="f_ev_hasta" style="padding:2px 4px; font-size:11px; border:none; background:transparent;" onchange="cargarEventosDisponibles()">
+            </div>
+            <div id="divFiltroVendedorEvento">
+              <select id="f_vendedor_evento" style="padding:4px 8px; font-size:11px; border-radius:6px; border:1px solid #cbd5e1;" onchange="cargarEventosDisponibles()">
+                <option value="ALL">Todas las Consignatarias</option>
+              </select>
+            </div>
           </div>
         </div>
         <div id="listaEventosDisponibles"><p style="color:#888; text-align:center;">Cargando remates...</p></div>
