@@ -2024,13 +2024,19 @@ HTML
           const puedeEditar = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
 
         html += `
+         const puedeGestionar = (modoOperatorioActivo === 'admin' || modoOperatorioActivo === 'vendedor');
+
+        html += `
           <div class="event-card ${esHoy ? 'sugerido-hoy' : ''}" onclick="seleccionarEvento(${ev.id}, '${ev.nombre.replace(/'/g, "\\'")}', '${ev.tipo_evento}')">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <strong>${ev.nombre}</strong>
               <div style="display:flex; gap:6px; align-items:center;">
                 <span class="event-type-badge">${ev.tipo_evento}</span>
                 ${esHoy ? '<span class="badge-sugerido">⭐ HOY</span>' : ''}
-                ${puedeEditar ? `<button type="button" class="btn-preset" style="padding:2px 8px; font-size:11px; background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc;" onclick="event.stopPropagation(); editarEvento(${ev.id})">✏️ Editar</button>` : ''}
+                ${puedeGestionar ? `
+                  <button type="button" class="btn-preset" style="padding:2px 8px; font-size:11px; background:#e0f2fe; color:#0369a1; border:1px solid #7dd3fc;" onclick="event.stopPropagation(); editarEvento(${ev.id})">✏️ Editar</button>
+                  <button type="button" class="btn-preset" style="padding:2px 8px; font-size:11px; background:#fee2e2; color:#dc2626; border:1px solid #fca5a5;" onclick="event.stopPropagation(); eliminarEvento(${ev.id})">🗑️</button>
+                ` : ''}
               </div>
             </div>
             <div style="font-size:12px; color:#6b7280; margin-top:4px;">
@@ -3152,7 +3158,47 @@ HTML
       evaluarFechaYNombreEvento();
       onTipoEventoChange();
     }
+async function eliminarEvento(id) {
+      const ev = EVENTOS_DEMO.find(e => e.id == id);
+      if (!ev) return;
 
+      // Control de auditoría: si ya tiene hacienda vendida, bloqueamos el borrado
+      const corrales = (CORRALES_DEMO && CORRALES_DEMO[id]) ? CORRALES_DEMO[id] : [];
+      const tieneVentas = corrales.some(c => c.ventas && c.ventas.length > 0);
+
+      if (tieneVentas) {
+        alert(`⚠️ No se puede eliminar "${ev.nombre}" porque ya tiene corrales vendidos registrados.`);
+        return;
+      }
+
+      if (!confirm(`⚠️ ¿Estás seguro de que querés eliminar el remate "${ev.nombre}"?\nEsta acción no se puede deshacer.`)) {
+        return;
+      }
+
+      // 1. Quitar de la memoria local
+      EVENTOS_DEMO = EVENTOS_DEMO.filter(e => e.id != id);
+      delete CORRALES_DEMO[id];
+      guardarMemoriaFisicaLocal();
+
+      // 2. Eliminar de Supabase (evento y corrales asociados)
+      if (sb) {
+        try {
+          await sb.from('corrales').delete().eq('evento_id', id);
+          const { error } = await sb.from('eventos').delete().eq('id', id);
+          if (error) console.warn("Aviso al borrar de Supabase:", error.message);
+        } catch (err) {
+          console.warn("Fallo de red al borrar en Supabase:", err);
+        }
+      }
+
+      // Si justo se estaba editando ese evento en el formulario, reseteamos el formulario
+      if (document.getElementById('ev_edit_id')?.value == id) {
+        cancelarEdicionEvento();
+      }
+
+      cargarEventosDisponibles();
+      alert(`✔ Remate "${ev.nombre}" eliminado con éxito.`);
+    }
     async function crearNuevoEvento(e) {
       if (e) e.preventDefault();
 
