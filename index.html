@@ -1030,7 +1030,63 @@ HTML
         localStorage.setItem('plazos_remates_v2', JSON.stringify(PLAZOS_SISTEMA));
       } catch (e) {}
     }
+// ==========================================
+    // 🏷️ GESTIÓN DE CATEGORÍAS DINÁMICAS
+    // ==========================================
+    let CATEGORIAS_SISTEMA = JSON.parse(localStorage.getItem('categorias_remates_v2')) || [
+      { id: 'NOV', texto: 'Novillo (NOV)' },
+      { id: 'NT', texto: 'Novillito (NT)' },
+      { id: 'VQ', texto: 'Vaquillona (VQ)' },
+      { id: 'VC', texto: 'Vaca (VC)' },
+      { id: 'TR', texto: 'Toro (TR - Reproductores)' },
+      { id: 'TER', texto: 'Ternero (TER)' },
+      { id: 'VQP', texto: 'Vaquillona Preñada (VQP)' }
+    ];
 
+    function guardarCategoriasEnStorage() {
+      localStorage.setItem('categorias_remates_v2', JSON.stringify(CATEGORIAS_SISTEMA));
+    }
+
+    function poblarSelectCategorias() {
+      const selects = [
+        { id: 'c_categoria', todas: false },
+        { id: 'rep_filtro_cat', todas: true },
+        { id: 'f_categoria_reporte', todas: true },
+        { id: 'f_categoria', todas: true }
+      ];
+
+      selects.forEach(s => {
+        const el = document.getElementById(s.id);
+        if (!el) return;
+        const valActual = el.value;
+        let html = s.todas ? '<option value="">Todas las Categorías</option>' : '';
+        CATEGORIAS_SISTEMA.forEach(cat => {
+          html += `<option value="${cat.id}">${cat.texto}</option>`;
+        });
+        if (!s.todas) {
+          html += `<option value="NUEVA" style="color:#0284c7; font-weight:bold;">➕ Crear nueva categoría...</option>`;
+        }
+        el.innerHTML = html;
+        if (valActual && valActual !== 'NUEVA') el.value = valActual;
+      });
+    }
+
+    function manejarCambioCategoria(el) {
+      if (el.value === 'NUEVA') {
+        const nueva = prompt('Ingrese el nombre de la nueva categoría (Ej: Vaca Conserva):');
+        if (nueva && nueva.trim() !== '') {
+          const nombreStr = nueva.trim();
+          const idStr = nombreStr.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 4) + Date.now().toString().slice(-4);
+          CATEGORIAS_SISTEMA.push({ id: idStr, texto: nombreStr });
+          guardarCategoriasEnStorage();
+          poblarSelectCategorias(); 
+          el.value = idStr;
+        } else {
+          el.selectedIndex = 0;
+        }
+      }
+      evaluarDetalleTorosIndividuales();
+    }
     // ==========================================
     // 💾 CAPA DE PERSISTENCIA LOCAL (OFFLINE-FIRST)
     // ==========================================
