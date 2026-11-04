@@ -1890,7 +1890,50 @@ HTML
         if (el) el.remove();
       }, 500);
     }
+function poblarSelectorEventosReporte() {
+      const sel = document.getElementById('f_evento_especifico_reporte');
+      if (!sel) return;
 
+      const tipoSel = document.getElementById('f_tipo_remate_reporte')?.value || 'TODOS';
+      let opts = '<option value="TODOS" selected>Todos los Remates</option>';
+
+      let filtrados = EVENTOS_DEMO;
+      if (usuarioActual && usuarioActual.rol === 'vendedor' && usuarioActual.consignataria_id !== 'ALL') {
+        filtrados = filtrados.filter(e => e.consignataria_id === usuarioActual.consignataria_id);
+      }
+      if (tipoSel !== 'TODOS') {
+        filtrados = filtrados.filter(e => e.tipo_evento === tipoSel);
+      }
+
+      filtrados.forEach(e => {
+        opts += `<option value="${e.id}">${e.nombre} (${e.fecha})</option>`;
+      });
+      sel.innerHTML = opts;
+    }
+
+    function imprimirConsolidadoGlobal() {
+      const area = document.getElementById('reporteGlobalTablaContainer');
+      if (!area) return;
+
+      const ventana = window.open('', '_blank');
+      ventana.document.write(`
+        <html><head><title>Consolidado General de Hacienda</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; font-size: 12px; }
+          th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+          th { background: #f2f2f2; font-weight: bold; }
+        </style>
+        </head><body>
+        <h2>Consolidado General de Hacienda</h2>
+        ${area.innerHTML}
+        </body></html>
+      `);
+      ventana.document.close();
+      ventana.focus();
+      ventana.print();
+      ventana.close();
+    }
     function actualizarGraficosVendedor(puntos, distribucion) {
       if (usuarioActual && usuarioActual.rol === 'admin') return;
       const ctxDisp = document.getElementById('chartDispersion')?.getContext('2d');
